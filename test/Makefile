@@ -79,6 +79,7 @@ endif
 # every link, image, make target and script the docs mention must exist
 docs:
 	cd .. && python3 docs/tools/check_docs.py
+	cd .. && python3 docs/tools/progress.py --check
 
 # The timing unit (src/sync/*.sv) is shared, byte for byte, between Tiqora and
 # Tiqora-Serial. docs/shared_timing.sha256 is identical in both repositories;

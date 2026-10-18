@@ -3,6 +3,8 @@
 #   make bit         build the bitstream with Vivado (WebPACK / ML Standard is free for this part)
 #   make prog        program the board over USB
 #   make resources   Yosys synthesis for Xilinx 7-series: LUT / FF count
+SHELL := /bin/bash
+.SHELLFLAGS := -o pipefail -ec    # a failing vvp fails make, even behind | grep
 SRC = ../../src
 RTL = $(SRC)/tp_pkg.sv $(SRC)/sync/sync_timebase.sv $(SRC)/sync/sync_capture.sv \
       $(SRC)/sync/sync_event_fifo.sv $(SRC)/sync/sync_compare.sv $(SRC)/sync/sync_unit.sv \
@@ -10,7 +12,8 @@ RTL = $(SRC)/tp_pkg.sv $(SRC)/sync/sync_timebase.sv $(SRC)/sync/sync_capture.sv 
       $(SRC)/tp_sync_soc.sv $(SRC)/tt_um_normansrule_tiqora_serial.sv
 .PHONY: sim bit prog resources clean
 sim:
-	@iverilog -g2012 -o tb_basys3.vvp -s tb_basys3 $(RTL) basys3_top.sv tb_basys3.sv 2>&1 | grep -v 'sorry:' || true
+	@rm -f tb_basys3.vvp    # a stale bench must not pass the test -f below
+	@iverilog -g2012 -o tb_basys3.vvp -s tb_basys3 $(RTL) basys3_top.sv tb_basys3.sv 2>&1 | { grep -v 'sorry:' || true; }
 	@test -f tb_basys3.vvp
 	vvp -n tb_basys3.vvp | grep -v "^VCD"
 bit:

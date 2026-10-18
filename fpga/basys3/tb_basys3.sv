@@ -77,6 +77,7 @@ module tb_basys3;
         chk(ok && saw_trig, "PULSE fires trigger 0, seen on LED 0");
         $display("\n%0d checks, %0d failures", checks, errors);
         if (errors == 0) $display("BASYS 3 SIMULATION PASSED\n"); else $display("BASYS 3 SIMULATION FAILED\n");
+        if (errors != 0) $fatal(1, "Basys 3 simulation failed");   // nonzero exit for make and CI
         $finish;
     end
 endmodule
