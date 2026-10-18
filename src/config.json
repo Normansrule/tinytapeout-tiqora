@@ -9,7 +9,7 @@
 
   "//": "If you get stuck with this config, please open an issue or get in touch via the discord.",
 
-  "//": "TinyPulse-serial: cells measure 20,391 um^2 (flattened, real sky130_fd_sc_hd library). That is 56% of the whole 1x2 tile but 59.5% of its placeable core (161.00 x 225.76 um minus the placement margins), and the real flow adds buffers on top. The default target of 60 would sit at or below the design's own utilization and fail with GPL-0302, so it is raised to 70, as in the main TinyPulse repo.",
+  "//": "Tiqora-Serial: cells measure 20,391 um^2 (flattened, real sky130_fd_sc_hd library). That is 56% of the whole 1x2 tile but 59.5% of its placeable core (161.00 x 225.76 um minus the placement margins), and the real flow adds buffers on top. The default target of 60 would sit at or below the design's own utilization and fail with GPL-0302, so it is raised to 70, as in the main Tiqora repo.",
 
   "//": "Here are some of the variables you may want to change:",
 

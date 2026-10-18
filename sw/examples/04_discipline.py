@@ -12,10 +12,10 @@ backwards, and every filter downstream sees a negative time delta.
 """
 import sys, time
 sys.path.insert(0, "..")
-from tpctl import TinyPulse
+from tpctl import Tiqora
 
 port = sys.argv[1] if len(sys.argv) > 1 else "/dev/ttyACM0"
-tp = TinyPulse(port)
+tp = Tiqora(port)
 tp.ping()
 tp.configure_capture(enable=0b1000_0000)     # CAP7 = PPS in
 tp.drain()

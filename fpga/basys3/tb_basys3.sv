@@ -1,4 +1,4 @@
-// tb_basys3.sv — TinyPulse-Serial on the simulated Basys 3, driven the way a
+// tb_basys3.sv — Tiqora-Serial on the simulated Basys 3, driven the way a
 // PC drives the real board: bytes over the USB serial pins at 115,200 baud
 // (434 clocks per bit at 50 MHz), buttons, and the LEDs watched.
 `default_nettype none
@@ -54,7 +54,7 @@ module tb_basys3;
     always @(posedge dut.clk50) if (dut.led[0] === 1'b1) saw_trig = 1'b1;
     initial begin
         saw_trig = 1'b0;
-        $display("\n=== TinyPulse-Serial on the Basys 3 (simulated board, 115200 baud) ===");
+        $display("\n=== Tiqora-Serial on the Basys 3 (simulated board, 115200 baud) ===");
         while (dut.rst_n !== 1'b1) @(posedge dut.clk50);
         repeat (100) @(posedge dut.clk50);
         send(8'h03); await(2);

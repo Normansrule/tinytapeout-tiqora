@@ -1,4 +1,4 @@
-# fpga/basys3/Makefile — TinyPulse-Serial on a Digilent Basys 3 (Artix-7 XC7A35T)
+# fpga/basys3/Makefile — Tiqora-Serial on a Digilent Basys 3 (Artix-7 XC7A35T)
 #   make sim         simulate the whole board design, driven like a PC drives it (~2 min)
 #   make bit         build the bitstream with Vivado (WebPACK / ML Standard is free for this part)
 #   make prog        program the board over USB
@@ -7,7 +7,7 @@ SRC = ../../src
 RTL = $(SRC)/tp_pkg.sv $(SRC)/sync/sync_timebase.sv $(SRC)/sync/sync_capture.sv \
       $(SRC)/sync/sync_event_fifo.sv $(SRC)/sync/sync_compare.sv $(SRC)/sync/sync_unit.sv \
       $(SRC)/uart/tp_uart_rx.sv $(SRC)/uart/tp_uart_tx.sv $(SRC)/uart/tp_host_uart.sv \
-      $(SRC)/tp_sync_soc.sv $(SRC)/tt_um_normansrule_tinypulse_serial.sv
+      $(SRC)/tp_sync_soc.sv $(SRC)/tt_um_normansrule_tiqora_serial.sv
 .PHONY: sim bit prog resources clean
 sim:
 	@iverilog -g2012 -o tb_basys3.vvp -s tb_basys3 $(RTL) basys3_top.sv tb_basys3.sv 2>&1 | grep -v 'sorry:' || true

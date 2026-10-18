@@ -1,6 +1,6 @@
 // sync_timebase.sv — the monotonic clock everything else is measured against.
 //
-// This is the part of TinyPulse-Skywater130 that makes it a clock rather than a counter.
+// This is the part of Tiqora that makes it a clock rather than a counter.
 // Three things act on it:
 //
 //   free run : +1 tick per core clock. One tick is one clock period, so the

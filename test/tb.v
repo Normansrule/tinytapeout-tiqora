@@ -22,7 +22,7 @@ module tb ();
     wire VGND = 1'b0;
 `endif
 
-    tt_um_normansrule_tinypulse_serial user_project (
+    tt_um_normansrule_tiqora_serial user_project (
 `ifdef GL_TEST
         .VPWR   (VPWR),
         .VGND   (VGND),

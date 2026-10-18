@@ -17,7 +17,7 @@ fusion quality. Here both are timestamped in hardware.
 """
 import argparse, sys, time
 sys.path.insert(0, "..")
-from tpctl import TinyPulse
+from tpctl import Tiqora
 
 ap = argparse.ArgumentParser()
 ap.add_argument("port", nargs="?", default="/dev/ttyACM0")
@@ -25,7 +25,7 @@ ap.add_argument("--fps", type=float, default=30.0)
 ap.add_argument("--frames", type=int, default=100)
 a = ap.parse_args()
 
-tp = TinyPulse(a.port)
+tp = Tiqora(a.port)
 tp.ping()
 tp.configure_capture(enable=0b0000_0011)      # CAP0 strobe, CAP1 IMU
 tp.set_pulse_width(tp.ticks(1e-6))            # 1 us shutter pulse

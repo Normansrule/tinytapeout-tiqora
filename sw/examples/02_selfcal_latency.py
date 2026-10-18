@@ -14,10 +14,10 @@ This is the whole reason a constant latency beats a small jittery one.
 """
 import sys, statistics, time
 sys.path.insert(0, "..")
-from tpctl import TinyPulse
+from tpctl import Tiqora
 
 port = sys.argv[1] if len(sys.argv) > 1 else "/dev/ttyACM0"
-tp = TinyPulse(port)
+tp = Tiqora(port)
 tp.ping()
 
 tp.configure_capture(enable=0x01)       # CAP0 only, rising edge

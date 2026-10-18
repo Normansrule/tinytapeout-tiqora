@@ -1,4 +1,4 @@
-# Makefile — test and check TinyPulse-Serial.
+# Makefile — test and check Tiqora-Serial.
 #
 #   make            cocotb + Icarus, the Tiny Tapeout standard flow
 #   make sim        the self-checking Icarus testbenches (no cocotb needed)
@@ -21,7 +21,7 @@ RTL += $(SRC)/uart/tp_uart_rx.sv
 RTL += $(SRC)/uart/tp_uart_tx.sv
 RTL += $(SRC)/uart/tp_host_uart.sv
 RTL += $(SRC)/tp_sync_soc.sv
-RTL += $(SRC)/tt_um_normansrule_tinypulse_serial.sv
+RTL += $(SRC)/tt_um_normansrule_tiqora_serial.sv
 
 # cocotb: RTL by default; `make GATES=yes` runs the same tests on the
 # gate-level netlist that Tiny Tapeout's CI copies in after hardening.
@@ -41,7 +41,7 @@ COCOTB_TEST_MODULES = test
 
 .PHONY: sim lint synth area uart clean-sim
 
-sim: uart docs
+sim: uart shared docs
 	@echo ""
 	@echo "all testbenches finished — check for FAILED above"
 
@@ -59,7 +59,7 @@ uart:
 # and Xpulse constants its core needs. This build has no core, so it
 # intentionally uses none of them.
 lint:
-	verilator --lint-only -Wall -Wno-UNUSEDPARAM --timing $(RTL) --top-module tt_um_normansrule_tinypulse_serial
+	verilator --lint-only -Wall -Wno-UNUSEDPARAM --timing $(RTL) --top-module tt_um_normansrule_tiqora_serial
 
 synth:
 	cd .. && yosys -s syn/synth_check.ys
@@ -79,3 +79,9 @@ endif
 # every link, image, make target and script the docs mention must exist
 docs:
 	cd .. && python3 docs/tools/check_docs.py
+
+# The timing unit (src/sync/*.sv) is shared, byte for byte, between Tiqora and
+# Tiqora-Serial. docs/shared_timing.sha256 is identical in both repositories;
+# editing one copy without updating both manifests fails here.
+shared:
+	cd .. && sha256sum -c --quiet docs/shared_timing.sha256 && echo "shared timing unit: 5 files match the manifest"

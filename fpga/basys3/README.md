@@ -1,4 +1,4 @@
-# TinyPulse-Serial on a Digilent Basys 3
+# Tiqora-Serial on a Digilent Basys 3
 
 Run the exact 1 × 2 tile RTL on a [Digilent Basys 3](https://digilent.com/reference/programmable-logic/basys-3/start)
 (Artix-7 XC7A35T). The board's USB port is the host link, so `sw/tpctl.py` talks to the FPGA
@@ -9,7 +9,7 @@ exactly as it will talk to the chip on the Tiny Tapeout demo board.
 A Basys 3, a micro-USB cable, and [Vivado ML Standard](https://www.xilinx.com/support/download.html)
 (free; the XC7A35T is supported). Nothing else.
 
-## The board, as TinyPulse-Serial sees it
+## The board, as Tiqora-Serial sees it
 
 | Board | Pin | Function |
 |---|---|---|

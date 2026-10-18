@@ -1,4 +1,4 @@
-# info.yaml — Tiny Tapeout metadata for TinyPulse-Serial.
+# info.yaml — Tiny Tapeout metadata for Tiqora-Serial.
 #
 # `tiles: "1x2"` is MEASURED. Yosys mapped this design onto the real
 # sky130_fd_sc_hd library and reported 20,725 um^2 of standard cells:
@@ -13,16 +13,16 @@
 # Reproduce: cd test && make area
 
 project:
-  title:        "TinyPulse-Serial serial timestamping unit"
+  title:        "Tiqora-Serial: USB-serial timestamping and trigger engine"
   author:       "Aleksander Norman"
   discord:      ""
-  description:  "Hardware event timestamping and zero-jitter deadline triggers, controlled over a UART from any USB serial port"
+  description:  "Hardware event timestamping and cycle-exact deadline triggers, controlled over a UART from any USB serial port"
   language:     "SystemVerilog"
   clock_hz:     50000000
 
   tiles:        "1x2"
 
-  top_module:   "tt_um_normansrule_tinypulse_serial"
+  top_module:   "tt_um_normansrule_tiqora_serial"
 
   source_files:
     - "tp_pkg.sv"
@@ -35,7 +35,7 @@ project:
     - "uart/tp_uart_tx.sv"
     - "uart/tp_host_uart.sv"
     - "tp_sync_soc.sv"
-    - "tt_um_normansrule_tinypulse_serial.sv"
+    - "tt_um_normansrule_tiqora_serial.sv"
 
 pinout:
   ui[0]:  "CAP0 capture input"

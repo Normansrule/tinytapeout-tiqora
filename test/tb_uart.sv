@@ -187,7 +187,7 @@ module tb_uart;
     initial begin
         $dumpfile("tb_uart.vcd");
         $dumpvars(0, tb_uart);
-        $display("\n=== TinyPulse-Serial serial host port ===");
+        $display("\n=== Tiqora-Serial serial host port ===");
 
         repeat (8) @(posedge clk);
         rst = 1'b0;

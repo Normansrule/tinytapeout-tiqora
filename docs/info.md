@@ -1,6 +1,9 @@
-# TinyPulse-Serial
+# Tiqora-Serial
 
-**Hardware timestamping and zero-jitter triggers, controlled over USB serial — no CPU.**
+**Hardware timestamping and cycle-exact triggers, controlled over USB serial — no CPU.**
+
+> **Tiqora-Serial was called TinyPulse-Serial until October 2026.** The serial protocol,
+> register map and pin functions are unchanged.
 
 ![Tiny Tapeout 1x2](https://img.shields.io/badge/Tiny_Tapeout-1%C3%972_tiles-3ddc97)
 ![SkyWater 130 nm](https://img.shields.io/badge/SkyWater-130_nm-ff9f1c)
@@ -8,15 +11,15 @@
 ![cocotb](https://img.shields.io/badge/cocotb-5%2F5-4f8cff)
 ![FPGA Basys 3](https://img.shields.io/badge/FPGA-Basys_3_(Artix--7)-e34c26)
 
-![Zooming from TinyPulse-Serial's tiles down to single transistors](images/zoom.webp)
+![Zooming from Tiqora-Serial's tiles down to single transistors](images/zoom.webp)
 
 <sub>From the 1 × 2 tile down to single transistors: the design's ~2,700 real sky130 cells, drawn
 from SkyWater's own cell geometry with KLayout (`docs/tools/zoom_animation.py`).</sub>
 
-> **Looking for the programmable microcontroller?** That is the main TinyPulse project:
-> [tinypulse-skywater130](https://github.com/Normansrule/tinypulse-skywater130), a RISC-V
+> **Looking for the programmable microcontroller?** That is the main Tiqora project:
+> [tiqora-skywater130](https://github.com/Normansrule/tiqora-skywater130), a RISC-V
 > microcontroller you program in C, over USB serial or from flash, in 2 × 2 tiles (280 €).
-> This repository, **tinytapeout-tinypulse**, is its low-cost sibling: the same timing hardware
+> This repository, **tinytapeout-tiqora**, is its low-cost sibling: the same timing hardware
 > with no CPU, driven by your computer, in 1 × 2 tiles (140 €).
 
 The timestamping and trigger logic here is the same verified RTL as the microcontroller's timing
@@ -50,14 +53,14 @@ microcontroller when the chip should run your code on its own.
 
 **From the board to the silicon.** The chip arrives in a QFN package on a carrier board that
 plugs into the demo board; inside, every project on the shuttle shares one die behind a
-multiplexer, and TinyPulse-Serial is one 1 × 2 block of tiles on it:
+multiplexer, and Tiqora-Serial is one 1 × 2 block of tiles on it:
 
-![From the demo board to TinyPulse-Serial's tiles on the die](images/board_to_silicon.svg)
+![From the demo board to Tiqora-Serial's tiles on the die](images/board_to_silicon.svg)
 
 **The tile, block by block.** Every cell of the synthesized design, placed by block inside the
 161.00 × 225.76 µm tile. The deadline comparators are the largest block; the UART is small:
 
-![Every real sky130 cell of TinyPulse-Serial, placed by block](images/layout_blocks.png)
+![Every real sky130 cell of Tiqora-Serial, placed by block](images/layout_blocks.png)
 
 **One flip-flop, taken apart.** The design's 458 flip-flops are this cell. Its real manufacturing
 layers separate and rejoin:
@@ -84,9 +87,9 @@ python3 examples/01_hello.py /dev/ttyACM0
 ```
 
 ```python
-from tpctl import TinyPulse
+from tpctl import Tiqora
 
-tp = TinyPulse("/dev/ttyACM0")
+tp = Tiqora("/dev/ttyACM0")
 tp.configure_capture(enable=0xFF)              # timestamp all 8 inputs
 tp.set_pulse_width(tp.ticks(1e-6))             # 1 us trigger pulses
 
@@ -114,7 +117,7 @@ Off the demo board, any 3.3 V USB-to-UART adapter works (CP2102, CH340,
 FT232). Three wires:
 
 ```
-   USB-UART adapter              TinyPulse-Serial
+   USB-UART adapter              Tiqora-Serial
    ----------------              -------------
    TXD  ──────────────────────►  ui_in[3]   RX
    RXD  ◄──────────────────────  uo_out[4]  TX
@@ -139,7 +142,7 @@ exact positions from Tiny Tapeout's 1 × 2 template; the band names each one:
 
 **What each pin connects to:**
 
-![Every TinyPulse-Serial pin wired to the device it connects to](images/connections.svg)
+![Every Tiqora-Serial pin wired to the device it connects to](images/connections.svg)
 
 
 | Pin | Name | Dir | Function |
@@ -287,16 +290,17 @@ at an internal flip-flop.
 | `tpctl.py selftest`, host protocol with no hardware | **18 / 18** |
 | Verilator `-Wall` | **clean** (two documented waivers) |
 | Yosys elaboration | **passes, no latches** |
-| Shared sync blocks | **byte-identical** to the main chip, which runs 246 assertions over them |
+| Shared sync blocks | **byte-identical** to the main Tiqora chip, checked by `make shared` against a SHA-256 manifest kept in both repositories |
 
 The serial test does everything a host would: ping, reject garbage, read the
 running timebase, configure capture, capture an edge and read the event back,
 fire triggers, and arm a deadline. **The deadline armed over serial fires on
-the exact programmed tick** — the same zero-jitter claim the full chip makes,
-proven through two pins.
+the exact programmed tick** — the same cycle-exact behaviour the full chip has (exact relative
+to the supplied clock; oscillator error and pad delay are separate), checked through two pins.
 
-What has *not* been done: hardening, timing, gate-level simulation, and —
-most importantly — confirming the area.
+What has *not* been done yet: hardening and routed timing (the `gds` workflow on GitHub),
+gate-level simulation, and a run on a real Basys 3. The area has been measured against the real
+sky130 library; see [Area](#area).
 
 ---
 
@@ -315,7 +319,7 @@ library: 2,524 cells, 458 of them flip-flops, **20,400–21,300 µm²** dependin
 That is about 60% of the 1 × 2 tile's **placeable** area (161.00 × 225.76 µm minus the placement
 margins), before the flow adds buffers. Tiny Tapeout's default placement density of 60 would sit
 at or below the design's own utilization and fail with `GPL-0302`, so `src/config.json` sets 70 —
-the same reasoning as the main TinyPulse repository, which uses 72.
+the same reasoning as the main Tiqora repository, which uses 72.
 
 A 1x1 was the original goal and it is not reachable with this feature
 set. The serial host port alone — receiver, transmitter and protocol
@@ -364,7 +368,7 @@ Regenerate the images (from the repository root):
 python3 -m pip install klayout pillow
 python3 docs/tools/layout_preview.py ~/pdk/sky130A/libs.ref/sky130_fd_sc_hd    # cell-level layout
 python3 docs/tools/zoom_animation.py                                           # the zoom
-python3 docs/tools/exploded_cell.py ~/pdk/sky130A/libs.ref/sky130_fd_sc_hd "Every register in TinyPulse-serial is built from this cell."
+python3 docs/tools/exploded_cell.py ~/pdk/sky130A/libs.ref/sky130_fd_sc_hd "Every register in Tiqora-Serial is built from this cell."
 python3 docs/tools/silicon_views.py                                            # pin map, packaging, connections
 ```
 

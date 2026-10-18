@@ -12,8 +12,8 @@ read_verilog -sv src/uart/tp_uart_rx.sv
 read_verilog -sv src/uart/tp_uart_tx.sv
 read_verilog -sv src/uart/tp_host_uart.sv
 read_verilog -sv src/tp_sync_soc.sv
-read_verilog -sv src/tt_um_normansrule_tinypulse_serial.sv
-hierarchy -check -top tt_um_normansrule_tinypulse_serial
-synth -top tt_um_normansrule_tinypulse_serial -flatten -noabc
+read_verilog -sv src/tt_um_normansrule_tiqora_serial.sv
+hierarchy -check -top tt_um_normansrule_tiqora_serial
+synth -top tt_um_normansrule_tiqora_serial -flatten -noabc
 select -assert-none t:$dlatch t:$_DLATCH_*
 tee -o syn/stat.txt stat

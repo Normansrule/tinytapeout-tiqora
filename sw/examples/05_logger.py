@@ -12,12 +12,12 @@ dropping them.
 """
 import csv, sys, time
 sys.path.insert(0, "..")
-from tpctl import TinyPulse
+from tpctl import Tiqora
 
 port = sys.argv[1] if len(sys.argv) > 1 else "/dev/ttyACM0"
 path = sys.argv[2] if len(sys.argv) > 2 else "events.csv"
 
-tp = TinyPulse(port)
+tp = Tiqora(port)
 tp.ping()
 tp.configure_capture(enable=0xFF, both_edges=True)
 tp.drain()

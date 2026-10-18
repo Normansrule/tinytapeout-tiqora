@@ -1,4 +1,4 @@
-# basys3.xdc — TinyPulse-Serial on the Digilent Basys 3.
+# basys3.xdc — Tiqora-Serial on the Digilent Basys 3.
 # Pin locations from Digilent's Basys-3-Master.xdc (github.com/Digilent/digilent-xdc).
 
 set_property -dict { PACKAGE_PIN W5 IOSTANDARD LVCMOS33 } [get_ports {clk}]

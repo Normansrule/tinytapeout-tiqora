@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""zoom_animation.py — an animated zoom from the whole TinyPulse tile down to
+"""zoom_animation.py — an animated zoom from the whole Tiqora tile down to
 single transistors, rendered frame by frame with KLayout from the real
 sky130 cell geometry. Run layout_preview.py first (it writes the GDS and the
 block positions this uses).

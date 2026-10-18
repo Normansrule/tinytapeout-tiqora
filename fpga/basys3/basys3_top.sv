@@ -1,4 +1,4 @@
-// basys3_top.sv — TinyPulse-Serial on a Digilent Basys 3 (Artix-7 XC7A35T).
+// basys3_top.sv — Tiqora-Serial on a Digilent Basys 3 (Artix-7 XC7A35T).
 // The same RTL as the 1x2 Tiny Tapeout tile, unchanged; the board is its
 // demo board, and the board's own USB serial port is its host link.
 //   clock      100 MHz divided to 50 MHz -> 115,200 baud (clk / 434)
@@ -38,7 +38,7 @@ module basys3_top (
     logic [7:0] ui_in, uo_out, uio_in, uio_out, uio_oe;
     assign ui_in  = {sw[7], sw[6] | btnU, sw[5] | btnR, sw[4] | btnL, RsRx, sw[2:0]};
     assign uio_in = {7'b0, sw[8] | btnD};
-    tt_um_normansrule_tinypulse_serial u_chip (
+    tt_um_normansrule_tiqora_serial u_chip (
         .ui_in(ui_in), .uo_out(uo_out), .uio_in(uio_in), .uio_out(uio_out), .uio_oe(uio_oe),
         .ena(1'b1), .clk(clk50), .rst_n(rst_n));
 

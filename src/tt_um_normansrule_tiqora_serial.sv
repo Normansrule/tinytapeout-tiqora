@@ -1,5 +1,5 @@
-// tt_um_normansrule_tinypulse_serial.sv — Tiny Tapeout submission top for
-// TinyPulse-Serial, the serially-controlled timestamping and trigger unit.
+// tt_um_normansrule_tiqora_serial.sv — Tiny Tapeout submission top for
+// Tiqora-Serial, the serially-controlled timestamping and trigger unit.
 //
 // The serial port sits on the Tiny Tapeout recommended UART pins, RX on
 // ui_in[3] and TX on uo_out[4]. On the Tiny Tapeout demo board the onboard
@@ -36,7 +36,7 @@
 // 50 MHz tile clock.
 `default_nettype none
 
-module tt_um_normansrule_tinypulse_serial (
+module tt_um_normansrule_tiqora_serial (
     input  wire [7:0] ui_in,
     output wire [7:0] uo_out,
     input  wire [7:0] uio_in,
@@ -99,4 +99,4 @@ module tt_um_normansrule_tinypulse_serial (
 
     wire _unused = &{1'b0, ena, uio_in[7:1], 1'b0};
 
-endmodule : tt_um_normansrule_tinypulse_serial
+endmodule : tt_um_normansrule_tiqora_serial

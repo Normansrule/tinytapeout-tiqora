@@ -1,4 +1,4 @@
-# Hooking up TinyPulse-Serial
+# Hooking up Tiqora-Serial
 
 Everything you need to physically connect and talk to the chip.
 
@@ -55,7 +55,7 @@ Three wires. Note that TX connects to RX and vice versa: the adapter's
 transmit line drives the chip's receive pin.
 
 ```
-   USB-C ─── USB-UART adapter              TinyPulse-Serial
+   USB-C ─── USB-UART adapter              Tiqora-Serial
              (3.3 V !)                     on the Pmod header
              ------------                  ------------------
              TXD  ───────────────────────►  ui_in[3]    RX

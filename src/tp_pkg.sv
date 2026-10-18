@@ -1,4 +1,4 @@
-// tp_pkg.sv — shared types and ISA constants for the TinyPulse-Skywater130 core.
+// tp_pkg.sv — shared types and ISA constants for the Tiqora core.
 // One package, imported everywhere. ISA constants live here only.
 `default_nettype none
 

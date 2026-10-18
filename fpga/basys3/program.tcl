@@ -1,7 +1,7 @@
-# program.tcl — load build/tinypulse_serial_basys3.bit into a Basys 3 over USB (JTAG).
+# program.tcl — load build/tiqora_serial_basys3.bit into a Basys 3 over USB (JTAG).
 # The board loses it at power-off; that is fine for testing.
 set here [file normalize [file dirname [info script]]]
-set bit  "$here/build/tinypulse_serial_basys3.bit"
+set bit  "$here/build/tiqora_serial_basys3.bit"
 if {![file exists $bit]} { puts "ERROR: $bit not found. Run `make bit` first."; exit 1 }
 open_hw_manager
 connect_hw_server

@@ -1,5 +1,5 @@
 import os
-# test.py — cocotb tests for TinyPulse-Serial.
+# test.py — cocotb tests for Tiqora-Serial.
 #
 # These drive the chip the way the demo board does: a serial line into
 # ui_in[3] and a serial line out of uo_out[4], plus the capture pins. No

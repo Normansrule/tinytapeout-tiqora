@@ -1,13 +1,13 @@
 #!/usr/bin/env python3
-"""tpctl.py — host library and command-line tool for TinyPulse-Serial.
+"""tpctl.py — host library and command-line tool for Tiqora-Serial.
 
 Talks to the chip over any serial port: the Tiny Tapeout demo board's USB-C
 connection, or a 3.3 V USB-to-UART adapter wired to two pins.
 
 As a library:
 
-    from tpctl import TinyPulse
-    tp = TinyPulse("/dev/ttyACM0")
+    from tpctl import Tiqora
+    tp = Tiqora("/dev/ttyACM0")
     tp.ping()
     tp.configure_capture(enable=0xFF)
     tp.arm(channel=0, at=tp.time() + 50_000)
@@ -44,7 +44,7 @@ RSP_ACK   = 0x06
 RSP_NAK   = 0x15
 RSP_MAGIC = 0x5A
 
-# Register offsets. Identical to the full TinyPulse chip.
+# Register offsets. Identical to the full Tiqora chip.
 REG_TIME  = 0    # R   32-bit timebase
 REG_EVENT = 1    # R   oldest queued event; reading POPS it
 REG_STAT  = 2    # R   status word
@@ -60,7 +60,7 @@ DEFAULT_BAUD = 115200          # clk_hz / 434, i.e. 50 MHz / 434
 DEFAULT_CLOCK_HZ = 50_000_000
 
 
-class TinyPulseError(RuntimeError):
+class TiqoraError(RuntimeError):
     pass
 
 
@@ -151,7 +151,7 @@ def encode_ping() -> bytes:
 
 def decode_word(data: bytes) -> int:
     if len(data) != 4:
-        raise TinyPulseError(f"expected 4 bytes, got {len(data)}")
+        raise TiqoraError(f"expected 4 bytes, got {len(data)}")
     return struct.unpack("<I", data)[0]
 
 
@@ -159,8 +159,8 @@ def decode_word(data: bytes) -> int:
 # The chip
 # ---------------------------------------------------------------------
 
-class TinyPulse:
-    """A TinyPulse-Serial chip on a serial port.
+class Tiqora:
+    """A Tiqora-Serial chip on a serial port.
 
     `transport` lets you substitute anything with read(n) and write(b)
     methods, which is how the self-test runs without hardware.
@@ -176,10 +176,10 @@ class TinyPulse:
             try:
                 import serial
             except ImportError:
-                raise TinyPulseError(
+                raise TiqoraError(
                     "pyserial is not installed. pip install pyserial") from None
             if port is None:
-                raise TinyPulseError("no serial port given")
+                raise TiqoraError("no serial port given")
             self._io = serial.Serial(port, baud, timeout=timeout)
 
     # -- raw access ---------------------------------------------------
@@ -188,7 +188,7 @@ class TinyPulse:
         self._io.write(out)
         got = self._io.read(nreply)
         if len(got) != nreply:
-            raise TinyPulseError(
+            raise TiqoraError(
                 f"timed out: wanted {nreply} bytes, got {len(got)}. "
                 "Check the baud rate, the wiring, and that TX and RX are "
                 "not swapped.")
@@ -198,7 +198,7 @@ class TinyPulse:
         """Check the link. Returns the protocol version."""
         r = self._exchange(encode_ping(), 2)
         if r[0] != RSP_MAGIC:
-            raise TinyPulseError(
+            raise TiqoraError(
                 f"bad ping reply 0x{r[0]:02X}, expected 0x{RSP_MAGIC:02X}")
         return r[1]
 
@@ -208,9 +208,9 @@ class TinyPulse:
     def write_reg(self, addr: int, value: int) -> None:
         r = self._exchange(encode_write(addr, value), 1)
         if r[0] == RSP_NAK:
-            raise TinyPulseError(f"chip refused the write to register {addr}")
+            raise TiqoraError(f"chip refused the write to register {addr}")
         if r[0] != RSP_ACK:
-            raise TinyPulseError(f"unexpected reply 0x{r[0]:02X} to a write")
+            raise TiqoraError(f"unexpected reply 0x{r[0]:02X} to a write")
 
     # -- timebase -----------------------------------------------------
 
@@ -366,7 +366,7 @@ class _FakeChip:
 
 def selftest() -> int:
     fake = _FakeChip()
-    tp = TinyPulse(transport=fake, clock_hz=50_000_000)
+    tp = Tiqora(transport=fake, clock_hz=50_000_000)
     checks = failures = 0
 
     def chk(cond, name):
@@ -447,7 +447,7 @@ def selftest() -> int:
 # ---------------------------------------------------------------------
 
 def main(argv=None) -> int:
-    ap = argparse.ArgumentParser(description="Control a TinyPulse-Serial chip")
+    ap = argparse.ArgumentParser(description="Control a Tiqora-Serial chip")
     ap.add_argument("--port", "-p", help="serial port, e.g. /dev/ttyACM0 or COM3")
     ap.add_argument("--baud", "-b", type=int, default=DEFAULT_BAUD)
     ap.add_argument("--clock", type=int, default=DEFAULT_CLOCK_HZ,
@@ -476,10 +476,10 @@ def main(argv=None) -> int:
     if a.cmd == "selftest":
         return selftest()
 
-    tp = TinyPulse(a.port, a.baud, a.clock)
+    tp = Tiqora(a.port, a.baud, a.clock)
 
     if a.cmd == "ping":
-        print(f"TinyPulse-Serial, protocol version {tp.ping()}")
+        print(f"Tiqora-Serial, protocol version {tp.ping()}")
     elif a.cmd == "time":
         t = tp.time()
         print(f"{t} ticks  ({t / a.clock:.6f} s at {a.clock/1e6:g} MHz)")

@@ -1,5 +1,5 @@
 {
- "chip": "TinyPulse-serial",
+ "chip": "Tiqora-Serial",
  "subtitle": "No CPU and no memory: a PC drives the timing hardware over the demo board's USB serial port.",
  "devices": [
   {"name": "Host PC, via the demo board", "note": "the RP2350 is the clock, reset and USB-serial bridge", "color": "#c77dff",
