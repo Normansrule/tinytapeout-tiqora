@@ -5,16 +5,12 @@
 > **Tiqora-Serial was called TinyPulse-Serial until October 2026.** The serial protocol,
 > register map and pin functions are unchanged.
 
-![Tiny Tapeout 1x2](https://img.shields.io/badge/Tiny_Tapeout-1%C3%972_tiles-3ddc97)
-![SkyWater 130 nm](https://img.shields.io/badge/SkyWater-130_nm-ff9f1c)
-![checks](https://img.shields.io/badge/serial_checks-30_passing-4f8cff)
-![cocotb](https://img.shields.io/badge/cocotb-5%2F5-4f8cff)
-![FPGA Basys 3](https://img.shields.io/badge/FPGA-Basys_3_(Artix--7)-e34c26)
+**Tiny Tapeout 1×2 tiles · SkyWater 130 nm · runs on a Basys 3 FPGA (Artix-7)**
 
-![Zooming from Tiqora-Serial's tiles down to single transistors](images/zoom.webp)
+![Zooming from Tiqora-Serial's tiles down to single transistors: the whole tile, one block, single cells](images/zoom_steps.png)
 
 <sub>From the 1 × 2 tile down to single transistors: the design's ~2,700 real sky130 cells, drawn
-from SkyWater's own cell geometry with KLayout (`docs/tools/zoom_animation.py`).</sub>
+from SkyWater's own cell geometry with KLayout (`docs/tools/zoom_animation.py`, stills by `docs/tools/datasheet_stills.py`).</sub>
 
 > **Looking for the programmable microcontroller?** That is the main Tiqora project:
 > [tiqora-skywater130](https://github.com/Normansrule/tiqora-skywater130), a RISC-V
@@ -30,12 +26,11 @@ microcontroller when the chip should run your code on its own.
 
 > **Status: verified in simulation and at gate level. Measured 20,400–21,300 µm² against the real
 > sky130 library (the range is between Yosys versions): a 1 × 2 tile (140 €), at about 60% of its
-> placeable area.** A 1 × 1 is not achievable with this feature set — see [Area](#area).
+> placeable area.** A 1 × 1 is not achievable with this feature set — see the Area section.
 > Reproduce with `make area`.
 
 ---
 
-**Contents:** [Status](#status) · [What it looks like](#what-it-looks-like) · [Run it on an FPGA today: Digilent Basys 3](#run-it-on-an-fpga-today-digilent-basys-3) · [Quick start](#quick-start) · [How you talk to it](#how-you-talk-to-it) · [Pin map](#pin-map) · [Serial protocol](#serial-protocol) · [Register map](#register-map) · [Host software](#host-software) · [Verification](#verification) · [Area](#area) · [Running the checks](#running-the-checks) · [Licence](#licence)
 
 ## Status
 
@@ -300,7 +295,7 @@ to the supplied clock; oscillator error and pad delay are separate), checked thr
 
 What has *not* been done yet: hardening and routed timing (the `gds` workflow on GitHub),
 gate-level simulation, and a run on a real Basys 3. The area has been measured against the real
-sky130 library; see [Area](#area).
+sky130 library; see the Area section.
 
 ---
 
@@ -368,6 +363,7 @@ Regenerate the images (from the repository root):
 python3 -m pip install klayout pillow
 python3 docs/tools/layout_preview.py ~/pdk/sky130A/libs.ref/sky130_fd_sc_hd    # cell-level layout
 python3 docs/tools/zoom_animation.py                                           # the zoom
+python3 docs/tools/datasheet_stills.py                                         # the zoom as stills, for the PDF
 python3 docs/tools/exploded_cell.py ~/pdk/sky130A/libs.ref/sky130_fd_sc_hd "Every register in Tiqora-Serial is built from this cell."
 python3 docs/tools/silicon_views.py                                            # pin map, packaging, connections
 ```

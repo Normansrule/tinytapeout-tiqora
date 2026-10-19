@@ -391,6 +391,7 @@ Regenerate the images (from the repository root):
 python3 -m pip install klayout pillow
 python3 docs/tools/layout_preview.py ~/pdk/sky130A/libs.ref/sky130_fd_sc_hd    # cell-level layout
 python3 docs/tools/zoom_animation.py                                           # the zoom
+python3 docs/tools/datasheet_stills.py                                         # the zoom as stills, for the PDF
 python3 docs/tools/exploded_cell.py ~/pdk/sky130A/libs.ref/sky130_fd_sc_hd "Every register in Tiqora-Serial is built from this cell."
 python3 docs/tools/silicon_views.py                                            # pin map, packaging, connections
 ```
@@ -401,5 +402,3 @@ if you have it, and finds your sky130 library automatically.
 ## Licence
 
 Apache-2.0.
-
-Maintained by [@Normansrule](https://github.com/Normansrule) ([MAINTAINERS.md](MAINTAINERS.md)).

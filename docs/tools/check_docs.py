@@ -5,6 +5,9 @@ For every Markdown file in the repository it checks that
   * every local link and image points at a file or folder that exists
   * every `make <target>` mentioned is a target in one of the Makefiles
   * every `python3 <script>.py` mentioned is a file in the repository
+and that docs/info.md will build into Tiny Tapeout's PDF datasheet (typst 0.13):
+  * every image is a local PNG, JPEG, GIF or SVG file (no web images, no WebP)
+  * no link to a heading anchor (#name); the datasheet's headings have no anchors
 Docs drift silently as a project changes; this makes drift a test failure.
     python3 docs/tools/check_docs.py        (from the repository root)
 """
@@ -49,6 +52,15 @@ for md in sorted(mds):
             continue
         if os.path.basename(m.group(1)) not in basenames:
             bad(f"script not found: {m.group(1)}")
+    if rel == os.path.join("docs", "info.md"):
+        for m in re.finditer(r"!\[[^\]]*\]\(([^)\s]+)\)|<img[^>]*\bsrc=\"([^\"]+)\"", text):
+            img = m.group(1) or m.group(2)
+            if re.match(r"[a-z]+:", img):
+                bad(f"datasheet image must be a local file, not {img}")
+            elif not re.search(r"\.(png|jpe?g|gif|svg)$", img, re.I):
+                bad(f"datasheet image must be PNG, JPEG, GIF or SVG for typst: {img}")
+        for m in re.finditer(r"\]\((#[^)\s]*)\)", text):
+            bad(f"datasheet link to a heading anchor fails the PDF build: {m.group(1)}")
 print(f"{len(mds)} Markdown files checked: " + ("all links, images, make targets and scripts exist"
                                                 if not problems else f"{problems} problems"))
 sys.exit(1 if problems else 0)

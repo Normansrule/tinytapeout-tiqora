@@ -1,7 +1,0 @@
-# Canonical identity for tools that read .mailmap (git shortlog, git log --use-mailmap).
-# These commits were made by Aleksander J. Norman on a machine whose git identity was
-# still a template placeholder ("your GitHub email", "Your Name <you@example.com>"); the
-# name and the work are his. The history is not rewritten. GitHub's own contributor
-# graph does not read this file.
-Aleksander J. Norman <aleksanderjnorman@gmail.com> <your GitHub email>
-Aleksander J. Norman <aleksanderjnorman@gmail.com> Your Name <you@example.com>
