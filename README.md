@@ -401,3 +401,5 @@ if you have it, and finds your sky130 library automatically.
 ## Licence
 
 Apache-2.0.
+
+Maintained by [@Normansrule](https://github.com/Normansrule) ([MAINTAINERS.md](MAINTAINERS.md)).
