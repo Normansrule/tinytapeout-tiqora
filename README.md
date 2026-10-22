@@ -1,20 +1,15 @@
-# Tiqora-Serial
+# Tiqora-Serial — hardware timestamps and cycle-exact triggers over USB serial, no CPU
 
-**Hardware timestamping and cycle-exact triggers, controlled over USB serial — no CPU.**
+**Tiny Tapeout 1 × 2 tiles · SkyWater sky130 · Apache 2.0 · maintained by [@Normansrule](https://github.com/Normansrule)**
+
+![A ping and a register write recorded from the RTL: the host's bytes on RX, the host port's states, and the chip's replies on TX](docs/images/explorer/tour.gif)
+
+<sub>Recorded, not drawn: one window of `make -C test tour`, a simulation of the submitted top module
+driven only through its pins, rendered by `docs/tools/readme_media.py`.
+[Still image](docs/images/explorer/tour.png) for readers with motion turned off.</sub>
 
 > **Tiqora-Serial was called TinyPulse-Serial until October 2026.** The serial protocol,
 > register map and pin functions are unchanged.
-
-![Tiny Tapeout 1x2](https://img.shields.io/badge/Tiny_Tapeout-1%C3%972_tiles-3ddc97)
-![SkyWater 130 nm](https://img.shields.io/badge/SkyWater-130_nm-ff9f1c)
-![checks](https://img.shields.io/badge/serial_checks-30_passing-4f8cff)
-![cocotb](https://img.shields.io/badge/cocotb-5%2F5-4f8cff)
-![FPGA Basys 3](https://img.shields.io/badge/FPGA-Basys_3_(Artix--7)-e34c26)
-
-![Zooming from Tiqora-Serial's tiles down to single transistors](docs/images/zoom.webp)
-
-<sub>From the 1 × 2 tile down to single transistors: the design's ~2,700 real sky130 cells, drawn
-from SkyWater's own cell geometry with KLayout (`docs/tools/zoom_animation.py`).</sub>
 
 > **Looking for the programmable microcontroller?** That is the main Tiqora project:
 > [tiqora-skywater130](https://github.com/Normansrule/tiqora-skywater130), a RISC-V
@@ -22,32 +17,70 @@ from SkyWater's own cell geometry with KLayout (`docs/tools/zoom_animation.py`).
 > This repository, **tinytapeout-tiqora**, is its low-cost sibling: the same timing hardware
 > with no CPU, driven by your computer, in 1 × 2 tiles (140 €).
 
-The timestamping and trigger logic here is the same verified RTL as the microcontroller's timing
-unit, byte for byte. Instead of a RISC-V core running your program, a host computer sends it
-commands over a serial port. Use this one when the thinking happens on a PC, a Raspberry Pi or an
+The timestamping and trigger logic here is the same verified RTL (register-transfer level: the
+hardware description a chip is built from) as the microcontroller's timing unit, byte for byte.
+Instead of a RISC-V core running your program, a host computer sends it commands over a serial
+port, through the demo board's USB (Universal Serial Bus) bridge. Use this one when the thinking happens on a PC, a Raspberry Pi or an
 existing microcontroller, and you only need precise timing from the chip. Use the
 microcontroller when the chip should run your code on its own.
 
-> **Status: verified in simulation and at gate level. Measured 20,400–21,300 µm² against the real
-> sky130 library (the range is between Yosys versions): a 1 × 2 tile (140 €), at about 60% of its
-> placeable area.** A 1 × 1 is not achievable with this feature set — see [Area](#area).
-> Reproduce with `make area`.
+It exists as tested RTL, not yet as a chip. The design synthesizes to 59% of the 1 × 2 die, but
+place and route at 1 × 2 stops with `DPL-0036`; an experimental copy at 2 × 2 routes clean and
+passes the Tiny Tapeout pre-flight. Which tile size to submit is the maintainer's decision.
 
----
+**Key features**
 
-**Contents:** [Status](#status) · [What it looks like](#what-it-looks-like) · [Run it on an FPGA today: Digilent Basys 3](#run-it-on-an-fpga-today-digilent-basys-3) · [Quick start](#quick-start) · [How you talk to it](#how-you-talk-to-it) · [Pin map](#pin-map) · [Serial protocol](#serial-protocol) · [Register map](#register-map) · [Host software](#host-software) · [Verification](#verification) · [Area](#area) · [Running the checks](#running-the-checks) · [Licence](#licence)
+- **Timestamps in hardware.** Edges on eight inputs are stamped with the 32-bit timebase, to the
+  20 ns clock, and queued until the host reads them.
+- **Triggers on the exact tick.** Three deadline outputs rise on the programmed tick, however
+  busy the host is.
+- **No processor to program.** Six-byte commands over 115,200 baud serial; a Python library and
+  command line (`sw/tpctl.py`) do the talking.
+- **Same timing unit as Tiqora**, checked byte for byte by `make -C test shared`.
+- **Evidence on every number**: measured (with command and version), experimental, failed or not
+  done yet.
+- **An explorer you can open offline**: recorded tours, a protocol lab, a lab where you fire your
+  own deadline, and a zoom from a grain of salt down to one flip-flop.
+
+### Explore it
+
+| Page | What you can do there |
+|---|---|
+| [**Overview**](https://htmlpreview.github.io/?https://github.com/Normansrule/tinytapeout-tiqora/blob/main/docs/site/index.html) | fire a deadline of your own; scroll from a grain of salt down to one flip-flop; what goes in, what happens inside, what comes out, what is proven |
+| [**Tours**](https://htmlpreview.github.io/?https://github.com/Normansrule/tinytapeout-tiqora/blob/main/docs/site/tours.html) | six sequences recorded from the RTL, with play, step, scrub and captions; type your own command bytes and see the 8N1 frames and the reply |
+| [**Chip atlas**](https://htmlpreview.github.io/?https://github.com/Normansrule/tinytapeout-tiqora/blob/main/docs/site/atlas.html) | every block from the elaborated RTL: ports, legal values, behaviour, tests, connections you can follow |
+| [**Physical design**](https://htmlpreview.github.io/?https://github.com/Normansrule/tinytapeout-tiqora/blob/main/docs/site/physical.html) | measured cell area per block against the 1 × 2 die, and the experimental 2 × 2 layout |
+| [**Evidence**](https://htmlpreview.github.io/?https://github.com/Normansrule/tinytapeout-tiqora/blob/main/docs/site/evidence.html) | the ladder from RTL tests to silicon, with the command behind every rung |
+
+The same pages are in `docs/site/` and open from a clone with no network.
+
+![The overview's opening shot: Tiqora-Serial's name above its tile of real sky130 cells, tilted in perspective and settling flat as you scroll](docs/images/explorer/site-hero.jpg)
+
+| Fire a deadline | The zoom's last view |
+|---|---|
+| ![The overview's deadline lab: TRIG0 rises on the chosen tick, computed from the recorded tour](docs/images/explorer/site-deadline.png) | ![The die zoom on one sky130 D flip-flop: diffusion, polysilicon, local interconnect, contacts and metal 1 as translucent colour on black](docs/images/explorer/site-zoom.png) |
+
+![The tour player: controls, caption and the recorded waveform](docs/images/explorer/site-tours.png)
+
+<sub>Photographed from the built pages by `docs/tools/site_shots.py`: the opening shot a little way into its scroll, the rest with reduced motion on.</sub>
+
+![What enters Tiqora-Serial, what happens inside, what comes out](docs/images/explorer/flow.svg)
+
+**Contents:** [Status](#status) · [What it looks like](#what-it-looks-like) · [Run it on an FPGA today: Digilent Basys 3](#run-it-on-an-fpga-today-digilent-basys-3) · [Quick start](#quick-start) · [How you talk to it](#how-you-talk-to-it) · [Pin map](#pin-map) · [Serial protocol](#serial-protocol) · [Register map](#register-map) · [Host software](#host-software) · [Verification](#verification) · [Area](#area) · [Running the checks](#running-the-checks) · [Design](#design) · [Repository](#repository) · [Maintainer](#maintainer)
 
 ## Status
 
-| | |
-|---|---|
-| ✅ **RTL simulation** | 30 checks on the serial host port (`cd test && make sim`), plus 5 cocotb tests from the pins only |
-| ✅ **FPGA (simulated)** | the whole Digilent Basys 3 design, driven like a PC at 115,200 baud: 7 checks (`make -C fpga/basys3 sim`) |
-| ✅ **Tiny Tapeout pre-flight** | CI's own project checker passes: docs, ports, build configuration |
-| ✅ **Docs** | every link, image, `make` target and script mentioned exists (`make docs`, part of `make sim`) |
-| ⏳ **Hardening** | runs on GitHub after a push (`gds` workflow); placement density set to 70 for this design |
-| ⏳ **FPGA board** | Vivado build and a real Basys 3: `make bit && make prog` in `fpga/basys3` |
-| ⏳ **Silicon** | after submission to a Tiny Tapeout shuttle |
+Where the Tiny Tapeout tile stands on the way to silicon. Each rung needs the one before it.
+
+| Stage | State | Evidence |
+|---|---|---|
+| RTL tested | ✅ done | 30 checks, 5 cocotb tests from the pins, recorded tour 13/13 (`make -C test sim`; v20) |
+| Formally checked | ⬜ not done | no formal proofs exist for this design |
+| Synthesized | ✅ done | 21,324 µm², 458 flip-flops, 59% of the 1 × 2 die (`make -C test area`, Yosys 0.33; v20) |
+| Placed and routed | ❌ failed at 1 × 2 | LibreLane 3.0.14 stops in detailed placement with `DPL-0036`. Experimental 2 × 2 copy: DRC 0, LVS 0, antenna 0 |
+| Timing checked | ⬜ not at 1 × 2 | experimental 2 × 2 copy: setup +0.563 ns, hold +0.107 ns worst slack |
+| Submitted, fabricated, measured | ⬜ not yet | the 2 × 2 copy passes the Tiny Tapeout pre-flight 15/15; submitting it means changing `info.yaml`'s tile count |
+| FPGA board | ⬜ not yet | the Basys 3 design passes in simulation, 7 checks; nothing has run on a board |
 
 <!-- progress:begin (generated by docs/tools/progress.py from docs/progress.json; do not edit) -->
 
@@ -74,24 +107,31 @@ Where Tiqora-Serial stands on the way to silicon. Every ✅ and 🔄 below names
 
 ## What it looks like
 
-**From the board to the silicon.** The chip arrives in a QFN package on a carrier board that
+**From the board to the silicon.** The chip would arrive in a QFN package on a carrier board that
 plugs into the demo board; inside, every project on the shuttle shares one die behind a
 multiplexer, and Tiqora-Serial is one 1 × 2 block of tiles on it:
 
 ![From the demo board to Tiqora-Serial's tiles on the die](docs/images/board_to_silicon.svg)
 
-**The tile, block by block.** Every cell of the synthesized design, placed by block inside the
-161.00 × 225.76 µm tile. The deadline comparators are the largest block; the UART is small:
+**Where the area goes, to scale.** Each block's measured cell area from synthesis, laid out in
+the real 161.00 × 225.76 µm die outline. A treemap of measured numbers, not a placement:
 
-![Every real sky130 cell of Tiqora-Serial, placed by block](docs/images/layout_blocks.png)
+![Treemap of each block's synthesized cell area inside the 1x2 die outline](docs/images/explorer/area_treemap.svg)
+
+**An illustration, not a placement.** Every real sky130 cell of the synthesized design, drawn
+with its real geometry but packed into rows block by block by a simple script
+(`docs/tools/layout_preview.py`). The zoom animation (`docs/images/zoom.webp`,
+`docs/tools/zoom_animation.py`) is drawn from the same illustration:
+
+![Illustration: Tiqora-Serial's real sky130 cells packed into rows block by block, not a placement](docs/images/layout_blocks.png)
 
 **One flip-flop, taken apart.** The design's 458 flip-flops are this cell. Its real manufacturing
 layers separate and rejoin:
 
 ![One sky130 D flip-flop exploded into its manufacturing layers](docs/images/flipflop_exploded.svg)
 
-The routed layout comes from the `gds` GitHub Actions run, which publishes it to this
-repository's GitHub Pages (enable Settings → Pages → Source: GitHub Actions).
+The only routed layout so far is the experimental 2 × 2 copy, shown with its sign-off numbers on
+the [Physical design page](docs/site/physical.html).
 
 ## Run it on an FPGA today: Digilent Basys 3
 
@@ -99,6 +139,14 @@ The same RTL runs on a [Digilent Basys 3](fpga/basys3/README.md) (Artix-7) with 
 The board's USB port is the host link, so `sw/tpctl.py` works unchanged; the buttons are capture
 inputs and the LEDs show the triggers and the event queue. `make sim` in `fpga/basys3` checks the
 whole board design first (7 of 7), and `make bit && make prog` loads it with Vivado.
+
+![A simulated Basys 3 talking to a PC: ping, two TIME reads, a CFG write, a BTNL press read back as an event, and a pulse on TRIG0, with the bytes in hex](docs/images/explorer/fpga.gif)
+
+<sub>**Simulated, not a real board.** `make -C fpga/basys3 record` repeats `make sim`, the whole
+board design in Icarus Verilog driven the way a PC drives it at the real 115,200 baud;
+`fpga/basys3/rec_basys3.sv` writes down the LEDs, the 7-segment display, the buttons and the
+serial bytes, and `docs/tools/fpga_media.py` draws them. Nothing has run on a real Basys 3 yet.
+[Still image](docs/images/explorer/fpga.png) for readers with motion turned off.</sub>
 
 ## Quick start
 
@@ -321,9 +369,9 @@ fire triggers, and arm a deadline. **The deadline armed over serial fires on
 the exact programmed tick** — the same cycle-exact behaviour the full chip has (exact relative
 to the supplied clock; oscillator error and pad delay are separate), checked through two pins.
 
-What has *not* been done yet: hardening and routed timing (the `gds` workflow on GitHub),
-gate-level simulation, and a run on a real Basys 3. The area has been measured against the real
-sky130 library; see [Area](#area).
+What has *not* been done yet: a placed and routed layout at 1 × 2 (it stops with `DPL-0036`),
+routed timing at 1 × 2, gate-level simulation, and a run on a real Basys 3. The area has been
+measured against the real sky130 library; see [Area](#area).
 
 ---
 
@@ -377,7 +425,8 @@ for every tile size with a fits / tight / does not fit verdict. Set
 
 ```bash
 cd test
-make sim      # the serial host port testbench
+make sim      # the serial host port testbench, the recorded tour, the docs and site checks
+make tour     # only the recorded tour (13 checks); then python3 ../docs/tools/traces.py
 make lint     # Verilator -Wall
 make synth    # Yosys elaboration
 make area LIB=<path>   # real sky130 area: cells, flip-flops, fit per tile size
@@ -394,11 +443,76 @@ python3 docs/tools/zoom_animation.py                                           #
 python3 docs/tools/datasheet_stills.py                                         # the zoom as stills, for the PDF
 python3 docs/tools/exploded_cell.py ~/pdk/sky130A/libs.ref/sky130_fd_sc_hd "Every register in Tiqora-Serial is built from this cell."
 python3 docs/tools/silicon_views.py                                            # pin map, packaging, connections
+python3 docs/tools/atlas.py && python3 docs/tools/build_site.py                # the explorer site (atlas needs Yosys)
+python3 docs/tools/readme_media.py                                             # the README animation
 ```
 
 Any Yosys version works. `make area` prefers `~/oss-cad-suite/bin/yosys`
 if you have it, and finds your sky130 library automatically.
 
+## Design
+
+The explorer site is meant to read like a logic analyser's capture, kept calm enough for long
+reading. We call the direction **Scope**; it is shared, file for file, with
+[Tiqora's explorer](https://github.com/Normansrule/tiqora-skywater130#design).
+
+- **Time runs left to right.** A thin cycle ruler under the header marks each section as a tick
+  and follows your place on the page. Recorded traces are amber; the cursor that marks "now",
+  links and focus rings are one cool probe blue. Light mode is the capture printed on paper;
+  dark mode is the instrument's screen.
+- **Readable first.** Body text is Atkinson Hyperlegible Next and values are Atkinson
+  Hyperlegible Mono, both drawn so that 0/O and 1/l/I never get confused. Headings use Barlow
+  Semi Condensed, the lettering of an instrument's front panel. Lines stay around 56
+  characters. All three fonts are SIL Open Font License files inlined into the pages.
+- **Colour never carries meaning alone.** Every evidence label has a word and a drawn shape,
+  every signal row and block has its name, and the block colours were checked for
+  colour-vision deficiency in both themes.
+- **Motion is physical and quiet.** The tour cursor and the deadline lab move on a critically
+  damped spring: they arrive quickly and settle without bouncing. Buttons give a 0.97 press.
+  With reduced motion turned on, everything jumps straight to its end state.
+- **The overview opens like a product page.** The name, then the tile of real cells lying tilted
+  in perspective; as you scroll the copy lifts away and the tile settles flat, straight into the
+  zoom. Then four big numbers, each with how it was obtained. Scroll sets the target and the
+  same spring follows it; with reduced motion the tile simply rests flat.
+- **The Basys 3 board is a recording too, and it plays live.** On the overview you can play or
+  drag through the recorded run (`docs/site/lib/board.js`); the README shows the same run as an
+  animation. It looks like the board (green board, red 7-segment digits, green LEDs at their real
+  duty cycle) but every frame comes from a simulation, and its corner says *Simulated board, not
+  a real one*.
+- **The zoom is drawn the way [Visual 6502](http://www.visual6502.org/) draws a die**: every
+  layer as translucent colour on black. The cells and their geometry are this design's real
+  sky130 cells (`docs/tools/die_map.py`); their positions come from a row packer, not a placer,
+  and the page says so at every zoom level. No Visual 6502 code or data is used, only the idea
+  of the view. With reduced motion it becomes four still views with buttons.
+- **Honest about where numbers come from.** Labs say *computed* and link to the recording they
+  are derived from; the zoom says *illustrative* where it is; nothing is drawn by hand.
+
+Every page works without JavaScript as plain text, keeps its keyboard controls, and has no
+horizontal scroll at phone width.
+
+## Repository
+
+```
+src/sync/      the timing unit: timebase, capture, event queue, deadline comparators
+               (byte-identical to Tiqora's, docs/shared_timing.sha256)
+src/uart/      serial receiver, transmitter and the host port that decodes commands
+src/tp_sync_soc.sv  the design;  tt_um_normansrule_tiqora_serial.sv  pin wrapper
+src/config.json  hardening configuration
+sw/            tpctl.py (host library and command line), examples/
+test/          testbenches, the recorded tour, cocotb tests
+fpga/basys3/   the Digilent Basys 3 build; rec_basys3.sv records a simulated run (make record)
+docs/site/     the explorer site: pages/ (templates), lib/ (shared styles, scripts and fonts),
+               data/ (atlas, tours, die map), and the built pages next to them
+docs/fpga/     the recorded Basys 3 run behind the board animation
+docs/tools/    atlas.py, traces.py, die_map.py, build_site.py, check_site.py, readme_media.py,
+               site_shots.py, fpga_media.py: the site and its README pictures; the other images' generators
+syn/           synthesis and area scripts
+```
+
+## Maintainer
+
+Maintained by [@Normansrule](https://github.com/Normansrule); see [MAINTAINERS.md](MAINTAINERS.md).
+
 ## Licence
 
-Apache-2.0.
+Apache-2.0. The sky130 PDK is by SkyWater and Google; fabrication would be through Tiny Tapeout.

@@ -1,0 +1,26 @@
+<!-- {"title": "Chip atlas", "description": "Every block in Tiqora-Serial, from the elaborated RTL: ports with legal values, parameters, flip-flops, measured area, behaviour, tests and connections.", "data": ["atlas", "site"], "scripts": ["atlas"]} -->
+<h1>Chip atlas</h1>
+<p class=lede>Every module instance in Tiqora-Serial, as Yosys elaborates it from the files <code>info.yaml</code> submits. Ports, widths, parameters, flip-flop counts and connections come from that elaboration; what each block means comes from <code>docs/atlas/notes.json</code>, which <code>docs/tools/atlas.py --check</code> holds to the real ports and tests.</p>
+<p class=small>To follow a signal, open a block and choose <b>follow</b> next to a port: the blocks it reaches are listed, and marked ◆ in the list.</p>
+<div id=atlas></div>
+<noscript>{{static:atlas_table}}</noscript>
+
+<h2>Across the whole chip</h2>
+<div id=cross class=grid></div>
+
+<h2 id=pins>Pins</h2>
+<p>From <code>info.yaml</code>, which the Tiny Tapeout datasheet is generated from.</p>
+{{static:pins}}
+<script>
+(function () {
+  const A = DATA("atlas"), site = DATA("site");
+  TQAtlas.mount(document.getElementById("atlas"), A, { repo: site.repo, ref: site.ref });
+  const cross = document.getElementById("cross");
+  A.cross_cutting.forEach(c => {
+    const d = document.createElement("div"); d.className = "card";
+    const h = document.createElement("h3"); h.textContent = c.title;
+    const p = document.createElement("p"); p.textContent = c.text.replace(/`/g, "");
+    d.append(h, p); cross.append(d);
+  });
+})();
+</script>

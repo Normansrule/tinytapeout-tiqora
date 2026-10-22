@@ -1,0 +1,644 @@
+{
+ "bytes": [
+  {
+   "at": 111266,
+   "byte": 2,
+   "dir": "host",
+   "end": 115606
+  },
+  {
+   "at": 115606,
+   "byte": 1,
+   "dir": "host",
+   "end": 119946
+  },
+  {
+   "at": 119734,
+   "byte": 162,
+   "dir": "chip",
+   "end": 124074
+  },
+  {
+   "at": 124075,
+   "byte": 178,
+   "dir": "chip",
+   "end": 128415
+  },
+  {
+   "at": 128416,
+   "byte": 1,
+   "dir": "chip",
+   "end": 132756
+  },
+  {
+   "at": 132757,
+   "byte": 8,
+   "dir": "chip",
+   "end": 137097
+  },
+  {
+   "at": 136881,
+   "byte": 126,
+   "dir": "host",
+   "end": 141221
+  }
+ ],
+ "captions": [
+  {
+   "at": 111260,
+   "blocks": [
+    "sync_capture"
+   ],
+   "text": "CAP0 (ui_in[0]) rises. Capture is enabled for channel 0, rising edges (the CFG write in the first tour)."
+  },
+  {
+   "at": 111263,
+   "blocks": [
+    "sync_capture",
+    "sync_unit"
+   ],
+   "text": "3 clocks later the edge is through the two-flop synchronizer and the edge detector: EVTP pulses for one clock and EVT goes high."
+  },
+  {
+   "at": 111263,
+   "blocks": [
+    "sync_event_fifo",
+    "tt_um_normansrule_tiqora_serial"
+   ],
+   "text": "The board can see the event without asking: EVQ = 1 (one queued), EVCH = 0, EVED = 1 (rising) on the uio pins."
+  },
+  {
+   "at": 111266,
+   "blocks": [
+    "tp_uart_rx",
+    "sync_event_fifo"
+   ],
+   "text": "Host sends 02 01: read EVENT."
+  },
+  {
+   "at": 119732,
+   "blocks": [
+    "tp_host_uart",
+    "sync_unit"
+   ],
+   "text": "H_DO: one clock on the register port, offset 1 (EVENT)."
+  },
+  {
+   "at": 119733,
+   "blocks": [
+    "sync_event_fifo"
+   ],
+   "text": "Reading EVENT pops the queue on the H_DO clock: EVQ and EVT drop. The word is source 0 (pin), channel 0, rising, timestamp 111266."
+  },
+  {
+   "at": 119734,
+   "blocks": [
+    "tp_uart_tx",
+    "tp_host_uart"
+   ],
+   "text": "The chip answers A2 B2 01 08, least significant byte first: 0x0801B2A2."
+  }
+ ],
+ "checks": [
+  {
+   "ok": true,
+   "text": "edge on CAP0: EVT high, one EVTP pulse, EVQ = 1, EVCH = 0, EVED = 1"
+  },
+  {
+   "ok": true,
+   "text": "read EVENT pops it: channel 0, rising; EVT goes low"
+  }
+ ],
+ "commands": [
+  {
+   "addr": 1,
+   "at": 111266,
+   "bytes": [
+    2,
+    1
+   ],
+   "cmd": "read EVENT",
+   "got": [
+    162,
+    178,
+    1,
+    8
+   ],
+   "value": 134328994
+  },
+  {
+   "at": 136881,
+   "bytes": [
+    126
+   ],
+   "cmd": "unknown 0x7E",
+   "got": [
+    21
+   ],
+   "reply": [
+    21
+   ]
+  }
+ ],
+ "cycles": [
+  110392,
+  137531
+ ],
+ "event_format": {
+  "26:0": "timestamp, low 27 bits of the timebase",
+  "27": "1 = rising edge",
+  "30:28": "channel or tag",
+  "31": "source: 0 pin, 1 TMARK"
+ },
+ "id": "event",
+ "kind": "recorded",
+ "kind_text": "Recorded from an RTL simulation, not computed in the browser",
+ "marks": [
+  {
+   "at": 111263,
+   "label": "captured"
+  },
+  {
+   "at": 119733,
+   "label": "popped"
+  }
+ ],
+ "provenance": {
+  "command": "make -C test tour  (then python3 docs/tools/traces.py)",
+  "sampling": "sampled on the falling edge of every clock; a line is kept only where a traced signal other than the timebase changes. Cycle 0 is the first rising edge after reset is released; reset holds the count. 1 cycle = 20 ns at 50 MHz; one serial bit is 434 cycles (115,200 baud)",
+  "simulator": "Icarus Verilog version 12.0 (stable) ()",
+  "sources": {
+   "src/sync/sync_capture.sv": "2a14d3051ed4d0f9c8d4c6158cb148cfe515bceb8111fc9da123d9b3f984a907",
+   "src/sync/sync_compare.sv": "532fda2a6751b3b1134744324ca9260de87b18ccb572aa18e21f0da8df998224",
+   "src/sync/sync_event_fifo.sv": "8072350d74f351b9ad8bbfbf90613ebb21058e3ccea1e7ea7e41ffdc945d1304",
+   "src/sync/sync_timebase.sv": "c7a8d227e898022290a6fd1fade22e451c9b5adf532139151d7c8872ceb1f1ef",
+   "src/sync/sync_unit.sv": "9b659ce29646ac5f536a629f6fcf83acc039761c72c61e4e8a1b4b592be4f270",
+   "src/tp_pkg.sv": "8da187b5b062a40778534565ed50fbbe5c70afb2faa444fe44a47f324cdb42cd",
+   "src/tp_sync_soc.sv": "462a14536fd2450134754e5f7c87a1fb90d28c6c95822d8596fed7975f1905aa",
+   "src/tt_um_normansrule_tiqora_serial.sv": "09a201defac0fb179034a01edc9dbbc2f4828b927dc53658c01290469dc57efb",
+   "src/uart/tp_host_uart.sv": "e131a7447cb016ede4b67bfcfdea0d5f9faca7cbfd2d0fc7de93b74e1656c449",
+   "src/uart/tp_uart_rx.sv": "74ac23194c71027eff9a5fa8fef0acd5eb32af71e996affae7d25d0c01bc2f1a",
+   "src/uart/tp_uart_tx.sv": "32458039699f7e41740457c80a820cc7132a2366a3f64bc58ee1675d674cb49a",
+   "test/tb_tour.sv": "11ffefe316205a5c26aee7b1a8ebb5643f61468a0a587c4c46202ad478030ae2"
+  },
+  "testbench": "test/tb_tour.sv"
+ },
+ "schema": 1,
+ "signals": [
+  {
+   "block": "tp_uart_rx",
+   "changes": [
+    [
+     111238,
+     1
+    ],
+    [
+     111266,
+     0
+    ],
+    [
+     112134,
+     1
+    ],
+    [
+     112568,
+     0
+    ],
+    [
+     115172,
+     1
+    ],
+    [
+     115606,
+     0
+    ],
+    [
+     116040,
+     1
+    ],
+    [
+     116474,
+     0
+    ],
+    [
+     119512,
+     1
+    ],
+    [
+     136881,
+     0
+    ]
+   ],
+   "id": "rx",
+   "kind": "bit",
+   "label": "RX (ui_in[3])",
+   "meaning": "serial in from the host, idle high",
+   "width": 1
+  },
+  {
+   "block": "tp_uart_tx",
+   "changes": [
+    [
+     111238,
+     1
+    ],
+    [
+     119734,
+     0
+    ],
+    [
+     120602,
+     1
+    ],
+    [
+     121036,
+     0
+    ],
+    [
+     122338,
+     1
+    ],
+    [
+     122772,
+     0
+    ],
+    [
+     123206,
+     1
+    ],
+    [
+     124075,
+     0
+    ],
+    [
+     124943,
+     1
+    ],
+    [
+     125377,
+     0
+    ],
+    [
+     126245,
+     1
+    ],
+    [
+     127113,
+     0
+    ],
+    [
+     127547,
+     1
+    ],
+    [
+     128416,
+     0
+    ],
+    [
+     128850,
+     1
+    ],
+    [
+     129284,
+     0
+    ],
+    [
+     132322,
+     1
+    ],
+    [
+     132757,
+     0
+    ],
+    [
+     134493,
+     1
+    ],
+    [
+     134927,
+     0
+    ],
+    [
+     136663,
+     1
+    ]
+   ],
+   "id": "tx",
+   "kind": "bit",
+   "label": "TX (uo_out[4])",
+   "meaning": "serial out to the host, idle high",
+   "width": 1
+  },
+  {
+   "block": "tp_host_uart",
+   "changes": [
+    [
+     111238,
+     0
+    ],
+    [
+     115393,
+     1
+    ],
+    [
+     137098,
+     0
+    ]
+   ],
+   "id": "act",
+   "kind": "bit",
+   "label": "ACT (uio[1])",
+   "meaning": "a command or reply is in progress",
+   "width": 1
+  },
+  {
+   "block": "tp_host_uart",
+   "changes": [
+    [
+     111238,
+     0
+    ],
+    [
+     115393,
+     1
+    ],
+    [
+     119732,
+     3
+    ],
+    [
+     119733,
+     4
+    ],
+    [
+     137098,
+     0
+    ]
+   ],
+   "enum": [
+    "H_CMD",
+    "H_ADDR",
+    "H_DATA",
+    "H_DO",
+    "H_SEND"
+   ],
+   "id": "h_state",
+   "kind": "enum",
+   "label": "host port state",
+   "meaning": "tp_host_uart's state register",
+   "width": 3
+  },
+  {
+   "block": "tp_host_uart",
+   "changes": [
+    [
+     111238,
+     0
+    ],
+    [
+     119732,
+     4
+    ],
+    [
+     119734,
+     3
+    ],
+    [
+     124075,
+     2
+    ],
+    [
+     128416,
+     1
+    ],
+    [
+     132757,
+     0
+    ]
+   ],
+   "id": "h_count",
+   "kind": "bus",
+   "label": "bytes left",
+   "meaning": "bytes still to receive (H_DATA) or send (H_SEND)",
+   "width": 3
+  },
+  {
+   "block": "tp_uart_rx",
+   "changes": [
+    [
+     111238,
+     null
+    ],
+    [
+     115392,
+     2
+    ],
+    [
+     115393,
+     null
+    ],
+    [
+     119731,
+     1
+    ],
+    [
+     119732,
+     null
+    ]
+   ],
+   "id": "rx_byte",
+   "kind": "bus",
+   "label": "byte received",
+   "meaning": "rx_data on the clock rx_valid pulses",
+   "width": 8
+  },
+  {
+   "block": "tp_host_uart",
+   "changes": [
+    [
+     111238,
+     0
+    ],
+    [
+     119732,
+     1
+    ],
+    [
+     119733,
+     0
+    ]
+   ],
+   "id": "reg_req",
+   "kind": "bit",
+   "label": "register access",
+   "meaning": "the single H_DO clock on the sync unit's register port",
+   "width": 1
+  },
+  {
+   "block": "tp_host_uart",
+   "changes": [
+    [
+     111238,
+     4
+    ],
+    [
+     119732,
+     1
+    ]
+   ],
+   "enum": [
+    "TIME",
+    "EVENT",
+    "STAT",
+    "CFG",
+    "CMP0",
+    "CMP1",
+    "offset 6",
+    "PW",
+    "ADJ",
+    "RATE",
+    "PULSE",
+    "offset 11",
+    "offset 12",
+    "offset 13",
+    "offset 14",
+    "offset 15"
+   ],
+   "id": "reg_addr",
+   "kind": "enum",
+   "label": "register",
+   "meaning": "register offset (tp_pkg.sv)",
+   "width": 4
+  },
+  {
+   "block": "sync_capture",
+   "changes": [
+    [
+     111238,
+     0
+    ],
+    [
+     111260,
+     1
+    ]
+   ],
+   "id": "cap0",
+   "kind": "bit",
+   "label": "CAP0 (ui_in[0])",
+   "meaning": "capture input 0",
+   "width": 1
+  },
+  {
+   "block": "sync_unit",
+   "changes": [
+    [
+     111238,
+     0
+    ],
+    [
+     111263,
+     1
+    ],
+    [
+     111264,
+     0
+    ]
+   ],
+   "id": "evtp",
+   "kind": "bit",
+   "label": "EVTP (uo_out[7])",
+   "meaning": "one-clock pulse per captured event",
+   "width": 1
+  },
+  {
+   "block": "sync_unit",
+   "changes": [
+    [
+     111238,
+     0
+    ],
+    [
+     111263,
+     1
+    ],
+    [
+     119733,
+     0
+    ]
+   ],
+   "id": "evt",
+   "kind": "bit",
+   "label": "EVT (uo_out[3])",
+   "meaning": "queue not empty",
+   "width": 1
+  },
+  {
+   "block": "sync_event_fifo",
+   "changes": [
+    [
+     111238,
+     0
+    ],
+    [
+     111263,
+     1
+    ],
+    [
+     119733,
+     0
+    ]
+   ],
+   "id": "evq",
+   "kind": "bus",
+   "label": "EVQ (uio[7:6])",
+   "meaning": "events in the queue",
+   "width": 2
+  },
+  {
+   "block": "sync_event_fifo",
+   "changes": [
+    [
+     111238,
+     null
+    ],
+    [
+     111263,
+     0
+    ],
+    [
+     119733,
+     null
+    ]
+   ],
+   "id": "evch",
+   "kind": "bus",
+   "label": "EVCH (uio[4:2])",
+   "meaning": "channel of the queue head; undefined until the first event",
+   "width": 3
+  },
+  {
+   "block": "sync_event_fifo",
+   "changes": [
+    [
+     111238,
+     null
+    ],
+    [
+     111263,
+     1
+    ],
+    [
+     119733,
+     null
+    ]
+   ],
+   "id": "eved",
+   "kind": "bit",
+   "label": "EVED (uio[5])",
+   "meaning": "edge of the queue head, 1 = rising",
+   "width": 1
+  }
+ ],
+ "summary": "An edge on a capture pin becomes a timestamped event: the queue pins show it at once, and a serial read pops it.",
+ "title": "An edge, queued and read"
+}

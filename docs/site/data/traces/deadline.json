@@ -1,0 +1,1046 @@
+{
+ "bytes": [
+  {
+   "at": 68387,
+   "byte": 1,
+   "dir": "host",
+   "end": 72727
+  },
+  {
+   "at": 72727,
+   "byte": 4,
+   "dir": "host",
+   "end": 77067
+  },
+  {
+   "at": 77067,
+   "byte": 138,
+   "dir": "host",
+   "end": 81407
+  },
+  {
+   "at": 81407,
+   "byte": 178,
+   "dir": "host",
+   "end": 85747
+  },
+  {
+   "at": 85747,
+   "byte": 1,
+   "dir": "host",
+   "end": 90087
+  },
+  {
+   "at": 90087,
+   "byte": 0,
+   "dir": "host",
+   "end": 94427
+  },
+  {
+   "at": 94215,
+   "byte": 6,
+   "dir": "chip",
+   "end": 98555
+  },
+  {
+   "at": 111266,
+   "byte": 2,
+   "dir": "host",
+   "end": 115606
+  }
+ ],
+ "captions": [
+  {
+   "at": 68387,
+   "blocks": [
+    "tp_uart_rx",
+    "sync_compare"
+   ],
+   "text": "Host sends 01 04 8A B2 01 00: write CMP0 = 0x0001B28A."
+  },
+  {
+   "at": 94213,
+   "blocks": [
+    "tp_host_uart",
+    "sync_unit"
+   ],
+   "text": "H_DO: one clock on the register port, offset 4 (CMP0)."
+  },
+  {
+   "at": 94214,
+   "blocks": [
+    "sync_compare"
+   ],
+   "text": "armed[0] goes high on the H_DO clock: channel 0 now waits for tick 111242 (the TIME read + 60000)."
+  },
+  {
+   "at": 94215,
+   "blocks": [
+    "tp_uart_tx",
+    "tp_host_uart"
+   ],
+   "text": "The chip answers 06."
+  },
+  {
+   "at": 111238,
+   "blocks": [
+    "sync_compare"
+   ],
+   "text": "Tick 111242: TRIG0 (uo_out[0]) rises on exactly the deadline tick. No host is involved; the ACK went out long ago."
+  },
+  {
+   "at": 111246,
+   "blocks": [
+    "sync_compare"
+   ],
+   "text": "TRIG0 falls 8 ticks later: the default pulse width of 8. armed[0] cleared when it fired, so it fires once."
+  }
+ ],
+ "checks": [
+  {
+   "ok": true,
+   "text": "write CMP0 = TIME + 60000 answers ACK"
+  },
+  {
+   "ok": true,
+   "text": "TRIG0 (uo_out[0]) rises on exactly the deadline tick"
+  },
+  {
+   "ok": true,
+   "text": "TRIG0 pulse is 8 ticks wide at the pin"
+  }
+ ],
+ "commands": [
+  {
+   "addr": 4,
+   "at": 68387,
+   "bytes": [
+    1,
+    4,
+    138,
+    178,
+    1,
+    0
+   ],
+   "cmd": "write CMP0 = 0x0001B28A",
+   "got": [
+    6
+   ],
+   "reply": [
+    6
+   ],
+   "value": 111242
+  },
+  {
+   "addr": 1,
+   "at": 111266,
+   "bytes": [
+    2,
+    1
+   ],
+   "cmd": "read EVENT",
+   "got": [
+    162,
+    178,
+    1,
+    8
+   ],
+   "value": 134328994
+  }
+ ],
+ "cycles": [
+  67953,
+  112982
+ ],
+ "id": "deadline",
+ "kind": "recorded",
+ "kind_text": "Recorded from an RTL simulation, not computed in the browser",
+ "marks": [
+  {
+   "at": 111238,
+   "label": "deadline tick"
+  }
+ ],
+ "provenance": {
+  "command": "make -C test tour  (then python3 docs/tools/traces.py)",
+  "sampling": "sampled on the falling edge of every clock; a line is kept only where a traced signal other than the timebase changes. Cycle 0 is the first rising edge after reset is released; reset holds the count. 1 cycle = 20 ns at 50 MHz; one serial bit is 434 cycles (115,200 baud)",
+  "simulator": "Icarus Verilog version 12.0 (stable) ()",
+  "sources": {
+   "src/sync/sync_capture.sv": "2a14d3051ed4d0f9c8d4c6158cb148cfe515bceb8111fc9da123d9b3f984a907",
+   "src/sync/sync_compare.sv": "532fda2a6751b3b1134744324ca9260de87b18ccb572aa18e21f0da8df998224",
+   "src/sync/sync_event_fifo.sv": "8072350d74f351b9ad8bbfbf90613ebb21058e3ccea1e7ea7e41ffdc945d1304",
+   "src/sync/sync_timebase.sv": "c7a8d227e898022290a6fd1fade22e451c9b5adf532139151d7c8872ceb1f1ef",
+   "src/sync/sync_unit.sv": "9b659ce29646ac5f536a629f6fcf83acc039761c72c61e4e8a1b4b592be4f270",
+   "src/tp_pkg.sv": "8da187b5b062a40778534565ed50fbbe5c70afb2faa444fe44a47f324cdb42cd",
+   "src/tp_sync_soc.sv": "462a14536fd2450134754e5f7c87a1fb90d28c6c95822d8596fed7975f1905aa",
+   "src/tt_um_normansrule_tiqora_serial.sv": "09a201defac0fb179034a01edc9dbbc2f4828b927dc53658c01290469dc57efb",
+   "src/uart/tp_host_uart.sv": "e131a7447cb016ede4b67bfcfdea0d5f9faca7cbfd2d0fc7de93b74e1656c449",
+   "src/uart/tp_uart_rx.sv": "74ac23194c71027eff9a5fa8fef0acd5eb32af71e996affae7d25d0c01bc2f1a",
+   "src/uart/tp_uart_tx.sv": "32458039699f7e41740457c80a820cc7132a2366a3f64bc58ee1675d674cb49a",
+   "test/tb_tour.sv": "11ffefe316205a5c26aee7b1a8ebb5643f61468a0a587c4c46202ad478030ae2"
+  },
+  "testbench": "test/tb_tour.sv"
+ },
+ "schema": 1,
+ "signals": [
+  {
+   "block": "tp_uart_rx",
+   "changes": [
+    [
+     68169,
+     1
+    ],
+    [
+     68387,
+     0
+    ],
+    [
+     68821,
+     1
+    ],
+    [
+     69255,
+     0
+    ],
+    [
+     72293,
+     1
+    ],
+    [
+     72727,
+     0
+    ],
+    [
+     74029,
+     1
+    ],
+    [
+     74463,
+     0
+    ],
+    [
+     76633,
+     1
+    ],
+    [
+     77067,
+     0
+    ],
+    [
+     77935,
+     1
+    ],
+    [
+     78369,
+     0
+    ],
+    [
+     78803,
+     1
+    ],
+    [
+     79237,
+     0
+    ],
+    [
+     80539,
+     1
+    ],
+    [
+     81407,
+     0
+    ],
+    [
+     82275,
+     1
+    ],
+    [
+     82709,
+     0
+    ],
+    [
+     83577,
+     1
+    ],
+    [
+     84445,
+     0
+    ],
+    [
+     84879,
+     1
+    ],
+    [
+     85747,
+     0
+    ],
+    [
+     86181,
+     1
+    ],
+    [
+     86615,
+     0
+    ],
+    [
+     89653,
+     1
+    ],
+    [
+     90087,
+     0
+    ],
+    [
+     93993,
+     1
+    ],
+    [
+     111266,
+     0
+    ],
+    [
+     112134,
+     1
+    ],
+    [
+     112568,
+     0
+    ]
+   ],
+   "id": "rx",
+   "kind": "bit",
+   "label": "RX (ui_in[3])",
+   "meaning": "serial in from the host, idle high",
+   "width": 1
+  },
+  {
+   "block": "tp_uart_tx",
+   "changes": [
+    [
+     68169,
+     1
+    ],
+    [
+     94215,
+     0
+    ],
+    [
+     95083,
+     1
+    ],
+    [
+     95951,
+     0
+    ],
+    [
+     98121,
+     1
+    ]
+   ],
+   "id": "tx",
+   "kind": "bit",
+   "label": "TX (uo_out[4])",
+   "meaning": "serial out to the host, idle high",
+   "width": 1
+  },
+  {
+   "block": "tp_host_uart",
+   "changes": [
+    [
+     68169,
+     1
+    ],
+    [
+     68604,
+     0
+    ],
+    [
+     72513,
+     1
+    ],
+    [
+     98556,
+     0
+    ]
+   ],
+   "id": "act",
+   "kind": "bit",
+   "label": "ACT (uio[1])",
+   "meaning": "a command or reply is in progress",
+   "width": 1
+  },
+  {
+   "block": "tp_host_uart",
+   "changes": [
+    [
+     68169,
+     4
+    ],
+    [
+     68604,
+     0
+    ],
+    [
+     72513,
+     1
+    ],
+    [
+     76853,
+     2
+    ],
+    [
+     94213,
+     3
+    ],
+    [
+     94214,
+     4
+    ],
+    [
+     98556,
+     0
+    ]
+   ],
+   "enum": [
+    "H_CMD",
+    "H_ADDR",
+    "H_DATA",
+    "H_DO",
+    "H_SEND"
+   ],
+   "id": "h_state",
+   "kind": "enum",
+   "label": "host port state",
+   "meaning": "tp_host_uart's state register",
+   "width": 3
+  },
+  {
+   "block": "tp_host_uart",
+   "changes": [
+    [
+     68169,
+     0
+    ],
+    [
+     76853,
+     4
+    ],
+    [
+     81193,
+     3
+    ],
+    [
+     85533,
+     2
+    ],
+    [
+     89873,
+     1
+    ],
+    [
+     94213,
+     0
+    ],
+    [
+     94214,
+     1
+    ],
+    [
+     94215,
+     0
+    ]
+   ],
+   "id": "h_count",
+   "kind": "bus",
+   "label": "bytes left",
+   "meaning": "bytes still to receive (H_DATA) or send (H_SEND)",
+   "width": 3
+  },
+  {
+   "block": "tp_uart_rx",
+   "changes": [
+    [
+     68169,
+     null
+    ],
+    [
+     72512,
+     1
+    ],
+    [
+     72513,
+     null
+    ],
+    [
+     76852,
+     4
+    ],
+    [
+     76853,
+     null
+    ],
+    [
+     81192,
+     138
+    ],
+    [
+     81193,
+     null
+    ],
+    [
+     85532,
+     178
+    ],
+    [
+     85533,
+     null
+    ],
+    [
+     89872,
+     1
+    ],
+    [
+     89873,
+     null
+    ],
+    [
+     94212,
+     0
+    ],
+    [
+     94213,
+     null
+    ]
+   ],
+   "id": "rx_byte",
+   "kind": "bus",
+   "label": "byte received",
+   "meaning": "rx_data on the clock rx_valid pulses",
+   "width": 8
+  },
+  {
+   "block": "tp_host_uart",
+   "changes": [
+    [
+     68169,
+     0
+    ],
+    [
+     94213,
+     1
+    ],
+    [
+     94214,
+     0
+    ]
+   ],
+   "id": "reg_req",
+   "kind": "bit",
+   "label": "register access",
+   "meaning": "the single H_DO clock on the sync unit's register port",
+   "width": 1
+  },
+  {
+   "block": "tp_host_uart",
+   "changes": [
+    [
+     68169,
+     0
+    ],
+    [
+     76853,
+     4
+    ]
+   ],
+   "enum": [
+    "TIME",
+    "EVENT",
+    "STAT",
+    "CFG",
+    "CMP0",
+    "CMP1",
+    "offset 6",
+    "PW",
+    "ADJ",
+    "RATE",
+    "PULSE",
+    "offset 11",
+    "offset 12",
+    "offset 13",
+    "offset 14",
+    "offset 15"
+   ],
+   "id": "reg_addr",
+   "kind": "enum",
+   "label": "register",
+   "meaning": "register offset (tp_pkg.sv)",
+   "width": 4
+  },
+  {
+   "block": "sync_timebase",
+   "changes": [
+    [
+     68169,
+     68173
+    ],
+    [
+     68387,
+     68391
+    ],
+    [
+     68603,
+     68607
+    ],
+    [
+     68604,
+     68608
+    ],
+    [
+     68821,
+     68825
+    ],
+    [
+     69040,
+     69044
+    ],
+    [
+     69255,
+     69259
+    ],
+    [
+     69474,
+     69478
+    ],
+    [
+     69908,
+     69912
+    ],
+    [
+     70342,
+     70346
+    ],
+    [
+     70776,
+     70780
+    ],
+    [
+     71210,
+     71214
+    ],
+    [
+     71644,
+     71648
+    ],
+    [
+     72078,
+     72082
+    ],
+    [
+     72293,
+     72297
+    ],
+    [
+     72512,
+     72516
+    ],
+    [
+     72513,
+     72517
+    ],
+    [
+     72727,
+     72731
+    ],
+    [
+     73380,
+     73384
+    ],
+    [
+     74029,
+     74033
+    ],
+    [
+     74248,
+     74252
+    ],
+    [
+     74463,
+     74467
+    ],
+    [
+     74682,
+     74686
+    ],
+    [
+     75116,
+     75120
+    ],
+    [
+     75550,
+     75554
+    ],
+    [
+     75984,
+     75988
+    ],
+    [
+     76418,
+     76422
+    ],
+    [
+     76633,
+     76637
+    ],
+    [
+     76852,
+     76856
+    ],
+    [
+     76853,
+     76857
+    ],
+    [
+     77067,
+     77071
+    ],
+    [
+     77720,
+     77724
+    ],
+    [
+     77935,
+     77939
+    ],
+    [
+     78154,
+     78158
+    ],
+    [
+     78369,
+     78373
+    ],
+    [
+     78588,
+     78592
+    ],
+    [
+     78803,
+     78807
+    ],
+    [
+     79022,
+     79026
+    ],
+    [
+     79237,
+     79241
+    ],
+    [
+     79456,
+     79460
+    ],
+    [
+     79890,
+     79894
+    ],
+    [
+     80324,
+     80328
+    ],
+    [
+     80539,
+     80543
+    ],
+    [
+     80758,
+     80762
+    ],
+    [
+     81192,
+     81196
+    ],
+    [
+     81193,
+     81197
+    ],
+    [
+     81407,
+     81411
+    ],
+    [
+     82060,
+     82064
+    ],
+    [
+     82275,
+     82279
+    ],
+    [
+     82494,
+     82498
+    ],
+    [
+     82709,
+     82713
+    ],
+    [
+     82928,
+     82932
+    ],
+    [
+     83362,
+     83366
+    ],
+    [
+     83577,
+     83581
+    ],
+    [
+     83796,
+     83800
+    ],
+    [
+     84230,
+     84234
+    ],
+    [
+     84445,
+     84449
+    ],
+    [
+     84664,
+     84668
+    ],
+    [
+     84879,
+     84883
+    ],
+    [
+     85098,
+     85102
+    ],
+    [
+     85532,
+     85536
+    ],
+    [
+     85533,
+     85537
+    ],
+    [
+     85747,
+     85751
+    ],
+    [
+     86181,
+     86185
+    ],
+    [
+     86400,
+     86404
+    ],
+    [
+     86615,
+     86619
+    ],
+    [
+     86834,
+     86838
+    ],
+    [
+     87268,
+     87272
+    ],
+    [
+     87702,
+     87706
+    ],
+    [
+     88136,
+     88140
+    ],
+    [
+     88570,
+     88574
+    ],
+    [
+     89004,
+     89008
+    ],
+    [
+     89438,
+     89442
+    ],
+    [
+     89653,
+     89657
+    ],
+    [
+     89872,
+     89876
+    ],
+    [
+     89873,
+     89877
+    ],
+    [
+     90087,
+     90091
+    ],
+    [
+     90740,
+     90744
+    ],
+    [
+     93993,
+     93997
+    ],
+    [
+     94212,
+     94216
+    ],
+    [
+     94213,
+     94217
+    ],
+    [
+     94214,
+     94218
+    ],
+    [
+     94215,
+     94219
+    ],
+    [
+     95083,
+     95087
+    ],
+    [
+     95951,
+     95955
+    ],
+    [
+     98121,
+     98125
+    ],
+    [
+     98555,
+     98559
+    ],
+    [
+     98556,
+     98560
+    ],
+    [
+     111238,
+     111242
+    ],
+    [
+     111246,
+     111250
+    ],
+    [
+     111260,
+     111264
+    ],
+    [
+     111263,
+     111267
+    ],
+    [
+     111264,
+     111268
+    ],
+    [
+     111266,
+     111270
+    ],
+    [
+     112134,
+     112138
+    ],
+    [
+     112354,
+     112358
+    ],
+    [
+     112568,
+     112572
+    ],
+    [
+     112788,
+     112792
+    ]
+   ],
+   "id": "now",
+   "kind": "bus",
+   "label": "timebase",
+   "meaning": "sync_timebase now, at each traced change",
+   "width": 32
+  },
+  {
+   "block": "sync_compare",
+   "changes": [
+    [
+     68169,
+     0
+    ],
+    [
+     94214,
+     111242
+    ]
+   ],
+   "id": "deadline0",
+   "kind": "bus",
+   "label": "deadline 0",
+   "meaning": "the armed tick",
+   "width": 32
+  },
+  {
+   "block": "sync_compare",
+   "changes": [
+    [
+     68169,
+     0
+    ],
+    [
+     94214,
+     1
+    ],
+    [
+     111238,
+     0
+    ]
+   ],
+   "id": "armed0",
+   "kind": "bit",
+   "label": "armed 0",
+   "meaning": "channel 0 armed",
+   "width": 1
+  },
+  {
+   "block": "sync_compare",
+   "changes": [
+    [
+     68169,
+     0
+    ],
+    [
+     111238,
+     1
+    ],
+    [
+     111246,
+     0
+    ]
+   ],
+   "id": "trig0",
+   "kind": "bit",
+   "label": "TRIG0 (uo_out[0])",
+   "meaning": "trigger pin",
+   "width": 1
+  }
+ ],
+ "summary": "Write CMP0 over the serial port and the trigger pin rises on exactly that tick, 8 ticks wide, with nothing on the wire.",
+ "title": "A deadline set over serial"
+}

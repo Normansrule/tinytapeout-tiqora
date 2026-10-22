@@ -1,0 +1,729 @@
+{
+ "bytes": [
+  {
+   "at": 136881,
+   "byte": 126,
+   "dir": "host",
+   "end": 141221
+  },
+  {
+   "at": 141008,
+   "byte": 21,
+   "dir": "chip",
+   "end": 145348
+  },
+  {
+   "at": 145344,
+   "byte": 1,
+   "dir": "host",
+   "end": 149684
+  },
+  {
+   "at": 149684,
+   "byte": 7,
+   "dir": "host",
+   "end": 154024
+  },
+  {
+   "at": 154024,
+   "byte": 32,
+   "dir": "host",
+   "end": 158364
+  },
+  {
+   "at": 175723,
+   "byte": 3,
+   "dir": "host",
+   "end": 180063
+  },
+  {
+   "at": 197442,
+   "byte": 3,
+   "dir": "host",
+   "end": 201782
+  },
+  {
+   "at": 201570,
+   "byte": 90,
+   "dir": "chip",
+   "end": 205910
+  },
+  {
+   "at": 205911,
+   "byte": 1,
+   "dir": "chip",
+   "end": 210251
+  },
+  {
+   "at": 210035,
+   "byte": 2,
+   "dir": "host",
+   "end": 214375
+  }
+ ],
+ "captions": [
+  {
+   "at": 136881,
+   "blocks": [
+    "tp_uart_rx",
+    "tp_host_uart"
+   ],
+   "text": "Host sends 7E: unknown 0x7E."
+  },
+  {
+   "at": 141008,
+   "blocks": [
+    "tp_uart_tx",
+    "tp_host_uart"
+   ],
+   "text": "The chip answers 15, NAK: not a command it knows. The port is back in H_CMD and nothing else changed."
+  },
+  {
+   "at": 145344,
+   "blocks": [
+    "tp_host_uart"
+   ],
+   "text": "Host sends 01 07 20: a write cut off after its address and one data byte. The port is in H_DATA with 3 bytes to go, and it has no timeout."
+  },
+  {
+   "at": 175723,
+   "blocks": [
+    "tp_host_uart"
+   ],
+   "text": "The host gives up and pings (03). The port takes it as the second data byte: no reply. A host that loses sync sees silence, not an error."
+  },
+  {
+   "at": 197422,
+   "blocks": [
+    "tt_um_normansrule_tiqora_serial",
+    "tp_host_uart"
+   ],
+   "text": "Reset (rst_n low) is the only thing that clears it. The rest of the chip resets too: timebase, queue and comparators."
+  },
+  {
+   "at": 197442,
+   "blocks": [
+    "tp_uart_rx",
+    "tp_host_uart"
+   ],
+   "text": "Host sends 03: ping."
+  },
+  {
+   "at": 201570,
+   "blocks": [
+    "tp_uart_tx",
+    "tp_host_uart"
+   ],
+   "text": "After reset the ping answers 5A 01 again."
+  }
+ ],
+ "checks": [
+  {
+   "ok": true,
+   "text": "unknown command 0x7E answers NAK 0x15"
+  },
+  {
+   "ok": true,
+   "text": "truncated write: no reply; the port waits for data bytes"
+  },
+  {
+   "ok": true,
+   "text": "a ping sent now is taken as a data byte: still no reply"
+  },
+  {
+   "ok": true,
+   "text": "after reset the port answers a ping again"
+  },
+  {
+   "ok": true,
+   "text": "read STAT after reset: no overflow, queue empty"
+  }
+ ],
+ "commands": [
+  {
+   "at": 136881,
+   "bytes": [
+    126
+   ],
+   "cmd": "unknown 0x7E",
+   "got": [
+    21
+   ],
+   "reply": [
+    21
+   ]
+  },
+  {
+   "at": 197442,
+   "bytes": [
+    3
+   ],
+   "cmd": "ping",
+   "got": [
+    90,
+    1
+   ],
+   "reply": [
+    90,
+    1
+   ]
+  },
+  {
+   "addr": 2,
+   "at": 210035,
+   "bytes": [
+    2,
+    2
+   ],
+   "cmd": "read STAT",
+   "got": [
+    16,
+    0,
+    1,
+    0
+   ],
+   "value": 65552
+  },
+  {
+   "at": 145344,
+   "bytes": [
+    1,
+    7,
+    32,
+    3
+   ],
+   "cmd": "write cut off after 4 of 6 bytes",
+   "got": [],
+   "reply": []
+  }
+ ],
+ "cycles": [
+  136447,
+  210685
+ ],
+ "id": "errors",
+ "kind": "recorded",
+ "kind_text": "Recorded from an RTL simulation, not computed in the browser",
+ "marks": [
+  {
+   "at": 197422,
+   "label": "reset"
+  }
+ ],
+ "provenance": {
+  "command": "make -C test tour  (then python3 docs/tools/traces.py)",
+  "sampling": "sampled on the falling edge of every clock; a line is kept only where a traced signal other than the timebase changes. Cycle 0 is the first rising edge after reset is released; reset holds the count. 1 cycle = 20 ns at 50 MHz; one serial bit is 434 cycles (115,200 baud)",
+  "simulator": "Icarus Verilog version 12.0 (stable) ()",
+  "sources": {
+   "src/sync/sync_capture.sv": "2a14d3051ed4d0f9c8d4c6158cb148cfe515bceb8111fc9da123d9b3f984a907",
+   "src/sync/sync_compare.sv": "532fda2a6751b3b1134744324ca9260de87b18ccb572aa18e21f0da8df998224",
+   "src/sync/sync_event_fifo.sv": "8072350d74f351b9ad8bbfbf90613ebb21058e3ccea1e7ea7e41ffdc945d1304",
+   "src/sync/sync_timebase.sv": "c7a8d227e898022290a6fd1fade22e451c9b5adf532139151d7c8872ceb1f1ef",
+   "src/sync/sync_unit.sv": "9b659ce29646ac5f536a629f6fcf83acc039761c72c61e4e8a1b4b592be4f270",
+   "src/tp_pkg.sv": "8da187b5b062a40778534565ed50fbbe5c70afb2faa444fe44a47f324cdb42cd",
+   "src/tp_sync_soc.sv": "462a14536fd2450134754e5f7c87a1fb90d28c6c95822d8596fed7975f1905aa",
+   "src/tt_um_normansrule_tiqora_serial.sv": "09a201defac0fb179034a01edc9dbbc2f4828b927dc53658c01290469dc57efb",
+   "src/uart/tp_host_uart.sv": "e131a7447cb016ede4b67bfcfdea0d5f9faca7cbfd2d0fc7de93b74e1656c449",
+   "src/uart/tp_uart_rx.sv": "74ac23194c71027eff9a5fa8fef0acd5eb32af71e996affae7d25d0c01bc2f1a",
+   "src/uart/tp_uart_tx.sv": "32458039699f7e41740457c80a820cc7132a2366a3f64bc58ee1675d674cb49a",
+   "test/tb_tour.sv": "11ffefe316205a5c26aee7b1a8ebb5643f61468a0a587c4c46202ad478030ae2"
+  },
+  "testbench": "test/tb_tour.sv"
+ },
+ "schema": 1,
+ "signals": [
+  {
+   "block": "tt_um_normansrule_tiqora_serial",
+   "changes": [
+    [
+     136663,
+     1
+    ],
+    [
+     197422,
+     0
+    ],
+    [
+     197422,
+     1
+    ]
+   ],
+   "id": "rst_n",
+   "kind": "bit",
+   "label": "rst_n",
+   "meaning": "reset pin, active low",
+   "width": 1
+  },
+  {
+   "block": "tp_uart_rx",
+   "changes": [
+    [
+     136663,
+     1
+    ],
+    [
+     136881,
+     0
+    ],
+    [
+     137749,
+     1
+    ],
+    [
+     140353,
+     0
+    ],
+    [
+     140787,
+     1
+    ],
+    [
+     145344,
+     0
+    ],
+    [
+     145778,
+     1
+    ],
+    [
+     146212,
+     0
+    ],
+    [
+     149250,
+     1
+    ],
+    [
+     149684,
+     0
+    ],
+    [
+     150118,
+     1
+    ],
+    [
+     151420,
+     0
+    ],
+    [
+     153590,
+     1
+    ],
+    [
+     154024,
+     0
+    ],
+    [
+     156628,
+     1
+    ],
+    [
+     157062,
+     0
+    ],
+    [
+     157930,
+     1
+    ],
+    [
+     175723,
+     0
+    ],
+    [
+     176157,
+     1
+    ],
+    [
+     177025,
+     0
+    ],
+    [
+     179629,
+     1
+    ],
+    [
+     197442,
+     0
+    ],
+    [
+     197876,
+     1
+    ],
+    [
+     198744,
+     0
+    ],
+    [
+     201348,
+     1
+    ],
+    [
+     210035,
+     0
+    ]
+   ],
+   "id": "rx",
+   "kind": "bit",
+   "label": "RX (ui_in[3])",
+   "meaning": "serial in from the host, idle high",
+   "width": 1
+  },
+  {
+   "block": "tp_uart_tx",
+   "changes": [
+    [
+     136663,
+     1
+    ],
+    [
+     141008,
+     0
+    ],
+    [
+     141442,
+     1
+    ],
+    [
+     141876,
+     0
+    ],
+    [
+     142310,
+     1
+    ],
+    [
+     142744,
+     0
+    ],
+    [
+     143178,
+     1
+    ],
+    [
+     143612,
+     0
+    ],
+    [
+     144914,
+     1
+    ],
+    [
+     201570,
+     0
+    ],
+    [
+     202438,
+     1
+    ],
+    [
+     202872,
+     0
+    ],
+    [
+     203306,
+     1
+    ],
+    [
+     204174,
+     0
+    ],
+    [
+     204608,
+     1
+    ],
+    [
+     205042,
+     0
+    ],
+    [
+     205476,
+     1
+    ],
+    [
+     205911,
+     0
+    ],
+    [
+     206345,
+     1
+    ],
+    [
+     206779,
+     0
+    ],
+    [
+     209817,
+     1
+    ]
+   ],
+   "id": "tx",
+   "kind": "bit",
+   "label": "TX (uo_out[4])",
+   "meaning": "serial out to the host, idle high",
+   "width": 1
+  },
+  {
+   "block": "tp_host_uart",
+   "changes": [
+    [
+     136663,
+     1
+    ],
+    [
+     137098,
+     0
+    ],
+    [
+     141007,
+     1
+    ],
+    [
+     145349,
+     0
+    ],
+    [
+     149470,
+     1
+    ],
+    [
+     197422,
+     0
+    ],
+    [
+     201569,
+     1
+    ],
+    [
+     210252,
+     0
+    ]
+   ],
+   "id": "act",
+   "kind": "bit",
+   "label": "ACT (uio[1])",
+   "meaning": "a command or reply is in progress",
+   "width": 1
+  },
+  {
+   "block": "tp_host_uart",
+   "changes": [
+    [
+     136663,
+     4
+    ],
+    [
+     137098,
+     0
+    ],
+    [
+     141007,
+     4
+    ],
+    [
+     145349,
+     0
+    ],
+    [
+     149470,
+     1
+    ],
+    [
+     153810,
+     2
+    ],
+    [
+     197422,
+     0
+    ],
+    [
+     201569,
+     4
+    ],
+    [
+     210252,
+     0
+    ]
+   ],
+   "enum": [
+    "H_CMD",
+    "H_ADDR",
+    "H_DATA",
+    "H_DO",
+    "H_SEND"
+   ],
+   "id": "h_state",
+   "kind": "enum",
+   "label": "host port state",
+   "meaning": "tp_host_uart's state register",
+   "width": 3
+  },
+  {
+   "block": "tp_host_uart",
+   "changes": [
+    [
+     136663,
+     0
+    ],
+    [
+     141007,
+     1
+    ],
+    [
+     141008,
+     0
+    ],
+    [
+     153810,
+     4
+    ],
+    [
+     158150,
+     3
+    ],
+    [
+     179850,
+     2
+    ],
+    [
+     197422,
+     0
+    ],
+    [
+     201569,
+     2
+    ],
+    [
+     201570,
+     1
+    ],
+    [
+     205911,
+     0
+    ]
+   ],
+   "id": "h_count",
+   "kind": "bus",
+   "label": "bytes left",
+   "meaning": "bytes still to receive (H_DATA) or send (H_SEND)",
+   "width": 3
+  },
+  {
+   "block": "tp_uart_rx",
+   "changes": [
+    [
+     136663,
+     null
+    ],
+    [
+     141006,
+     126
+    ],
+    [
+     141007,
+     null
+    ],
+    [
+     149469,
+     1
+    ],
+    [
+     149470,
+     null
+    ],
+    [
+     153809,
+     7
+    ],
+    [
+     153810,
+     null
+    ],
+    [
+     158149,
+     32
+    ],
+    [
+     158150,
+     null
+    ],
+    [
+     179849,
+     3
+    ],
+    [
+     179850,
+     null
+    ],
+    [
+     201568,
+     3
+    ],
+    [
+     201569,
+     null
+    ]
+   ],
+   "id": "rx_byte",
+   "kind": "bus",
+   "label": "byte received",
+   "meaning": "rx_data on the clock rx_valid pulses",
+   "width": 8
+  },
+  {
+   "block": "tp_host_uart",
+   "changes": [
+    [
+     136663,
+     0
+    ]
+   ],
+   "id": "reg_req",
+   "kind": "bit",
+   "label": "register access",
+   "meaning": "the single H_DO clock on the sync unit's register port",
+   "width": 1
+  },
+  {
+   "block": "tp_host_uart",
+   "changes": [
+    [
+     136663,
+     1
+    ],
+    [
+     153810,
+     7
+    ],
+    [
+     197422,
+     0
+    ]
+   ],
+   "enum": [
+    "TIME",
+    "EVENT",
+    "STAT",
+    "CFG",
+    "CMP0",
+    "CMP1",
+    "offset 6",
+    "PW",
+    "ADJ",
+    "RATE",
+    "PULSE",
+    "offset 11",
+    "offset 12",
+    "offset 13",
+    "offset 14",
+    "offset 15"
+   ],
+   "id": "reg_addr",
+   "kind": "enum",
+   "label": "register",
+   "meaning": "register offset (tp_pkg.sv)",
+   "width": 4
+  }
+ ],
+ "summary": "An unknown command gets NAK; a command cut off part way gets nothing at all, swallows the next command, and only reset recovers.",
+ "title": "Wrong bytes, and the way out"
+}

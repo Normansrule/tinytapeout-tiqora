@@ -111,10 +111,9 @@ def treemap(items, x, y, w, h):
     return {**treemap(left, x, y, w, h * fl), **treemap(right, x, y + h * fl, w, h * (1 - fl))}
 
 
-def main():
-    if len(sys.argv) < 2:
-        sys.exit(__doc__)
-    libdir = sys.argv[1]
+def pack(libdir):
+    """Synthesize, then pack every cell into rows block by block. Returns what
+    main() draws and what docs/tools/die_map.py exports for the explorer."""
     net = synth(libdir)
     cells = expand(net)
     sizes = lef_sizes(f"{libdir}/lef/sky130_fd_sc_hd.lef")
@@ -179,6 +178,15 @@ def main():
                 pos = start + wsites
                 acc = 0.0
             fill_span(pos, s1)
+    return dict(placements=placements, fills=fills, regions=regions, area=area, colour=colour, total=total, util=util)
+
+
+def main():
+    if len(sys.argv) < 2:
+        sys.exit(__doc__)
+    libdir = sys.argv[1]
+    P = pack(libdir)
+    placements, fills, regions, area, colour, total, util = (P[k] for k in ("placements", "fills", "regions", "area", "colour", "total", "util"))
 
     # ---- build the layout from the real cell GDS ----
     ly = db.Layout()

@@ -39,15 +39,22 @@ COMPILE_ARGS += -g2012
 TOPLEVEL = tb
 COCOTB_TEST_MODULES = test
 
-.PHONY: sim lint synth area uart clean-sim
+.PHONY: sim lint synth area uart tour clean-sim explorer
 
-sim: uart shared docs
+sim: uart tour shared docs
 	@echo ""
 	@echo "all testbenches finished — check for FAILED above"
 
 uart:
 	iverilog -g2012 -o tb_uart.vvp -s tb_uart $(RTL) tb_uart.sv
 	vvp tb_uart.vvp
+
+# The explorer's guided tours, recorded from this RTL at the submitted top's pins
+# at 115,200 baud: every narrated step checked, the trace written to
+# tour_trace.txt for docs/tools/traces.py.
+tour:
+	@iverilog -g2012 -o tb_tour.vvp -s tb_tour $(RTL) tb_tour.sv > tb_tour.log 2>&1 || { cat tb_tour.log; exit 1; }
+	vvp -n tb_tour.vvp +TRACE=tour_trace.txt > tour_out.txt; s=$$?; cat tour_out.txt; [ $$s -eq 0 ] && grep -q "TOUR TRACE PASSED" tour_out.txt
 
 # Two waivers, both deliberate:
 #   IMPORTSTAR   file-scope `import tp_pkg::*;` is the only import form
@@ -80,6 +87,15 @@ endif
 docs:
 	cd .. && python3 docs/tools/check_docs.py
 	cd .. && python3 docs/tools/progress.py --check
+	cd .. && python3 docs/tools/check_site.py
+	cd .. && python3 docs/tools/die_map.py --check
+
+# the explorer site: atlas against the RTL (needs Yosys), tours against a fresh
+# simulation, then the site itself
+explorer:
+	@if command -v yosys > /dev/null; then cd .. && python3 docs/tools/atlas.py --check; else echo "explorer: yosys not found, atlas check skipped"; fi
+	cd .. && python3 docs/tools/traces.py --check
+	cd .. && python3 docs/tools/check_site.py
 
 # The timing unit (src/sync/*.sv) is shared, byte for byte, between Tiqora and
 # Tiqora-Serial. docs/shared_timing.sha256 is identical in both repositories;

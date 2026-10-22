@@ -24,7 +24,7 @@ commands over a serial port. Use this one when the thinking happens on a PC, a R
 existing microcontroller, and you only need precise timing from the chip. Use the
 microcontroller when the chip should run your code on its own.
 
-> **Status: verified in simulation and at gate level. Measured 20,400–21,300 µm² against the real
+> **Status: verified in RTL simulation; not yet placed and routed at 1 × 2. Measured 20,400–21,300 µm² against the real
 > sky130 library (the range is between Yosys versions): a 1 × 2 tile (140 €), at about 60% of its
 > placeable area.** A 1 × 1 is not achievable with this feature set — see the Area section.
 > Reproduce with `make area`.
@@ -38,9 +38,9 @@ microcontroller when the chip should run your code on its own.
 |---|---|
 | ✅ **RTL simulation** | 30 checks on the serial host port (`cd test && make sim`), plus 5 cocotb tests from the pins only |
 | ✅ **FPGA (simulated)** | the whole Digilent Basys 3 design, driven like a PC at 115,200 baud: 7 checks (`make -C fpga/basys3 sim`) |
-| ✅ **Tiny Tapeout pre-flight** | CI's own project checker passes: docs, ports, build configuration |
+| ✅ **Area (v20)** | 21,324 µm², 458 flip-flops, 59% of the 1 × 2 die (`make area`) |
 | ✅ **Docs** | every link, image, `make` target and script mentioned exists (`make docs`, part of `make sim`) |
-| ⏳ **Hardening** | runs on GitHub after a push (`gds` workflow); placement density set to 70 for this design |
+| ❌ **Place and route at 1 × 2** | LibreLane 3.0.14 stops in detailed placement with `DPL-0036`. An experimental copy at 2 × 2 routes clean (DRC 0, LVS 0, antenna 0, setup +0.563 ns, hold +0.107 ns) and passes the Tiny Tapeout pre-flight 15/15 |
 | ⏳ **FPGA board** | Vivado build and a real Basys 3: `make bit && make prog` in `fpga/basys3` |
 | ⏳ **Silicon** | after submission to a Tiny Tapeout shuttle |
 
@@ -52,18 +52,20 @@ multiplexer, and Tiqora-Serial is one 1 × 2 block of tiles on it:
 
 ![From the demo board to Tiqora-Serial's tiles on the die](images/board_to_silicon.svg)
 
-**The tile, block by block.** Every cell of the synthesized design, placed by block inside the
-161.00 × 225.76 µm tile. The deadline comparators are the largest block; the UART is small:
+**An illustration, not a placement.** Every real sky130 cell of the synthesized design, drawn
+with its real geometry but packed into rows block by block by a simple script
+(`docs/tools/layout_preview.py`) inside the 161.00 × 225.76 µm tile. The deadline comparators
+are the largest block; the UART is small:
 
-![Every real sky130 cell of Tiqora-Serial, placed by block](images/layout_blocks.png)
+![Illustration: Tiqora-Serial's real sky130 cells packed into rows block by block, not a placement](images/layout_blocks.png)
 
 **One flip-flop, taken apart.** The design's 458 flip-flops are this cell. Its real manufacturing
 layers separate and rejoin:
 
 ![One sky130 D flip-flop exploded into its manufacturing layers](images/flipflop_exploded.svg)
 
-The routed layout comes from the `gds` GitHub Actions run, which publishes it to this
-repository's GitHub Pages (enable Settings → Pages → Source: GitHub Actions).
+There is no routed layout at 1 × 2 yet. The explorer site, `docs/site/index.html`, shows the
+experimental 2 × 2 layout with its sign-off numbers.
 
 ## Run it on an FPGA today: Digilent Basys 3
 
@@ -293,8 +295,8 @@ fire triggers, and arm a deadline. **The deadline armed over serial fires on
 the exact programmed tick** — the same cycle-exact behaviour the full chip has (exact relative
 to the supplied clock; oscillator error and pad delay are separate), checked through two pins.
 
-What has *not* been done yet: hardening and routed timing (the `gds` workflow on GitHub),
-gate-level simulation, and a run on a real Basys 3. The area has been measured against the real
+What has *not* been done yet: a placed and routed layout at 1 × 2 (it stops with `DPL-0036`),
+routed timing at 1 × 2, gate-level simulation, and a run on a real Basys 3. The area has been measured against the real
 sky130 library; see the Area section.
 
 ---

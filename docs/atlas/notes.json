@@ -1,0 +1,174 @@
+{
+ "chip": "Tiqora-Serial",
+ "repo": "https://github.com/Normansrule/tinytapeout-tiqora",
+ "categories": {
+  "pins": "The Tiny Tapeout pin wrapper: the only module the shuttle sees",
+  "interface": "The serial host port: what lets a computer reach the timing unit with no CPU on the chip",
+  "control": "The glue that wires the host port to the timing unit",
+  "memory": "Storage on the chip: the event queue",
+  "timing": "The timing unit shared byte for byte with Tiqora: timebase, capture, queue arbitration, deadlines"
+ },
+ "builds": {
+  "tile": "Tiny Tapeout tile: exactly the files info.yaml submits"
+ },
+ "cross_cutting": [
+  {"title": "Clock", "text": "One clock domain: every flip-flop runs on the tile clock `clk`, 50 MHz target (info.yaml clock_hz). The serial bit time is fixed in silicon at 434 clocks, so the baud rate is clk / 434: 115,200 at 50 MHz, 57,600 at 25 MHz."},
+  {"title": "Reset", "text": "`rst_n` at the pins is active low and becomes the synchronous active-high `rst`. Reset is the only way to bring the host port back after a command was cut off half way: the port has no timeout (checked by make tour)."},
+  {"title": "Asynchronous inputs", "text": "The serial input goes through its own two-flop synchronizer in tp_uart_rx; the eight capture inputs go through the two-flop synchronizers in sync_capture. Not analyzed here: metastability rates (MTBF), pad delay and oscillator error."},
+  {"title": "Not present", "text": "No CPU, no program memory, no QSPI, no security block, no debug port. The Xpulse instruction port of the shared timing unit is tied to zero; the host reaches the same functions through the register port."}
+ ],
+ "blocks": {
+  "tt_um_normansrule_tiqora_serial": {
+   "title": "Tiny Tapeout pin wrapper",
+   "category": "pins",
+   "summary": "Puts the serial port on the Tiny Tapeout UART pins and the timing unit's triggers, capture inputs and queue status on the rest.",
+   "example": "On the demo board the RP2040 bridges ui_in[3] and uo_out[4] to USB-C, so a computer talks to the chip with no adapter.",
+   "stages": ["rst_n inverted to the synchronous active-high rst", "capture inputs: ui_in[2:0], ui_in[7:4] and uio_in[0]; ui_in[3] is the serial input", "uio_oe is fixed at 1111_1110: uio[0] in, the other seven out"],
+   "handshake": "None: wiring.",
+   "latency": "Zero clocks: combinational.",
+   "reset": "uio_oe does not depend on reset.",
+   "errors": "None of its own.",
+   "stall": "None.",
+   "port_notes": {
+    "ui_in": "[8] CAP0, CAP1, CAP2, RX, CAP3, CAP4, CAP5, CAP6",
+    "uo_out": "[8] TRIG0, TRIG1, TRIG2, EVT, TX, OVF, HB, EVTP",
+    "uio_out": "[8] bit 1 ACT, bits 4:2 EVCH, bit 5 EVED, bits 7:6 EVQ; bit 0 is an input (CAP7)",
+    "uio_oe": "[8] constant 1111_1110",
+    "ena": "[1] unused"
+   },
+   "tests": ["uart", "tour"]
+  },
+  "tp_sync_soc": {
+   "title": "Serial system top",
+   "category": "control",
+   "summary": "Connects the host port to the timing unit's register port and puts the head of the event queue on pins for a logic analyzer.",
+   "example": "When a capture lands, EVTP (uo_out[7]) pulses for one clock and EVQ (uio[7:6]) goes to 1, with no host polling.",
+   "stages": ["EVTP: one-clock pulse when the queue goes from empty to not empty", "HB: timebase bit 23", "EVCH/EVED/EVQ: fields of the queue head and count. EVCH and EVED are meaningful only while EVQ is not 0: the queue storage has no reset, so before the first event they are undefined, and after the last pop they still show the popped event"],
+   "handshake": "Wiring plus one flip-flop for the EVTP edge.",
+   "latency": "EVTP pulses the clock after EVT rises.",
+   "reset": "EVTP edge detector clear.",
+   "errors": "None of its own.",
+   "stall": "None.",
+   "port_notes": {"trig_pin": "[3] TRIG0, TRIG1, TRIG2", "ev_count": "[2] queue occupancy 0..2"},
+   "tests": ["uart", "tour"]
+  },
+  "tp_host_uart": {
+   "title": "Serial host port",
+   "category": "interface",
+   "summary": "Turns bytes from the host into register reads and writes on the timing unit, with an ACK, a NAK or the data in reply.",
+   "example": "01 04 a0 bb 0d 00 writes 0x000dbba0 into CMP0 (arms TRIG0) and the chip answers 06; 02 01 pops the oldest event and returns it in four bytes, least significant first.",
+   "stages": ["H_CMD: wait for a command byte", "H_ADDR: wait for the register offset", "H_DATA: collect four data bytes (writes)", "H_DO: one clock on the register port", "H_SEND: send the reply bytes"],
+   "handshake": "Host to chip: 0x01 addr d0 d1 d2 d3 write, 0x02 addr read, 0x03 ping. Chip to host: 0x06 ACK, d0..d3, 0x5A 0x01 (magic, version), or 0x15 NAK. No flow control; one command at a time.",
+   "latency": "Each byte is 10 bits of 434 clocks (86.8 us at 50 MHz). A write is 6 bytes in and 1 out; a read is 2 in and 4 out.",
+   "reset": "H_CMD, nothing pending.",
+   "errors": "An unknown command byte answers NAK 0x15. Only offsets 0, 1 and 2 can be read; every other offset reads 0. A write to an offset with no register behind it (0, 1, 2, 6, 11 to 15) is acknowledged and does nothing.",
+   "stall": "There is no timeout. A command cut off part way leaves the port waiting for the missing bytes, and whatever the host sends next is taken as those bytes; bytes that arrive while a reply is being sent are dropped. Only reset clears it (checked by make tour).",
+   "port_notes": {
+    "reg_addr": "[4] register offset: 0 TIME, 1 EVENT (pops), 2 STAT, 3 CFG, 4 CMP0, 5 CMP1, 7 PW, 8 ADJ, 9 RATE, 10 PULSE",
+    "active": "[1] high while a command or reply is in progress (ACT pin)"
+   },
+   "tests": ["uart", "tour"]
+  },
+  "tp_uart_rx": {
+   "title": "Serial receiver",
+   "category": "interface",
+   "summary": "8N1 receiver with its own two-flop synchronizer and a fixed bit time of DIV clocks.",
+   "example": "At 50 MHz a bit is 434 clocks; each data bit is sampled in its centre.",
+   "stages": ["IDLE: wait for the line to go low", "START: confirm it is still low half a bit later", "DATA: eight bits, least significant first", "STOP: valid pulses for one clock"],
+   "handshake": "valid for one clock with data.",
+   "latency": "A byte is ready during its stop bit.",
+   "reset": "Idle, line assumed high.",
+   "errors": "A start bit gone at its half-bit check is ignored as a glitch.",
+   "stall": "None.",
+   "port_notes": {"data": "[8] valid only in the valid clock"},
+   "tests": ["uart", "tour"]
+  },
+  "tp_uart_tx": {
+   "title": "Serial transmitter",
+   "category": "interface",
+   "summary": "8N1 transmitter with the same fixed bit time as the receiver.",
+   "example": "Pulse start with 0x06 while busy is low: start bit, 0,1,1,0,0,0,0,0, stop bit.",
+   "stages": ["start bit", "8 data bits, least significant first", "stop bit"],
+   "handshake": "start while busy is low.",
+   "latency": "10 bit times per byte.",
+   "reset": "Line idle high.",
+   "errors": "A start while busy is ignored.",
+   "stall": "None.",
+   "port_notes": {"data": "[8] byte to send"},
+   "tests": ["uart", "tour"]
+  },
+  "sync_unit": {
+   "title": "Timing unit",
+   "category": "timing",
+   "summary": "Joins the timebase, capture lanes, event queue and three deadline comparators behind one register port that the host reaches over serial.",
+   "example": "A read of offset 0 returns the live 32-bit timebase at the clock the host port's H_DO happens.",
+   "stages": ["decode the register port", "arbitrate simultaneous capture events: lowest channel first, one per clock, same timestamp", "push events into one queue"],
+   "handshake": "Register port: single-clock reg_req. The Xpulse instruction port is tied to zero in this build.",
+   "latency": "Same clock for every register access.",
+   "reset": "Timebase 0, queue empty, triggers disarmed, capture disabled, pulse width 8.",
+   "errors": "Queue overflow is sticky (OVF pin, status bit 6). Reading EVENT on an empty queue returns 0.",
+   "stall": "None.",
+   "port_notes": {
+    "trig_pin": "[3] TRIG0, TRIG1, TRIG2",
+    "status_out": "[32] bits 1:0 count, 4 empty, 5 full, 6 overflow, 10:8 armed, 14:12 trigger levels, 23:16 synchronized pin levels"
+   },
+   "tests": ["uart", "tour", "shared"]
+  },
+  "sync_timebase": {
+   "title": "Timebase with rate trim",
+   "category": "timing",
+   "summary": "A 32-bit tick counter that advances one tick per clock, can be stepped through ADJ and slewed through RATE in steps of 2^-24 tick per clock.",
+   "example": "RATE = 0x0080_0000 (2^23) makes the timebase run at 1.5 ticks per clock.",
+   "stages": ["free run: +1 per clock", "rate: a 24-bit fractional accumulator; on overflow +2 (positive) or 0 (negative)", "step: ADJ adds a signed value plus the clock's own tick"],
+   "handshake": "rate_we and adj_we are one-clock strobes.",
+   "latency": "Same clock.",
+   "reset": "now = 0, rate 0.",
+   "errors": "Wraps after 2^32 ticks (85.9 s at 50 MHz); the comparators are wrap-safe within 2^31 ticks.",
+   "stall": "Never stops.",
+   "port_notes": {"rate_in": "[32] bit 31 sign, bits 23:0 magnitude", "adj_in": "[32] signed step in ticks"},
+   "tests": ["uart", "shared"]
+  },
+  "sync_capture": {
+   "title": "Capture lanes",
+   "category": "timing",
+   "summary": "Turns each asynchronous capture pin into a clean edge event through a two-flop synchronizer and an edge detector.",
+   "example": "An edge on CAP0 is in the queue within a few clocks, and EVT and EVTP show it at the pins (checked by make tour).",
+   "stages": ["two-flop synchronizer", "optional glitch filter (FILTW, 0 in this build)", "edge detect: rising, falling or both, per channel"],
+   "handshake": "One-clock evt per edge.",
+   "latency": "Constant two clocks from pin to event with FILTW = 0.",
+   "reset": "No events; channels disabled until CFG is written.",
+   "errors": "A pulse shorter than one clock can be missed.",
+   "stall": "None.",
+   "port_notes": {"en": "[8] CFG bits 7:0", "fall": "[8] CFG bits 15:8"},
+   "tests": ["uart", "tour"]
+  },
+  "sync_event_fifo": {
+   "title": "Event queue",
+   "category": "memory",
+   "summary": "One shared queue of 32-bit timestamped events, two deep, that keeps the order of events across channels.",
+   "example": "The host reads offset 1 to pop the oldest event: bit 31 source, 30:28 channel, 27 edge, 26:0 timestamp.",
+   "stages": ["push when not full", "pop when not empty", "overflow when a push finds it full"],
+   "handshake": "push and pop strobes; rdata is the head while not empty.",
+   "latency": "An event is readable the clock after it is pushed.",
+   "reset": "Empty, overflow clear.",
+   "errors": "A push into a full queue drops the event and sets overflow, which stays set until reset.",
+   "stall": "None.",
+   "port_notes": {"wdata": "[32] bit 31 source, 30:28 channel, 27 rising edge, 26:0 timestamp", "count": "[2] 0..2 entries"},
+   "tests": ["uart", "tour"]
+  },
+  "sync_compare": {
+   "title": "Deadline comparators",
+   "category": "timing",
+   "summary": "Three trigger channels: arm one with an absolute tick and its pin goes high on exactly that tick for the programmed pulse width.",
+   "example": "Write CMP0 = TIME + 60000: TRIG0 rises at the pin on the tick the timebase equals 60000 past the value read, 8 ticks wide (checked by make tour).",
+   "stages": ["arm: store the deadline, set armed", "compare: reached = signed((now + 1) - deadline) >= 0", "fire: load the pulse counter, disarm", "count down the pulse width"],
+   "handshake": "arm_we with arm_time and arm_sel; pulse_we fires channels at once.",
+   "latency": "The pin edge lands on the programmed tick.",
+   "reset": "Disarmed, deadlines 0, pulse width 8 ticks.",
+   "errors": "Wrap-safe within 2^31 ticks. The register map reaches CMP0 and CMP1 only (offset 6 is unmapped); TRIG2 fires only through PULSE.",
+   "stall": "None.",
+   "port_notes": {"arm_sel": "[2] channel 0..2", "trig": "[3] TRIG0, TRIG1, TRIG2"},
+   "tests": ["uart", "tour"]
+  }
+ }
+}

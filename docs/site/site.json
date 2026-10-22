@@ -1,0 +1,332 @@
+{
+ "chip": "Tiqora-Serial",
+ "repo": "https://github.com/Normansrule/tinytapeout-tiqora",
+ "ref": "v20.1",
+ "clock_ns": 20,
+ "die_um": [
+  161.0,
+  225.76
+ ],
+ "die_source": "docs/tile_template.json (tt_block_1x2_pg.def)",
+ "footer": "Tiqora-Serial is Tiqora's timing unit with a serial host port instead of a processor, for a Tiny Tapeout 1x2 tile on SkyWater sky130. Nothing on these pages has run on real silicon or a real FPGA board; every number says how it was obtained.",
+ "data": {
+  "die": "docs/site/data/die.json",
+  "layout": "docs/site/data/serial_2x2_layout.json"
+ },
+ "pages": [
+  {
+   "id": "index",
+   "nav": "Overview"
+  },
+  {
+   "id": "tours",
+   "nav": "Tours"
+  },
+  {
+   "id": "atlas",
+   "nav": "Chip atlas"
+  },
+  {
+   "id": "physical",
+   "nav": "Physical design"
+  },
+  {
+   "id": "evidence",
+   "nav": "Evidence"
+  }
+ ],
+ "flow": {
+  "title": "Tiqora-Serial: what enters, what happens inside, what comes out",
+  "desc": "A host computer sends commands over serial into the receiver and the host port, which reads and writes the timing unit's registers and answers through the transmitter. Pin edges enter the timing unit; triggers, queue status and TX leave on uo_out and uio.",
+  "size": [
+   1000,
+   380
+  ],
+  "columns": [
+   {
+    "x": 20,
+    "label": "What enters"
+   },
+   {
+    "x": 255,
+    "label": "Inside the chip"
+   },
+   {
+    "x": 790,
+    "label": "What comes out"
+   }
+  ],
+  "chip_box": [
+   235,
+   40,
+   520,
+   320
+  ],
+  "chip_label": "tt_um_normansrule_tiqora_serial · tp_sync_soc · no processor",
+  "nodes": [
+   {
+    "id": "host",
+    "label": "Host computer",
+    "lines": [
+     "USB serial, 115,200 baud,",
+     "through the demo board,",
+     "into ui_in[3]"
+    ],
+    "x": 20,
+    "y": 60,
+    "w": 190,
+    "h": 76
+   },
+   {
+    "id": "pins",
+    "label": "ui_in, uio[0]",
+    "lines": [
+     "CAP0–CAP7: edges",
+     "to timestamp"
+    ],
+    "x": 20,
+    "y": 230,
+    "w": 190,
+    "h": 62
+   },
+   {
+    "id": "rx",
+    "label": "Serial receiver",
+    "lines": [
+     "8N1, 434 clocks per bit"
+    ],
+    "x": 255,
+    "y": 60,
+    "w": 210,
+    "h": 48,
+    "cat": "interface",
+    "blocks": [
+     "tp_uart_rx"
+    ]
+   },
+   {
+    "id": "port",
+    "label": "Host port",
+    "lines": [
+     "decodes write, read, ping",
+     "one register access each"
+    ],
+    "x": 255,
+    "y": 150,
+    "w": 210,
+    "h": 62,
+    "cat": "control",
+    "blocks": [
+     "tp_host_uart"
+    ]
+   },
+   {
+    "id": "tx",
+    "label": "Serial transmitter",
+    "lines": [
+     "ACK, NAK, data bytes"
+    ],
+    "x": 510,
+    "y": 60,
+    "w": 225,
+    "h": 48,
+    "cat": "interface",
+    "blocks": [
+     "tp_uart_tx"
+    ]
+   },
+   {
+    "id": "sync",
+    "label": "Timing unit",
+    "lines": [
+     "timebase · capture · queue",
+     "· 3 deadline triggers"
+    ],
+    "x": 510,
+    "y": 190,
+    "w": 225,
+    "h": 62,
+    "cat": "timing",
+    "blocks": [
+     "sync_unit",
+     "sync_timebase",
+     "sync_capture",
+     "sync_event_fifo",
+     "sync_compare"
+    ]
+   },
+   {
+    "id": "uo",
+    "label": "uo_out, uio",
+    "lines": [
+     "TRIG0–2 on the exact tick",
+     "EVT, EVTP, OVF, EVQ, EVCH",
+     "uo_out[4]: TX to the host"
+    ],
+    "x": 790,
+    "y": 140,
+    "w": 190,
+    "h": 76
+   }
+  ],
+  "edges": [
+   [
+    "host",
+    "rx",
+    "RX on ui_in[3]"
+   ],
+   [
+    "rx",
+    "port"
+   ],
+   [
+    "port",
+    "tx"
+   ],
+   [
+    "port",
+    "sync",
+    "registers"
+   ],
+   [
+    "pins",
+    "sync",
+    "edges"
+   ],
+   [
+    "sync",
+    "uo",
+    "triggers, queue"
+   ],
+   [
+    "tx",
+    "uo",
+    "TX"
+   ]
+  ]
+ },
+ "ladder": [
+  {
+   "target": "Tiny Tapeout tile, 1x2 (what info.yaml submits)",
+   "note": "Each rung needs the one below it. At 1x2 nothing above rung 3 has been reached; an experimental 2x2 copy reached rung 6's pre-flight.",
+   "rungs": [
+    {
+     "rung": "RTL tested",
+     "state": "measured",
+     "why": "30 checks and 5 cocotb tests from the pins (<code>make -C test sim</code>, v20), and the recorded tour, 13/13 (<code>make -C test tour</code>), whose every reply is checked against a model of the protocol."
+    },
+    {
+     "rung": "Formally checked",
+     "state": "none",
+     "word": "not done",
+     "why": "No formal proofs exist for this design. The repository has no SymbiYosys or other formal set-up."
+    },
+    {
+     "rung": "Synthesized",
+     "state": "measured",
+     "why": "21,324 µm² of sky130 cells, 458 flip-flops: 59% of the 1x2 die (<code>make area</code>, Yosys 0.33, v20)."
+    },
+    {
+     "rung": "Placed and routed",
+     "state": "fail",
+     "word": "failed at 1x2",
+     "why": "LibreLane 3.0.14 stops in detailed placement with DPL-0036 at 1x2. <span class='ev experimental'>experimental</span> The same RTL at 2x2 places and routes clean: DRC 0, LVS 0, antenna 0."
+    },
+    {
+     "rung": "Timing checked",
+     "state": "none",
+     "word": "not at 1x2",
+     "why": "<span class='ev experimental'>experimental</span> The 2x2 copy meets setup (+0.563 ns worst slack) and hold (+0.107 ns) at every corner LibreLane checks."
+    },
+    {
+     "rung": "Submitted to a shuttle",
+     "state": "none",
+     "word": "not yet",
+     "why": "<span class='ev experimental'>experimental</span> The 2x2 copy passes the Tiny Tapeout pre-flight, 15/15. Submitting at 2x2 means changing <code>info.yaml</code>'s tile count: the owner's decision."
+    },
+    {
+     "rung": "Fabricated",
+     "state": "none",
+     "word": "not yet",
+     "why": "No chip exists."
+    },
+    {
+     "rung": "Measured on silicon",
+     "state": "none",
+     "word": "not yet",
+     "why": "No chip exists, so there are no silicon measurements and no photographs on these pages."
+    }
+   ]
+  },
+  {
+   "target": "Digilent Basys 3 FPGA",
+   "note": "",
+   "rungs": [
+    {
+     "rung": "Board design simulated",
+     "state": "measured",
+     "why": "7 checks (<code>make -C fpga/basys3 sim</code>, v20)."
+    },
+    {
+     "rung": "Bitstream built",
+     "state": "none",
+     "word": "not yet",
+     "why": "<code>make bit</code> needs Vivado, which has not been run."
+    },
+    {
+     "rung": "Run on a board",
+     "state": "none",
+     "word": "not yet",
+     "why": "Nothing has run on a real Basys 3."
+    }
+   ]
+  }
+ ],
+ "gif": {
+  "fixture": "host-protocol",
+  "signals": [
+   "rx",
+   "tx",
+   "h_state",
+   "h_count",
+   "reg_addr"
+  ],
+  "out": "docs/images/explorer/tour.gif"
+ },
+ "fpga": {
+  "title": "Tiqora-Serial on a Basys 3: a PC session, simulated",
+  "chip": "Tiqora-Serial RTL",
+  "inside": "timing unit and serial host port; no processor",
+  "buttons": {
+   "C": "reset",
+   "L": "CAP3",
+   "R": "CAP4",
+   "U": "CAP5",
+   "D": "CAP7"
+  },
+  "leds": [
+   "TRIG0",
+   "TRIG1",
+   "TRIG2",
+   "EVT",
+   "TX",
+   "OVF",
+   "HB",
+   "EVTP",
+   "run",
+   "ACT",
+   "CH0",
+   "CH1",
+   "CH2",
+   "EDGE",
+   "Q0",
+   "Q1"
+  ],
+  "terminal": "hex",
+  "terminal_title": "PC, USB serial bytes in hex",
+  "host_prefix": "PC:   ",
+  "chip_prefix": "chip: ",
+  "note": "Recorded from RTL simulation, not a board: fpga/basys3/tb_basys3.sv drives the whole board design the way a PC does, at the real 115,200 baud (make -C fpga/basys3 record; its 7 checks pass): a ping, two TIME reads, a CFG write, a BTNL press read back as an event, and a PULSE on TRIG0. Nothing has run on a real Basys 3.",
+  "pmod": "not used"
+ }
+}

@@ -49,6 +49,10 @@ ping (`5A 01`), two TIME reads that advance, a CFG write, a BTNL press read back
 channel-3 rising event timestamped after those reads, and a PULSE seen on LED 0. **7 of 7 pass.**
 `make resources` estimates about 520 LUTs (2.5%) and 420 flip-flops (1%) of the XC7A35T.
 
+`make record` runs the same session with `rec_basys3.sv` beside the bench, which writes what the
+board shows to `docs/fpga/basys3_demo.rec`; `python3 docs/tools/fpga_media.py` turns that into
+the README's board animation. It is a simulation: nothing has run on a real board.
+
 ## Status
 
 Verified here: Verilator lint, the board-level simulation, Yosys synthesis for Artix-7, and the

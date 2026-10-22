@@ -1,0 +1,149 @@
+<!-- {"title": "Overview", "description": "Tiqora-Serial: hardware timestamping and cycle-exact triggers for a Tiny Tapeout 1x2 tile, controlled over USB serial with no processor. What goes in and out, and what is proven.", "data": ["tours", "die", "deadline", "site", "board"], "scripts": ["die", "labs", "board"]} -->
+<section class="reveal bleed" id=reveal aria-labelledby=hero-h>
+ <div class=reveal-stage>
+  <div class=reveal-copy>
+   <p class=eyebrow>Hardware timing for Tiny Tapeout, no processor</p>
+   <h1 id=hero-h>Tiqora-Serial</h1>
+   <p class=tagline>Exact time, from your computer.</p>
+  <p class=lede>The timing unit of the Tiqora microcontroller, byte for byte, with no processor: a host sends six-byte commands over the demo board's USB serial port to arm triggers that fire on an exact clock tick and to read back timestamped pin edges. It is built for SkyWater sky130 through Tiny Tapeout, at 1x2 tiles.</p>
+  <div class=row>
+   <a class=btn href="tours.html">Watch a session</a>
+   <a class="btn ghost" href="atlas.html">Open the chip atlas</a>
+   <a class="btn ghost" href="evidence.html">What is proven</a>
+  </div>
+  <p class=small>Every waveform here was recorded from the RTL in simulation, at the chip's real 434 clocks per serial bit. Every number carries how it was obtained: <span class="ev measured">measured</span> <span class="ev experimental">experimental</span> <span class="ev fail">failed</span> <span class="ev todo">not yet</span>.</p>
+ </div>
+  <div class=reveal-chip aria-hidden=true><div class=chip3d><i class=sheen></i></div><i class=shadow></i></div>
+  <p class=reveal-cap>{{die:cells}} real sky130 cells, packed by a script into one Tiny Tapeout 1x2 tile. Keep scrolling to fall into it. <span class="ev illustrative">illustrative</span></p>
+ </div>
+</section>
+<script>TQDie.reveal(document.getElementById("reveal"), DATA("die"));</script>
+
+
+<section class="zoom bleed" id=zoom aria-labelledby=zoom-h>
+ <div class=zoom-stage>
+  <canvas aria-hidden=true></canvas>
+  <p class=zoom-label>Drawing {{die:cells}} cells…</p>
+  <ul class=zoom-legend hidden aria-label="Layer colours">
+   <li><i style="--c:#d9bb3e"></i>diffusion</li>
+   <li><i style="--c:#d8463a"></i>polysilicon</li>
+   <li><i style="--c:#4f86d9"></i>local interconnect</li>
+   <li><i style="--c:#f2f2ee"></i>contacts</li>
+   <li><i style="--c:#7d858c"></i>metal 1</li>
+  </ul>
+  <div class=zoom-scale aria-hidden=true><span></span></div>
+ </div>
+ <div class=zoom-go role=group aria-label="Zoom level"><button type=button>A grain of salt</button><button type=button>The whole tile</button><button type=button>Rows of cells</button><button type=button>One flip-flop</button></div>
+ <div class=zoom-steps>
+  <div data-stage><div>
+   <h2 id=zoom-h>Smaller than a grain of salt</h2>
+   <p>The amber outline is all of Tiqora-Serial: a Tiny Tapeout 1x2 tile, <span class=num>{{die:tile}}</span> µm. Beside it, to scale, is a grain of table salt about 300 µm across. <span class="ev illustrative">illustrative</span></p>
+   <p class=small>Scroll, and the view falls into it.</p>
+  </div></div>
+  <div data-stage><div>
+   <h2>{{die:cells}} cells in {{die:blocks}} blocks</h2>
+   <p>Synthesized with each block kept whole, Tiqora-Serial is <span class=num>{{die:cells}}</span> standard cells of <span class=num>{{die:kinds}}</span> kinds. The largest block is the {{die:big}}. Each block is outlined in its colour from the <a href=atlas.html>atlas</a>:{{die:cats}}. <span class="ev measured">measured</span> <span class=small>{{die:synth}}</span></p>
+   <p>A script packs them here row by row, one block at a time. That shows how big each block is, not where it will sit: at 1x2 the real layout does not fit yet. <span class="ev illustrative">illustrative</span></p>
+  </div></div>
+  <div data-stage><div>
+   <h2>Rows of real cells</h2>
+   <p>Each row is <span class=num>{{die:row}}</span> µm tall, and every other one is flipped so neighbours share a power rail. The shapes are the cells' real geometry from the SkyWater sky130 library, drawn the way <a href="http://www.visual6502.org/">Visual 6502</a> draws a die: every layer as translucent colour on black.</p>
+  </div></div>
+  <div data-stage><div>
+   <h2>One flip-flop</h2>
+   <p>Outlined in blue: one D flip-flop, <code>{{die:focus}}</code>, <span class=num>{{die:focus_w}} × {{die:row}}</span> µm. It sits in the {{die:home}}. Where red polysilicon crosses yellow diffusion is a transistor's gate; blue is local interconnect, white squares are contacts, and the pale bands are the metal 1 power rails.</p>
+  </div></div>
+ </div>
+</section>
+<script>
+TQDie.mount(document.getElementById("zoom"), DATA("die"), {
+  font: getComputedStyle(document.body).fontFamily,
+  labels: ["To scale. The grain of salt is illustrative.", "Real sky130 cells, packed by a script, not placed."]
+});
+</script>
+
+<section aria-labelledby=num-h>
+ <h2 id=num-h class=sr>In numbers</h2>
+ <div class=stats>
+  <div class=stat><b>{{die:tile_r}}<small>µm</small></b><span>all of it: one Tiny Tapeout 1x2 tile, the size the shuttle sets.</span></div>
+  <div class=stat><b>{{die:cells}}</b><span>standard cells, synthesized with each block kept whole. <span class="ev measured">measured</span></span></div>
+  <div class=stat><b>0<small>ticks late</small></b><span>TRIG0 rises on exactly the tick the host armed. <span class="ev recorded">recorded</span> <a href="tours.html#seq=deadline">the deadline tour</a></span></div>
+  <div class=stat><b>20<small>ns</small></b><span>per tick: the timebase counts every clock of the 50 MHz clock, by design. <a href="tours.html">See it count</a></span></div>
+ </div>
+</section>
+
+<section aria-labelledby=dl-h>
+ <h2 id=dl-h>Fire a deadline</h2>
+ <p>The host writes a tick number into a deadline register and goes back to whatever it was doing. When the timebase reaches that tick, the pin rises on exactly that clock, with no help from the host. Pick how far ahead to arm it.</p>
+ <div class=deadline id=deadline><p class=small>The lab needs JavaScript. <a href="tours.html#seq=deadline">The recorded deadline tour</a> shows the same moment, cycle by cycle.</p></div>
+</section>
+<script>
+TQLabs.deadline(document.getElementById("deadline"), DATA("deadline"), { clockNs: DATA("site").clock_ns, recordedHref: "tours.html#seq=deadline" });
+</script>
+
+<section aria-labelledby=board-h>
+ <h2 id=board-h>On a Basys 3, simulated</h2>
+ <p>The same RTL on a Digilent Basys 3, with the board's USB port as the host link. Press play, or drag through the session: a ping, two TIME reads, a CFG write, a BTNL press read back as an event, and a PULSE on TRIG0, with every byte in hex.</p>
+ <div class=board-live><div class=scroll id=board tabindex=0 role=region aria-label="The simulated board; scrolls sideways on narrow screens">
+  <img src="{{img:docs/images/explorer/fpga.png}}" width=880 height=560 alt="The simulated Basys 3 at the end of the PC session: the terminal lists the bytes each way" style="display:block;max-width:100%;height:auto">
+ </div></div>
+ <p class=board-cap><span class="ev recorded">recorded</span> <span class="ev illustrative">simulated board, not a real one</span> <code>make -C fpga/basys3 record</code> runs the whole board design in Icarus Verilog at the real 115,200 baud and <code>fpga/basys3/rec_basys3.sv</code> writes down the LEDs, display, buttons and serial bytes; this board is drawn from that file, cycle by cycle. Nothing has run on a real Basys 3 yet.</p>
+</section>
+<script>TQBoard.mount(document.getElementById("board"), DATA("board"));</script>
+
+<section aria-labelledby=io-h>
+ <h2 id=io-h>What goes in and what comes out</h2>
+ <figure class=hero-art aria-label="Data flow through Tiqora-Serial">{{static:flow}}</figure>
+</section>
+
+<section aria-labelledby=q>
+ <h2 id=q>Seven questions</h2>
+ <div class=qa><h3>What is Tiqora-Serial?</h3><div>
+  <p>A Tiny Tapeout design of 1 × 2 tiles that timestamps edges on eight inputs and drives three trigger outputs on exact clock ticks, all controlled by a host computer over a serial port. The timing RTL in <code>src/sync/</code> is the same file, byte for byte, as in the <a href="https://github.com/Normansrule/tiqora-skywater130">Tiqora microcontroller</a>, which <code>make -C test shared</code> checks. Use it when the thinking happens on a PC or a Raspberry Pi and only the timing has to be exact.</p>
+ </div></div>
+ <div class=qa><h3>What enters?</h3><div>
+  <p><b>Commands</b> on <code>ui_in[3]</code>, at 115,200 baud from the demo board's RP2040 USB bridge: write <code>01 addr d0 d1 d2 d3</code>, read <code>02 addr</code>, ping <code>03</code>, least significant byte first. <b>Edges</b> on CAP0 to CAP7 (<code>ui_in[0:2]</code>, <code>ui_in[4:7]</code>, <code>uio[0]</code>). One 50 MHz clock and an active-low reset.</p>
+ </div></div>
+ <div class=qa><h3>What happens inside?</h3><div>
+  <p>The receiver turns serial bits into bytes; the host port collects a command, touches one register of the timing unit for exactly one clock, and replies. Meanwhile the timing unit counts ticks, stamps edges into a two-deep queue and compares the time against armed deadlines on every clock. <a href="tours.html#seq=host-protocol">A ping and a write</a> · <a href="tours.html#seq=deadline">a deadline</a> · <a href="tours.html#seq=event">an edge, queued and read</a>.</p>
+ </div></div>
+ <div class=qa><h3>What comes out?</h3><div>
+  <p>Replies on <code>uo_out[4]</code>. TRIG0 to TRIG2 on <code>uo_out[2:0]</code>, rising on the programmed tick. EVT, EVTP and OVF on <code>uo_out</code>, and the queue's count, channel and edge on <code>uio</code>, so a board can react to an event without asking. <a href="atlas.html#pins">The pinout</a>.</p>
+ </div></div>
+ <div class=qa><h3>What exists today?</h3><div>
+  <p>SystemVerilog RTL, a Python host library and command line, testbenches, a Basys 3 FPGA build and Tiny Tapeout packaging. <b>No chip and no board run.</b> At the 1x2 size <code>info.yaml</code> submits, the layout fails placement; an experimental copy at 2x2 hardens clean. <a href="physical.html">Physical design</a>.</p>
+ </div></div>
+ <div class=qa><h3>What is proven or measured?</h3><div>
+  <p><span class="ev measured">measured</span> 30 RTL checks, 5 cocotb tests, 13 tour checks, synthesized cell area. <span class="ev experimental">experimental</span> at 2x2: DRC, LVS and antenna clean, timing met, pre-flight 15/15. <span class="ev fail">failed</span> placement at 1x2. <span class="ev todo">not yet</span> formal proofs, a shuttle, silicon. <a href="evidence.html">The evidence ladder</a>.</p>
+ </div></div>
+ <div class=qa><h3>What can I try?</h3><div>
+<pre class=cmd><span class=c># Icarus Verilog 12 and Python 3</span>
+git clone {{repo}}
+cd tinytapeout-tiqora
+make -C test tour                <span class=c># the recorded session: 13 checks</span>
+python3 docs/tools/traces.py     <span class=c># decode it and check every reply against the protocol model</span>
+make -C test sim                 <span class=c># every suite</span></pre>
+  <p>Or build any command in the <a href="tours.html#lab-h">protocol lab</a>, including wrong ones, and see what the chip answers.</p>
+ </div></div>
+</section>
+
+<section aria-labelledby=tours>
+ <h2 id=tours>Five recorded tours, and the whole session</h2>
+ <p>Each is a window of one simulation of the real top module, <code>tt_um_normansrule_tiqora_serial</code>, driven only through its pins the way the demo board drives it.</p>
+ <ol class=tourlist id=tourcards></ol>
+</section>
+<script>
+(function () {
+  const box = document.getElementById("tourcards");
+  DATA("tours").forEach(f => {
+    const li = document.createElement("li");
+    li.innerHTML = "<a></a><p></p><span class=small></span>";
+    li.querySelector("a").href = "tours.html#seq=" + f.id;
+    li.querySelector("a").textContent = f.title;
+    li.querySelector("p").textContent = f.summary;
+    li.querySelector(".small").textContent = (f.cycles[1] - f.cycles[0] + 1).toLocaleString("en-US") + " cycles, " + f.captions + " captions";
+    box.append(li);
+  });
+})();
+</script>
+<noscript><p>The tour list needs JavaScript; the tours are also in <code>docs/site/data/traces/</code> as JSON.</p></noscript>

@@ -1,0 +1,38 @@
+{
+ "chip": "Tiqora-Serial",
+ "fixtures": [
+  {
+   "file": "host-protocol.json",
+   "id": "host-protocol",
+   "title": "Ping, then a register write"
+  },
+  {
+   "file": "read-time.json",
+   "id": "read-time",
+   "title": "Reading the timebase"
+  },
+  {
+   "file": "deadline.json",
+   "id": "deadline",
+   "title": "A deadline set over serial"
+  },
+  {
+   "file": "event.json",
+   "id": "event",
+   "title": "An edge, queued and read"
+  },
+  {
+   "file": "errors.json",
+   "id": "errors",
+   "title": "Wrong bytes, and the way out"
+  },
+  {
+   "file": "overview.json",
+   "id": "overview",
+   "title": "The whole serial session"
+  }
+ ],
+ "model": "every chip reply checked against a Python model of the src/uart/tp_host_uart.sv protocol",
+ "schema": 1,
+ "tour_checks": 13
+}

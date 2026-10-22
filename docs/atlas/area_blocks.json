@@ -1,0 +1,33 @@
+{
+ "command": "python3 docs/tools/atlas.py --area <sky130_fd_sc_hd__tt_025C_1v80.lib>",
+ "label": "measured",
+ "library": "sky130_fd_sc_hd__tt_025C_1v80.lib",
+ "modules_um2": {
+  "sync_capture": 890.9,
+  "sync_compare": 7757.4,
+  "sync_event_fifo": 2612.5,
+  "sync_timebase": 4380.5,
+  "sync_unit": 4405.5,
+  "tp_host_uart": 2052.0,
+  "tp_sync_soc": 32.5,
+  "tp_uart_rx": 1201.2,
+  "tp_uart_tx": 1069.8,
+  "tt_um_normansrule_tiqora_serial": 3.8
+ },
+ "sources": {
+  "src/sync/sync_capture.sv": "2a14d3051ed4d0f9c8d4c6158cb148cfe515bceb8111fc9da123d9b3f984a907",
+  "src/sync/sync_compare.sv": "532fda2a6751b3b1134744324ca9260de87b18ccb572aa18e21f0da8df998224",
+  "src/sync/sync_event_fifo.sv": "8072350d74f351b9ad8bbfbf90613ebb21058e3ccea1e7ea7e41ffdc945d1304",
+  "src/sync/sync_timebase.sv": "c7a8d227e898022290a6fd1fade22e451c9b5adf532139151d7c8872ceb1f1ef",
+  "src/sync/sync_unit.sv": "9b659ce29646ac5f536a629f6fcf83acc039761c72c61e4e8a1b4b592be4f270",
+  "src/tp_pkg.sv": "8da187b5b062a40778534565ed50fbbe5c70afb2faa444fe44a47f324cdb42cd",
+  "src/tp_sync_soc.sv": "462a14536fd2450134754e5f7c87a1fb90d28c6c95822d8596fed7975f1905aa",
+  "src/tt_um_normansrule_tiqora_serial.sv": "09a201defac0fb179034a01edc9dbbc2f4828b927dc53658c01290469dc57efb",
+  "src/uart/tp_host_uart.sv": "e131a7447cb016ede4b67bfcfdea0d5f9faca7cbfd2d0fc7de93b74e1656c449",
+  "src/uart/tp_uart_rx.sv": "74ac23194c71027eff9a5fa8fef0acd5eb32af71e996affae7d25d0c01bc2f1a",
+  "src/uart/tp_uart_tx.sv": "32458039699f7e41740457c80a820cc7132a2366a3f64bc58ee1675d674cb49a"
+ },
+ "tool": "Yosys 0.33",
+ "total_hierarchical_um2": 24405.9072,
+ "what": "sky130_fd_sc_hd cell area per module, hierarchical synthesis before placement (the flattened netlist the flow builds is smaller: synthesis optimizes across boundaries)"
+}

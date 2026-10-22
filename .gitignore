@@ -9,3 +9,6 @@ results.xml
 runs/
 tt/
 src/user_config.json
+test/tour_trace.txt
+test/tour_out.txt
+test/tb_tour.log

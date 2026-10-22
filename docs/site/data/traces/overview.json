@@ -1,0 +1,1635 @@
+{
+ "bytes": [
+  {
+   "at": 16,
+   "byte": 3,
+   "dir": "host",
+   "end": 4356
+  },
+  {
+   "at": 4144,
+   "byte": 90,
+   "dir": "chip",
+   "end": 8484
+  },
+  {
+   "at": 8485,
+   "byte": 1,
+   "dir": "chip",
+   "end": 12825
+  },
+  {
+   "at": 12609,
+   "byte": 1,
+   "dir": "host",
+   "end": 16949
+  },
+  {
+   "at": 16949,
+   "byte": 3,
+   "dir": "host",
+   "end": 21289
+  },
+  {
+   "at": 21289,
+   "byte": 1,
+   "dir": "host",
+   "end": 25629
+  },
+  {
+   "at": 25629,
+   "byte": 0,
+   "dir": "host",
+   "end": 29969
+  },
+  {
+   "at": 29969,
+   "byte": 0,
+   "dir": "host",
+   "end": 34309
+  },
+  {
+   "at": 34309,
+   "byte": 0,
+   "dir": "host",
+   "end": 38649
+  },
+  {
+   "at": 38437,
+   "byte": 6,
+   "dir": "chip",
+   "end": 42777
+  },
+  {
+   "at": 42772,
+   "byte": 2,
+   "dir": "host",
+   "end": 47112
+  },
+  {
+   "at": 47112,
+   "byte": 0,
+   "dir": "host",
+   "end": 51452
+  },
+  {
+   "at": 51240,
+   "byte": 42,
+   "dir": "chip",
+   "end": 55580
+  },
+  {
+   "at": 55581,
+   "byte": 200,
+   "dir": "chip",
+   "end": 59921
+  },
+  {
+   "at": 59922,
+   "byte": 0,
+   "dir": "chip",
+   "end": 64262
+  },
+  {
+   "at": 64263,
+   "byte": 0,
+   "dir": "chip",
+   "end": 68603
+  },
+  {
+   "at": 68387,
+   "byte": 1,
+   "dir": "host",
+   "end": 72727
+  },
+  {
+   "at": 72727,
+   "byte": 4,
+   "dir": "host",
+   "end": 77067
+  },
+  {
+   "at": 77067,
+   "byte": 138,
+   "dir": "host",
+   "end": 81407
+  },
+  {
+   "at": 81407,
+   "byte": 178,
+   "dir": "host",
+   "end": 85747
+  },
+  {
+   "at": 85747,
+   "byte": 1,
+   "dir": "host",
+   "end": 90087
+  },
+  {
+   "at": 90087,
+   "byte": 0,
+   "dir": "host",
+   "end": 94427
+  },
+  {
+   "at": 94215,
+   "byte": 6,
+   "dir": "chip",
+   "end": 98555
+  },
+  {
+   "at": 111266,
+   "byte": 2,
+   "dir": "host",
+   "end": 115606
+  },
+  {
+   "at": 115606,
+   "byte": 1,
+   "dir": "host",
+   "end": 119946
+  },
+  {
+   "at": 119734,
+   "byte": 162,
+   "dir": "chip",
+   "end": 124074
+  },
+  {
+   "at": 124075,
+   "byte": 178,
+   "dir": "chip",
+   "end": 128415
+  },
+  {
+   "at": 128416,
+   "byte": 1,
+   "dir": "chip",
+   "end": 132756
+  },
+  {
+   "at": 132757,
+   "byte": 8,
+   "dir": "chip",
+   "end": 137097
+  },
+  {
+   "at": 136881,
+   "byte": 126,
+   "dir": "host",
+   "end": 141221
+  },
+  {
+   "at": 141008,
+   "byte": 21,
+   "dir": "chip",
+   "end": 145348
+  },
+  {
+   "at": 145344,
+   "byte": 1,
+   "dir": "host",
+   "end": 149684
+  },
+  {
+   "at": 149684,
+   "byte": 7,
+   "dir": "host",
+   "end": 154024
+  },
+  {
+   "at": 154024,
+   "byte": 32,
+   "dir": "host",
+   "end": 158364
+  },
+  {
+   "at": 175723,
+   "byte": 3,
+   "dir": "host",
+   "end": 180063
+  },
+  {
+   "at": 197442,
+   "byte": 3,
+   "dir": "host",
+   "end": 201782
+  },
+  {
+   "at": 201570,
+   "byte": 90,
+   "dir": "chip",
+   "end": 205910
+  },
+  {
+   "at": 205911,
+   "byte": 1,
+   "dir": "chip",
+   "end": 210251
+  },
+  {
+   "at": 210035,
+   "byte": 2,
+   "dir": "host",
+   "end": 214375
+  },
+  {
+   "at": 214375,
+   "byte": 2,
+   "dir": "host",
+   "end": 218715
+  },
+  {
+   "at": 218503,
+   "byte": 16,
+   "dir": "chip",
+   "end": 222843
+  },
+  {
+   "at": 222844,
+   "byte": 0,
+   "dir": "chip",
+   "end": 227184
+  },
+  {
+   "at": 227185,
+   "byte": 1,
+   "dir": "chip",
+   "end": 231525
+  },
+  {
+   "at": 231526,
+   "byte": 0,
+   "dir": "chip",
+   "end": 235866
+  }
+ ],
+ "captions": [
+  {
+   "at": 16,
+   "blocks": [
+    "tp_host_uart"
+   ],
+   "text": "ping -> 5A 01"
+  },
+  {
+   "at": 12609,
+   "blocks": [
+    "tp_host_uart"
+   ],
+   "text": "write CFG = 0x00000001 -> 06"
+  },
+  {
+   "at": 42772,
+   "blocks": [
+    "tp_host_uart"
+   ],
+   "text": "read TIME -> 2A C8 00 00"
+  },
+  {
+   "at": 68387,
+   "blocks": [
+    "tp_host_uart"
+   ],
+   "text": "write CMP0 = 0x0001B28A -> 06"
+  },
+  {
+   "at": 111238,
+   "blocks": [
+    "sync_compare"
+   ],
+   "text": "TRIG0 on the deadline tick"
+  },
+  {
+   "at": 111263,
+   "blocks": [
+    "sync_capture"
+   ],
+   "text": "CAP0 edge captured"
+  },
+  {
+   "at": 111266,
+   "blocks": [
+    "tp_host_uart"
+   ],
+   "text": "read EVENT -> A2 B2 01 08"
+  },
+  {
+   "at": 136881,
+   "blocks": [
+    "tp_host_uart"
+   ],
+   "text": "unknown 0x7E -> 15"
+  },
+  {
+   "at": 145344,
+   "blocks": [
+    "tp_host_uart"
+   ],
+   "text": "write cut off after 4 of 6 bytes: no reply"
+  },
+  {
+   "at": 197422,
+   "blocks": [
+    "tt_um_normansrule_tiqora_serial"
+   ],
+   "text": "reset"
+  },
+  {
+   "at": 197442,
+   "blocks": [
+    "tp_host_uart"
+   ],
+   "text": "ping -> 5A 01"
+  },
+  {
+   "at": 210035,
+   "blocks": [
+    "tp_host_uart"
+   ],
+   "text": "read STAT -> 10 00 01 00"
+  }
+ ],
+ "checks": [
+  {
+   "ok": true,
+   "text": "ping 0x03 answers 0x5A, version 0x01"
+  },
+  {
+   "ok": true,
+   "text": "write CFG = 1 (capture channel 0, rising) answers ACK 0x06"
+  },
+  {
+   "ok": true,
+   "text": "read TIME returns the timebase, least significant byte first"
+  },
+  {
+   "ok": true,
+   "text": "write CMP0 = TIME + 60000 answers ACK"
+  },
+  {
+   "ok": true,
+   "text": "TRIG0 (uo_out[0]) rises on exactly the deadline tick"
+  },
+  {
+   "ok": true,
+   "text": "TRIG0 pulse is 8 ticks wide at the pin"
+  },
+  {
+   "ok": true,
+   "text": "edge on CAP0: EVT high, one EVTP pulse, EVQ = 1, EVCH = 0, EVED = 1"
+  },
+  {
+   "ok": true,
+   "text": "read EVENT pops it: channel 0, rising; EVT goes low"
+  },
+  {
+   "ok": true,
+   "text": "unknown command 0x7E answers NAK 0x15"
+  },
+  {
+   "ok": true,
+   "text": "truncated write: no reply; the port waits for data bytes"
+  },
+  {
+   "ok": true,
+   "text": "a ping sent now is taken as a data byte: still no reply"
+  },
+  {
+   "ok": true,
+   "text": "after reset the port answers a ping again"
+  },
+  {
+   "ok": true,
+   "text": "read STAT after reset: no overflow, queue empty"
+  }
+ ],
+ "commands": [
+  {
+   "at": 16,
+   "bytes": [
+    3
+   ],
+   "cmd": "ping",
+   "got": [
+    90,
+    1
+   ],
+   "reply": [
+    90,
+    1
+   ]
+  },
+  {
+   "addr": 3,
+   "at": 12609,
+   "bytes": [
+    1,
+    3,
+    1,
+    0,
+    0,
+    0
+   ],
+   "cmd": "write CFG = 0x00000001",
+   "got": [
+    6
+   ],
+   "reply": [
+    6
+   ],
+   "value": 1
+  },
+  {
+   "addr": 0,
+   "at": 42772,
+   "bytes": [
+    2,
+    0
+   ],
+   "cmd": "read TIME",
+   "got": [
+    42,
+    200,
+    0,
+    0
+   ],
+   "value": 51242
+  },
+  {
+   "addr": 4,
+   "at": 68387,
+   "bytes": [
+    1,
+    4,
+    138,
+    178,
+    1,
+    0
+   ],
+   "cmd": "write CMP0 = 0x0001B28A",
+   "got": [
+    6
+   ],
+   "reply": [
+    6
+   ],
+   "value": 111242
+  },
+  {
+   "addr": 1,
+   "at": 111266,
+   "bytes": [
+    2,
+    1
+   ],
+   "cmd": "read EVENT",
+   "got": [
+    162,
+    178,
+    1,
+    8
+   ],
+   "value": 134328994
+  },
+  {
+   "at": 136881,
+   "bytes": [
+    126
+   ],
+   "cmd": "unknown 0x7E",
+   "got": [
+    21
+   ],
+   "reply": [
+    21
+   ]
+  },
+  {
+   "at": 197442,
+   "bytes": [
+    3
+   ],
+   "cmd": "ping",
+   "got": [
+    90,
+    1
+   ],
+   "reply": [
+    90,
+    1
+   ]
+  },
+  {
+   "addr": 2,
+   "at": 210035,
+   "bytes": [
+    2,
+    2
+   ],
+   "cmd": "read STAT",
+   "got": [
+    16,
+    0,
+    1,
+    0
+   ],
+   "value": 65552
+  },
+  {
+   "at": 145344,
+   "bytes": [
+    1,
+    7,
+    32,
+    3
+   ],
+   "cmd": "write cut off after 4 of 6 bytes",
+   "got": [],
+   "reply": []
+  }
+ ],
+ "cycles": [
+  -4,
+  235432
+ ],
+ "id": "overview",
+ "kind": "recorded",
+ "kind_text": "Recorded from an RTL simulation, not computed in the browser",
+ "marks": [],
+ "provenance": {
+  "command": "make -C test tour  (then python3 docs/tools/traces.py)",
+  "sampling": "sampled on the falling edge of every clock; a line is kept only where a traced signal other than the timebase changes. Cycle 0 is the first rising edge after reset is released; reset holds the count. 1 cycle = 20 ns at 50 MHz; one serial bit is 434 cycles (115,200 baud)",
+  "simulator": "Icarus Verilog version 12.0 (stable) ()",
+  "sources": {
+   "src/sync/sync_capture.sv": "2a14d3051ed4d0f9c8d4c6158cb148cfe515bceb8111fc9da123d9b3f984a907",
+   "src/sync/sync_compare.sv": "532fda2a6751b3b1134744324ca9260de87b18ccb572aa18e21f0da8df998224",
+   "src/sync/sync_event_fifo.sv": "8072350d74f351b9ad8bbfbf90613ebb21058e3ccea1e7ea7e41ffdc945d1304",
+   "src/sync/sync_timebase.sv": "c7a8d227e898022290a6fd1fade22e451c9b5adf532139151d7c8872ceb1f1ef",
+   "src/sync/sync_unit.sv": "9b659ce29646ac5f536a629f6fcf83acc039761c72c61e4e8a1b4b592be4f270",
+   "src/tp_pkg.sv": "8da187b5b062a40778534565ed50fbbe5c70afb2faa444fe44a47f324cdb42cd",
+   "src/tp_sync_soc.sv": "462a14536fd2450134754e5f7c87a1fb90d28c6c95822d8596fed7975f1905aa",
+   "src/tt_um_normansrule_tiqora_serial.sv": "09a201defac0fb179034a01edc9dbbc2f4828b927dc53658c01290469dc57efb",
+   "src/uart/tp_host_uart.sv": "e131a7447cb016ede4b67bfcfdea0d5f9faca7cbfd2d0fc7de93b74e1656c449",
+   "src/uart/tp_uart_rx.sv": "74ac23194c71027eff9a5fa8fef0acd5eb32af71e996affae7d25d0c01bc2f1a",
+   "src/uart/tp_uart_tx.sv": "32458039699f7e41740457c80a820cc7132a2366a3f64bc58ee1675d674cb49a",
+   "test/tb_tour.sv": "11ffefe316205a5c26aee7b1a8ebb5643f61468a0a587c4c46202ad478030ae2"
+  },
+  "testbench": "test/tb_tour.sv"
+ },
+ "schema": 1,
+ "signals": [
+  {
+   "block": "tt_um_normansrule_tiqora_serial",
+   "changes": [
+    [
+     -4,
+     0
+    ],
+    [
+     -4,
+     1
+    ],
+    [
+     197422,
+     0
+    ],
+    [
+     197422,
+     1
+    ]
+   ],
+   "id": "rst_n",
+   "kind": "bit",
+   "label": "rst_n",
+   "meaning": "reset pin",
+   "width": 1
+  },
+  {
+   "block": "tp_uart_rx",
+   "changes": [
+    [
+     -4,
+     1
+    ],
+    [
+     16,
+     0
+    ],
+    [
+     450,
+     1
+    ],
+    [
+     1318,
+     0
+    ],
+    [
+     3922,
+     1
+    ],
+    [
+     12609,
+     0
+    ],
+    [
+     13043,
+     1
+    ],
+    [
+     13477,
+     0
+    ],
+    [
+     16515,
+     1
+    ],
+    [
+     16949,
+     0
+    ],
+    [
+     17383,
+     1
+    ],
+    [
+     18251,
+     0
+    ],
+    [
+     20855,
+     1
+    ],
+    [
+     21289,
+     0
+    ],
+    [
+     21723,
+     1
+    ],
+    [
+     22157,
+     0
+    ],
+    [
+     25195,
+     1
+    ],
+    [
+     25629,
+     0
+    ],
+    [
+     29535,
+     1
+    ],
+    [
+     29969,
+     0
+    ],
+    [
+     33875,
+     1
+    ],
+    [
+     34309,
+     0
+    ],
+    [
+     38215,
+     1
+    ],
+    [
+     42772,
+     0
+    ],
+    [
+     43640,
+     1
+    ],
+    [
+     44074,
+     0
+    ],
+    [
+     46678,
+     1
+    ],
+    [
+     47112,
+     0
+    ],
+    [
+     51018,
+     1
+    ],
+    [
+     68387,
+     0
+    ],
+    [
+     68821,
+     1
+    ],
+    [
+     69255,
+     0
+    ],
+    [
+     72293,
+     1
+    ],
+    [
+     72727,
+     0
+    ],
+    [
+     74029,
+     1
+    ],
+    [
+     74463,
+     0
+    ],
+    [
+     76633,
+     1
+    ],
+    [
+     77067,
+     0
+    ],
+    [
+     77935,
+     1
+    ],
+    [
+     78369,
+     0
+    ],
+    [
+     78803,
+     1
+    ],
+    [
+     79237,
+     0
+    ],
+    [
+     80539,
+     1
+    ],
+    [
+     81407,
+     0
+    ],
+    [
+     82275,
+     1
+    ],
+    [
+     82709,
+     0
+    ],
+    [
+     83577,
+     1
+    ],
+    [
+     84445,
+     0
+    ],
+    [
+     84879,
+     1
+    ],
+    [
+     85747,
+     0
+    ],
+    [
+     86181,
+     1
+    ],
+    [
+     86615,
+     0
+    ],
+    [
+     89653,
+     1
+    ],
+    [
+     90087,
+     0
+    ],
+    [
+     93993,
+     1
+    ],
+    [
+     111266,
+     0
+    ],
+    [
+     112134,
+     1
+    ],
+    [
+     112568,
+     0
+    ],
+    [
+     115172,
+     1
+    ],
+    [
+     115606,
+     0
+    ],
+    [
+     116040,
+     1
+    ],
+    [
+     116474,
+     0
+    ],
+    [
+     119512,
+     1
+    ],
+    [
+     136881,
+     0
+    ],
+    [
+     137749,
+     1
+    ],
+    [
+     140353,
+     0
+    ],
+    [
+     140787,
+     1
+    ],
+    [
+     145344,
+     0
+    ],
+    [
+     145778,
+     1
+    ],
+    [
+     146212,
+     0
+    ],
+    [
+     149250,
+     1
+    ],
+    [
+     149684,
+     0
+    ],
+    [
+     150118,
+     1
+    ],
+    [
+     151420,
+     0
+    ],
+    [
+     153590,
+     1
+    ],
+    [
+     154024,
+     0
+    ],
+    [
+     156628,
+     1
+    ],
+    [
+     157062,
+     0
+    ],
+    [
+     157930,
+     1
+    ],
+    [
+     175723,
+     0
+    ],
+    [
+     176157,
+     1
+    ],
+    [
+     177025,
+     0
+    ],
+    [
+     179629,
+     1
+    ],
+    [
+     197442,
+     0
+    ],
+    [
+     197876,
+     1
+    ],
+    [
+     198744,
+     0
+    ],
+    [
+     201348,
+     1
+    ],
+    [
+     210035,
+     0
+    ],
+    [
+     210903,
+     1
+    ],
+    [
+     211337,
+     0
+    ],
+    [
+     213941,
+     1
+    ],
+    [
+     214375,
+     0
+    ],
+    [
+     215243,
+     1
+    ],
+    [
+     215677,
+     0
+    ],
+    [
+     218281,
+     1
+    ]
+   ],
+   "id": "rx",
+   "kind": "bit",
+   "label": "RX (ui_in[3])",
+   "meaning": "serial in from the host, idle high",
+   "width": 1
+  },
+  {
+   "block": "tp_uart_tx",
+   "changes": [
+    [
+     -4,
+     1
+    ],
+    [
+     4144,
+     0
+    ],
+    [
+     5012,
+     1
+    ],
+    [
+     5446,
+     0
+    ],
+    [
+     5880,
+     1
+    ],
+    [
+     6748,
+     0
+    ],
+    [
+     7182,
+     1
+    ],
+    [
+     7616,
+     0
+    ],
+    [
+     8050,
+     1
+    ],
+    [
+     8485,
+     0
+    ],
+    [
+     8919,
+     1
+    ],
+    [
+     9353,
+     0
+    ],
+    [
+     12391,
+     1
+    ],
+    [
+     38437,
+     0
+    ],
+    [
+     39305,
+     1
+    ],
+    [
+     40173,
+     0
+    ],
+    [
+     42343,
+     1
+    ],
+    [
+     51240,
+     0
+    ],
+    [
+     52108,
+     1
+    ],
+    [
+     52542,
+     0
+    ],
+    [
+     52976,
+     1
+    ],
+    [
+     53410,
+     0
+    ],
+    [
+     53844,
+     1
+    ],
+    [
+     54278,
+     0
+    ],
+    [
+     55146,
+     1
+    ],
+    [
+     55581,
+     0
+    ],
+    [
+     57317,
+     1
+    ],
+    [
+     57751,
+     0
+    ],
+    [
+     58619,
+     1
+    ],
+    [
+     59922,
+     0
+    ],
+    [
+     63828,
+     1
+    ],
+    [
+     64263,
+     0
+    ],
+    [
+     68169,
+     1
+    ],
+    [
+     94215,
+     0
+    ],
+    [
+     95083,
+     1
+    ],
+    [
+     95951,
+     0
+    ],
+    [
+     98121,
+     1
+    ],
+    [
+     119734,
+     0
+    ],
+    [
+     120602,
+     1
+    ],
+    [
+     121036,
+     0
+    ],
+    [
+     122338,
+     1
+    ],
+    [
+     122772,
+     0
+    ],
+    [
+     123206,
+     1
+    ],
+    [
+     124075,
+     0
+    ],
+    [
+     124943,
+     1
+    ],
+    [
+     125377,
+     0
+    ],
+    [
+     126245,
+     1
+    ],
+    [
+     127113,
+     0
+    ],
+    [
+     127547,
+     1
+    ],
+    [
+     128416,
+     0
+    ],
+    [
+     128850,
+     1
+    ],
+    [
+     129284,
+     0
+    ],
+    [
+     132322,
+     1
+    ],
+    [
+     132757,
+     0
+    ],
+    [
+     134493,
+     1
+    ],
+    [
+     134927,
+     0
+    ],
+    [
+     136663,
+     1
+    ],
+    [
+     141008,
+     0
+    ],
+    [
+     141442,
+     1
+    ],
+    [
+     141876,
+     0
+    ],
+    [
+     142310,
+     1
+    ],
+    [
+     142744,
+     0
+    ],
+    [
+     143178,
+     1
+    ],
+    [
+     143612,
+     0
+    ],
+    [
+     144914,
+     1
+    ],
+    [
+     201570,
+     0
+    ],
+    [
+     202438,
+     1
+    ],
+    [
+     202872,
+     0
+    ],
+    [
+     203306,
+     1
+    ],
+    [
+     204174,
+     0
+    ],
+    [
+     204608,
+     1
+    ],
+    [
+     205042,
+     0
+    ],
+    [
+     205476,
+     1
+    ],
+    [
+     205911,
+     0
+    ],
+    [
+     206345,
+     1
+    ],
+    [
+     206779,
+     0
+    ],
+    [
+     209817,
+     1
+    ],
+    [
+     218503,
+     0
+    ],
+    [
+     220673,
+     1
+    ],
+    [
+     221107,
+     0
+    ],
+    [
+     222409,
+     1
+    ],
+    [
+     222844,
+     0
+    ],
+    [
+     226750,
+     1
+    ],
+    [
+     227185,
+     0
+    ],
+    [
+     227619,
+     1
+    ],
+    [
+     228053,
+     0
+    ],
+    [
+     231091,
+     1
+    ],
+    [
+     231526,
+     0
+    ],
+    [
+     235432,
+     1
+    ]
+   ],
+   "id": "tx",
+   "kind": "bit",
+   "label": "TX (uo_out[4])",
+   "meaning": "serial out to the host, idle high",
+   "width": 1
+  },
+  {
+   "block": "tp_host_uart",
+   "changes": [
+    [
+     -4,
+     0
+    ],
+    [
+     4143,
+     1
+    ],
+    [
+     12826,
+     0
+    ],
+    [
+     16735,
+     1
+    ],
+    [
+     42778,
+     0
+    ],
+    [
+     46898,
+     1
+    ],
+    [
+     68604,
+     0
+    ],
+    [
+     72513,
+     1
+    ],
+    [
+     98556,
+     0
+    ],
+    [
+     115393,
+     1
+    ],
+    [
+     137098,
+     0
+    ],
+    [
+     141007,
+     1
+    ],
+    [
+     145349,
+     0
+    ],
+    [
+     149470,
+     1
+    ],
+    [
+     197422,
+     0
+    ],
+    [
+     201569,
+     1
+    ],
+    [
+     210252,
+     0
+    ],
+    [
+     214161,
+     1
+    ]
+   ],
+   "id": "act",
+   "kind": "bit",
+   "label": "ACT (uio[1])",
+   "meaning": "a command or reply is in progress",
+   "width": 1
+  },
+  {
+   "block": "tp_host_uart",
+   "changes": [
+    [
+     -4,
+     0
+    ],
+    [
+     4143,
+     4
+    ],
+    [
+     12826,
+     0
+    ],
+    [
+     16735,
+     1
+    ],
+    [
+     21075,
+     2
+    ],
+    [
+     38435,
+     3
+    ],
+    [
+     38436,
+     4
+    ],
+    [
+     42778,
+     0
+    ],
+    [
+     46898,
+     1
+    ],
+    [
+     51238,
+     3
+    ],
+    [
+     51239,
+     4
+    ],
+    [
+     68604,
+     0
+    ],
+    [
+     72513,
+     1
+    ],
+    [
+     76853,
+     2
+    ],
+    [
+     94213,
+     3
+    ],
+    [
+     94214,
+     4
+    ],
+    [
+     98556,
+     0
+    ],
+    [
+     115393,
+     1
+    ],
+    [
+     119732,
+     3
+    ],
+    [
+     119733,
+     4
+    ],
+    [
+     137098,
+     0
+    ],
+    [
+     141007,
+     4
+    ],
+    [
+     145349,
+     0
+    ],
+    [
+     149470,
+     1
+    ],
+    [
+     153810,
+     2
+    ],
+    [
+     197422,
+     0
+    ],
+    [
+     201569,
+     4
+    ],
+    [
+     210252,
+     0
+    ],
+    [
+     214161,
+     1
+    ],
+    [
+     218501,
+     3
+    ],
+    [
+     218502,
+     4
+    ]
+   ],
+   "enum": [
+    "H_CMD",
+    "H_ADDR",
+    "H_DATA",
+    "H_DO",
+    "H_SEND"
+   ],
+   "id": "h_state",
+   "kind": "enum",
+   "label": "host port state",
+   "meaning": "tp_host_uart's state register",
+   "width": 3
+  },
+  {
+   "block": "sync_compare",
+   "changes": [
+    [
+     -4,
+     0
+    ],
+    [
+     111238,
+     1
+    ],
+    [
+     111246,
+     0
+    ]
+   ],
+   "id": "trig0",
+   "kind": "bit",
+   "label": "TRIG0",
+   "meaning": "uo_out[0]",
+   "width": 1
+  },
+  {
+   "block": "sync_unit",
+   "changes": [
+    [
+     -4,
+     0
+    ],
+    [
+     111263,
+     1
+    ],
+    [
+     119733,
+     0
+    ]
+   ],
+   "id": "evt",
+   "kind": "bit",
+   "label": "EVT",
+   "meaning": "uo_out[3]",
+   "width": 1
+  }
+ ],
+ "summary": "Every byte the host and the chip exchanged in the tour, each command decoded and checked against a model of the protocol.",
+ "title": "The whole serial session"
+}

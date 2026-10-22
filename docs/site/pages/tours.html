@@ -1,0 +1,78 @@
+<!-- {"title": "Tours", "description": "Tiqora-Serial's serial protocol recorded from RTL simulation: ping and write, reading the timebase, a deadline, an edge queued and read, and what wrong bytes do.", "data": ["traces", "site", "blocks"], "scripts": ["model", "wave", "player"]} -->
+<h1>Tours of a serial session</h1>
+<p class=lede>One simulation of the submitted top module, <code>tt_um_normansrule_tiqora_serial</code>, driven only through its pins at 115,200 baud, the way the demo board's USB bridge drives it. Every byte below was decoded from the pin trace, and every reply was checked against an independent model of the protocol before this page was built.</p>
+<div class=note><b>How to read it.</b> A serial byte takes 4,340 clocks, so the trace keeps only the clocks where something changed; the cursor moves from change to change. The byte rows show each byte on the wire, host to chip and chip to host. The table beside the waveform gives every value at the cursor. The <span class="ev recorded">recorded</span> label stays on every sequence; the protocol lab further down is <span class="ev computed">computed</span> in your browser.</div>
+<div id=player></div>
+
+<section aria-labelledby=lab-h>
+ <h2 id=lab-h>Protocol lab: send your own bytes</h2>
+ <p>Type bytes in hex, or add commands with the buttons, and see how the host port reads them: what each command does and what it answers. Try an unknown command, or a write that stops half way. The model is <code>hostPort</code> in <code>docs/site/lib/model.js</code>.</p>
+ <div class=lab>
+  <div class=card>
+   <label for=pb>Bytes from the host, in hex</label>
+   <input id=pb value="03 01 03 01 00 00 00 02 00 7E 01 07 20" autocomplete=off spellcheck=false aria-describedby=perr>
+   <p id=perr class=small role=status></p>
+   <div class=row>
+    <button class="btn ghost" type=button data-add="03">+ ping</button>
+    <button class="btn ghost" type=button data-add="02 00">+ read TIME</button>
+    <button class="btn ghost" type=button data-add="02 01">+ read EVENT</button>
+    <button class="btn ghost" type=button data-add="01 04 60 EA 00 00">+ write CMP0</button>
+    <button class="btn ghost" type=button data-add="7E">+ wrong byte</button>
+    <button class="btn ghost" type=button id=preset>reset (clear)</button>
+   </div>
+  </div>
+  <div class=card>
+   <p><span class="ev computed">computed in the browser</span></p>
+   <ol id=pout></ol>
+   <p id=pwait></p>
+  </div>
+ </div>
+ <h3>The first byte on the wire</h3>
+ <p class=small>8N1 framing: a low start bit, eight data bits least significant first, a high stop bit, 434 clocks each.</p>
+ <div class=tablewrap><table class=nibs id=pframe><caption class=sr>Bits of the first byte</caption></table></div>
+</section>
+<noscript><p>The tours need JavaScript. The recorded data is in <code>docs/site/data/traces/</code> as JSON, one file per tour.</p></noscript>
+<script>
+(function () {
+  const site = DATA("site"), fixtures = DATA("traces"), M = TQModel, $ = id => document.getElementById(id);
+  const rec = (fixtures.find(f => f.id === "overview") || { commands: [] }).commands;
+  const hx = bs => bs.map(b => b.toString(16).toUpperCase().padStart(2, "0")).join(" ");
+  function run() {
+    const t = $("pb").value.trim();
+    const parts = t ? t.split(/[\s,]+/) : [];
+    const bad = parts.filter(p => !/^(0x)?[0-9a-f]{1,2}$/i.test(p));
+    $("pb").setAttribute("aria-invalid", bad.length > 0);
+    if (bad.length) { $("perr").textContent = "Not a byte: " + bad.join(", ") + ". Use two hex digits per byte, separated by spaces."; return; }
+    $("perr").textContent = "";
+    const bytes = parts.map(p => parseInt(p.replace(/^0x/i, ""), 16));
+    const r = M.hostPort(bytes);
+    $("pout").replaceChildren(...r.commands.map(c => {
+      const li = document.createElement("li");
+      const same = rec.find(x => hx(x.bytes) === hx(c.bytes));
+      li.innerHTML = "<code></code> → <b></b><br><span class=small></span>";
+      li.querySelector("code").textContent = hx(c.bytes);
+      li.querySelector("b").textContent = Array.isArray(c.reply) ? hx(c.reply) : "4 bytes of the register";
+      li.querySelector(".small").textContent = c.text + (same ? ". The recorded session sent these bytes too and the chip answered " + (same.got.length ? hx(same.got) : "nothing") + "." : "");
+      return li;
+    }));
+    $("pwait").textContent = r.waiting ? "⏸ " + hx(r.waiting.bytes) + ": " + r.waiting.text : (bytes.length ? "The port is idle, waiting for a command byte." : "");
+    const f = $("pframe");
+    f.replaceChildren();
+    if (bytes.length) {
+      const bits = M.uartBits(bytes[0]);
+      const names = ["start", "d0", "d1", "d2", "d3", "d4", "d5", "d6", "d7", "stop"];
+      [["bit", names], ["level", bits]].forEach(([h, row]) => {
+        const tr = document.createElement("tr");
+        const th = document.createElement("th"); th.scope = "row"; th.textContent = h; tr.append(th);
+        row.forEach(v => { const td = document.createElement("td"); td.textContent = v; tr.append(td); });
+        f.append(tr);
+      });
+    }
+  }
+  $("pb").addEventListener("input", run);
+  document.querySelectorAll("[data-add]").forEach(b => b.addEventListener("click", () => { $("pb").value = ($("pb").value.trim() + " " + b.dataset.add).trim(); run(); }));
+  $("preset").addEventListener("click", () => { $("pb").value = ""; run(); });
+  run();
+  TQPlayer.mount(document.getElementById("player"), { fixtures, chip: site.chip, clockNs: site.clock_ns, blocks: DATA("blocks"), initial: "host-protocol" });
+})();
+</script>
