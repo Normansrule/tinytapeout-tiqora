@@ -127,6 +127,23 @@ make -C test sim                 <span class=c># every suite</span></pre>
  </div></div>
 </section>
 
+<section aria-labelledby=reels-h>
+ <h2 id=reels-h>Watch it run</h2>
+ <p>Every recorded tour, playing on its own: a cursor sweeps each window from caption to caption and uncovers the waveform the simulation wrote. Nothing here is computed in the browser.</p>
+ {{static:motion}}
+</section>
+<script>
+(function () {
+  const b = document.getElementById("reel-pause"), box = document.getElementById("reels");
+  b.addEventListener("click", () => {
+    const on = b.getAttribute("aria-pressed") !== "true";
+    b.setAttribute("aria-pressed", on);
+    b.textContent = on ? "Play the animations" : "Pause the animations";
+    box.toggleAttribute("data-paused", on);
+  });
+})();
+</script>
+
 <section aria-labelledby=tours>
  <h2 id=tours>Five recorded tours, and the whole session</h2>
  <p>Each is a window of one simulation of the real top module, <code>tt_um_normansrule_tiqora_serial</code>, driven only through its pins the way the demo board drives it.</p>

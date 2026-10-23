@@ -575,3 +575,11 @@ html { overflow-x: clip; }
   .top, .controls, .theme, .skip { display: none; }
   body { background: #fff; color: #000; }
 }
+
+/* recorded reels (docs/tools/motion.py), inlined by {{static:motion}} */
+.reels { display: grid; gap: 1.6rem; margin-top: 1rem; }
+.reel { margin: 0; max-width: 880px; }
+.reel svg { display: block; width: 100%; height: auto; border-radius: 12px; }
+.reel figcaption { margin-top: .45rem; display: flex; flex-wrap: wrap; gap: .3rem .7rem; align-items: baseline; }
+.reel-bar { display: flex; flex-wrap: wrap; gap: .4rem .9rem; align-items: center; }
+.reels[data-paused] svg, .reels[data-paused] svg * { animation-play-state: paused !important; }
