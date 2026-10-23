@@ -46,13 +46,15 @@ passes the Tiny Tapeout pre-flight. Which tile size to submit is the maintainer'
 
 | Page | What you can do there |
 |---|---|
-| [**Overview**](https://htmlpreview.github.io/?https://github.com/Normansrule/tinytapeout-tiqora/blob/main/docs/site/index.html) | fire a deadline of your own; scroll from a grain of salt down to one flip-flop; what goes in, what happens inside, what comes out, what is proven |
-| [**Tours**](https://htmlpreview.github.io/?https://github.com/Normansrule/tinytapeout-tiqora/blob/main/docs/site/tours.html) | six sequences recorded from the RTL, with play, step, scrub and captions; type your own command bytes and see the 8N1 frames and the reply |
-| [**Chip atlas**](https://htmlpreview.github.io/?https://github.com/Normansrule/tinytapeout-tiqora/blob/main/docs/site/atlas.html) | every block from the elaborated RTL: ports, legal values, behaviour, tests, connections you can follow |
-| [**Physical design**](https://htmlpreview.github.io/?https://github.com/Normansrule/tinytapeout-tiqora/blob/main/docs/site/physical.html) | measured cell area per block against the 1 × 2 die, and the experimental 2 × 2 layout |
-| [**Evidence**](https://htmlpreview.github.io/?https://github.com/Normansrule/tinytapeout-tiqora/blob/main/docs/site/evidence.html) | the ladder from RTL tests to silicon, with the command behind every rung |
+| [**Overview**](https://normansrule.github.io/tinytapeout-tiqora/index.html) | fire a deadline of your own; scroll from a grain of salt down to one flip-flop; what goes in, what happens inside, what comes out, what is proven |
+| [**Tours**](https://normansrule.github.io/tinytapeout-tiqora/tours.html) | six sequences recorded from the RTL, with play, step, scrub and captions; type your own command bytes and see the 8N1 frames and the reply |
+| [**Chip atlas**](https://normansrule.github.io/tinytapeout-tiqora/atlas.html) | every block from the elaborated RTL: ports, legal values, behaviour, tests, connections you can follow |
+| [**Physical design**](https://normansrule.github.io/tinytapeout-tiqora/physical.html) | measured cell area per block against the 1 × 2 die, and the experimental 2 × 2 layout |
+| [**Evidence**](https://normansrule.github.io/tinytapeout-tiqora/evidence.html) | the ladder from RTL tests to silicon, with the command behind every rung |
 
 The same pages are in `docs/site/` and open from a clone with no network.
+The links above are the GitHub Pages copy, published by `.github/workflows/pages.yaml` on every push to
+`main`; if it is not up, the same pages open [through htmlpreview](https://htmlpreview.github.io/?https://github.com/Normansrule/tinytapeout-tiqora/blob/main/docs/site/index.html).
 
 ![The overview's opening shot: Tiqora-Serial's name above its tile of real sky130 cells, tilted in perspective and settling flat as you scroll](docs/images/explorer/site-hero.jpg)
 
@@ -106,6 +108,15 @@ Where Tiqora-Serial stands on the way to silicon. Every ✅ and 🔄 below names
 <!-- progress:end -->
 
 ## What it looks like
+
+**Watch it run.** Every recorded tour also plays as an animation: a cursor sweeps the window
+from caption to caption and uncovers the waveform the simulation wrote. This one is the whole
+serial session; the others sit next to the part of this README they show
+([Serial protocol](#serial-protocol) and [Register map](#register-map)).
+
+![Recorded from the RTL: the whole serial session, every byte each way, the host port's states, TRIG0 and EVT](docs/images/motion/overview.svg)
+
+<sub>Recorded from `make -C test tour` and drawn by `docs/tools/motion.py`. [Step through it](https://normansrule.github.io/tinytapeout-tiqora/tours.html#seq=overview). With reduced motion on, it is a still of the whole window.</sub>
 
 **From the board to the silicon.** The chip would arrive in a QFN package on a carrier board that
 plugs into the demo board; inside, every project on the shuttle shares one die behind a
@@ -265,6 +276,24 @@ The chip is full duplex and begins replying as soon as it has sampled your
 last stop bit, so your receiver must be listening independently of your
 transmitter. Every hardware USB-UART adapter already works that way.
 
+**A ping, then a register write**, byte by byte on the pins:
+
+![Recorded from the RTL: the host sends a ping and a six-byte write; the chip answers 5A 01, then 06](docs/images/motion/host-protocol.svg)
+
+<sub>Recorded from `make -C test tour` and drawn by `docs/tools/motion.py`. [Step through it](https://normansrule.github.io/tinytapeout-tiqora/tours.html#seq=host-protocol). With reduced motion on, it is a still of the whole window.</sub>
+
+**A read.** Two bytes in, four bytes out, least significant first; the value is the timebase on the clock the port touched the register:
+
+![Recorded from the RTL: a two-byte TIME read and its four-byte answer](docs/images/motion/read-time.svg)
+
+<sub>Recorded from `make -C test tour` and drawn by `docs/tools/motion.py`. [Step through it](https://normansrule.github.io/tinytapeout-tiqora/tours.html#seq=read-time). With reduced motion on, it is a still of the whole window.</sub>
+
+**Wrong bytes.** An unknown command gets `15`; a command cut off part way gets nothing, swallows the next one, and only reset recovers:
+
+![Recorded from the RTL: an unknown command NAKed, a truncated command swallowing the next, then reset](docs/images/motion/errors.svg)
+
+<sub>Recorded from `make -C test tour` and drawn by `docs/tools/motion.py`. [Step through it](https://normansrule.github.io/tinytapeout-tiqora/tours.html#seq=errors). With reduced motion on, it is a still of the whole window.</sub>
+
 ## Register map
 
 Same map as the full chip. `aa` is the offset.
@@ -287,6 +316,18 @@ Trigger 2 has no register alias; in this build it is reachable only by
 chip — see its README.
 
 ---
+
+**A deadline over serial.** Write `CMP0` and `TRIG0` rises on exactly that tick, with nothing on the wire:
+
+![Recorded from the RTL: CMP0 written over serial, then TRIG0 rises on exactly the written tick](docs/images/motion/deadline.svg)
+
+<sub>Recorded from `make -C test tour` and drawn by `docs/tools/motion.py`. [Step through it](https://normansrule.github.io/tinytapeout-tiqora/tours.html#seq=deadline). With reduced motion on, it is a still of the whole window.</sub>
+
+**An edge, queued and read.** A capture pin's edge becomes a timestamped event at once; a serial read pops it:
+
+![Recorded from the RTL: an edge on CAP0 queued as an event, then popped by a serial read](docs/images/motion/event.svg)
+
+<sub>Recorded from `make -C test tour` and drawn by `docs/tools/motion.py`. [Step through it](https://normansrule.github.io/tinytapeout-tiqora/tours.html#seq=event). With reduced motion on, it is a still of the whole window.</sub>
 
 ## Host software
 
@@ -443,6 +484,7 @@ python3 docs/tools/zoom_animation.py                                           #
 python3 docs/tools/datasheet_stills.py                                         # the zoom as stills, for the PDF
 python3 docs/tools/exploded_cell.py ~/pdk/sky130A/libs.ref/sky130_fd_sc_hd "Every register in Tiqora-Serial is built from this cell."
 python3 docs/tools/silicon_views.py                                            # pin map, packaging, connections
+python3 docs/tools/motion.py                                                   # every tour as an animation (before build_site.py)
 python3 docs/tools/atlas.py && python3 docs/tools/build_site.py                # the explorer site (atlas needs Yosys)
 python3 docs/tools/readme_media.py                                             # the README animation
 ```
@@ -505,7 +547,7 @@ docs/site/     the explorer site: pages/ (templates), lib/ (shared styles, scrip
                data/ (atlas, tours, die map), and the built pages next to them
 docs/fpga/     the recorded Basys 3 run behind the board animation
 docs/tools/    atlas.py, traces.py, die_map.py, build_site.py, check_site.py, readme_media.py,
-               site_shots.py, fpga_media.py: the site and its README pictures; the other images' generators
+               motion.py, site_shots.py, fpga_media.py: the site and its README pictures; the other images' generators
 syn/           synthesis and area scripts
 ```
 

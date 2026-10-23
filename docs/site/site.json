@@ -328,5 +328,81 @@
   "chip_prefix": "chip: ",
   "note": "Recorded from RTL simulation, not a board: fpga/basys3/tb_basys3.sv drives the whole board design the way a PC does, at the real 115,200 baud (make -C fpga/basys3 record; its 7 checks pass): a ping, two TIME reads, a CFG write, a BTNL press read back as an event, and a PULSE on TRIG0. Nothing has run on a real Basys 3.",
   "pmod": "not used"
+ },
+ "motion": {
+  "out": "docs/images/motion",
+  "reels": [
+   {
+    "fixture": "overview",
+    "signals": [
+     "rst_n",
+     "rx",
+     "tx",
+     "act",
+     "h_state",
+     "trig0",
+     "evt"
+    ]
+   },
+   {
+    "fixture": "host-protocol",
+    "signals": [
+     "rx",
+     "tx",
+     "h_state",
+     "h_count",
+     "reg_req",
+     "reg_addr"
+    ]
+   },
+   {
+    "fixture": "read-time",
+    "signals": [
+     "rx",
+     "tx",
+     "h_state",
+     "h_count",
+     "reg_req",
+     "reg_addr",
+     "now"
+    ]
+   },
+   {
+    "fixture": "deadline",
+    "signals": [
+     "rx",
+     "tx",
+     "h_state",
+     "reg_addr",
+     "deadline0",
+     "armed0",
+     "trig0"
+    ]
+   },
+   {
+    "fixture": "event",
+    "signals": [
+     "rx",
+     "tx",
+     "h_state",
+     "cap0",
+     "evt",
+     "evq",
+     "evch",
+     "eved"
+    ]
+   },
+   {
+    "fixture": "errors",
+    "signals": [
+     "rst_n",
+     "rx",
+     "tx",
+     "h_state",
+     "h_count",
+     "reg_req"
+    ]
+   }
+  ]
  }
 }

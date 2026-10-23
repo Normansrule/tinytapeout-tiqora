@@ -93,8 +93,23 @@ def static_treemap(ctx):
     return treemap_svg(ctx, inline=True)
 
 
+def static_motion(ctx):
+    """Every reel docs/tools/motion.py drew, inlined so the pause button can stop it.
+    Each reel names its classes after its tour, so they do not collide here."""
+    m = ctx["site"]["motion"]
+    out = []
+    for r in m["reels"]:
+        fx = next(t for t in ctx["data"]["traces"] if t["id"] == r["fixture"])
+        svg = open(f"{m['out']}/{fx['id']}.svg", encoding="utf-8").read().strip()
+        out.append(f"<figure class=reel>{svg}<figcaption><a href='tours.html#seq={esc(fx['id'])}'>Step through “{esc(fx['title'])}”</a> "
+                   f"<span class='ev measured'>recorded</span> <span class=small>{esc(fx['kind_text'])}; drawn by <code>docs/tools/motion.py</code></span></figcaption></figure>")
+    return ("<p class=reel-bar><button class='btn ghost' type=button id=reel-pause aria-pressed=false>Pause the animations</button> "
+            "<span class=small>With reduced motion turned on in your system, each one is a still of the whole recording.</span></p>"
+            f"<div class=reels id=reels>{''.join(out)}</div>")
+
+
 STATIC = {"atlas_table": static_atlas_table, "pins": static_pins, "progress": static_progress,
-          "ladder": static_ladder, "flow": static_flow, "treemap": static_treemap}
+          "ladder": static_ladder, "flow": static_flow, "treemap": static_treemap, "motion": static_motion}
 
 
 # ------------------------------------------------------------------ diagram styling
@@ -331,7 +346,7 @@ def page(ctx, tpl_path):
             return facts[mm.group(1)]
         body = re.sub(r"\{\{die:(\w+)\}\}", dsub, body)
     # {{img:path}}: an image in the repository, inlined so the page stays one file
-    body = re.sub(r"\{\{img:([\w./-]+)\}\}", lambda mm: "data:image/" + {"jpg": "jpeg", "gif": "gif"}.get(mm.group(1).rsplit(".", 1)[-1], "png") + ";base64," +
+    body = re.sub(r"\{\{img:([\w./-]+)\}\}", lambda mm: "data:image/" + {"jpg": "jpeg", "gif": "gif", "svg": "svg+xml"}.get(mm.group(1).rsplit(".", 1)[-1], "png") + ";base64," +
                   base64.b64encode(open(mm.group(1), "rb").read()).decode(), body)
     body = body.replace("{{repo}}", site["repo"]).replace("{{chip}}", esc(site["chip"]))
     # a page's own scripts run last, after its data and the library

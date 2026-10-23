@@ -1,0 +1,58 @@
+name: pages
+
+# Publishes the explorer site (docs/site/*.html) to GitHub Pages on every push to main.
+# One-time repository setting: Settings > Pages > Build and deployment > Source: "GitHub Actions".
+# Each page is self-contained (styles, scripts, data and images inlined), so the site is just
+# those files; nothing is built here, only checked to be up to date with its sources.
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v6
+
+      - name: Check the pages are built from the current sources
+        run: |
+          python3 docs/tools/motion.py --check
+          python3 docs/tools/build_site.py --check
+
+      - name: Collect the site
+        run: |
+          mkdir -p _site
+          cp docs/site/*.html _site/
+          touch _site/.nojekyll
+          ls -la _site
+
+      - name: Configure Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload the site
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-24.04
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
