@@ -1,6 +1,11 @@
 {
  "chip": "Tiqora-Serial",
  "repo": "https://github.com/Normansrule/tinytapeout-tiqora",
+ "url": "https://normansrule.github.io/tinytapeout-tiqora/",
+ "sibling": {
+  "name": "Tiqora, the full microcontroller",
+  "url": "https://normansrule.github.io/tiqora-skywater130/"
+ },
  "ref": "v20.1",
  "clock_ns": 20,
  "die_um": [
