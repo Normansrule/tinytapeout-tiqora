@@ -6,14 +6,14 @@
 <div class=grid>
  <div class=card><h3>Die area</h3><p><b>36,347 µm²</b> at 1x2: 161.0 × 225.76 µm, from Tiny Tapeout's template <code>tt_block_1x2_pg.def</code>. At 2x2, <b>75,602 µm²</b> (334.88 × 225.76 µm), as the 2x2 run reports.</p></div>
  <div class=card><h3>Core area</h3><p>Where cells may go, inside the power ring. <span class="ev experimental">experimental</span> at 2x2: <b><span id=core></span> µm²</b>, from LibreLane. Not known at 1x2, where no run got that far.</p></div>
- <div class=card><h3>Summed cell area</h3><p><b>21,324 µm²</b> <span class="ev measured">measured</span> flat synthesis (<code>make area</code>, Yosys 0.33): 59% of the 1x2 die. <span class="ev experimental">experimental</span> after placement at 2x2, with timing-repair buffers, taps and clock tree but no fill: <b><span id=placed></span> µm²</b>, <span id=util></span> of the core.</p></div>
+ <div class=card><h3>Summed cell area</h3><p><b>25,033 µm²</b> <span class="ev measured">measured</span> flat synthesis (<code>make area</code>, Yosys 0.33, only the cells the Tiny Tapeout flow allows): 69% of the 1x2 die. <span class="ev experimental">experimental</span> after placement at 2x2, with timing-repair buffers, taps and clock tree but no fill: <b><span id=placed></span> µm²</b>, <span id=util></span> of the core.</p></div>
 </div>
 
 <h2>Where the cells go</h2>
 <p>Each block's cells, synthesized one module at a time and drawn <b>to scale</b> inside the 1x2 die outline. Positions mean nothing: this is proportion, not a floorplan.</p>
 <figure class=figure>
  <div class=treemap>{{static:treemap}}</div>
- <figcaption><span class="ev measured">measured</span> <code>python3 docs/tools/atlas.py --area sky130_fd_sc_hd__tt_025C_1v80.lib</code> (Yosys 0.33, each module synthesized without flattening). The hierarchical sum, 24,406 µm², is larger than the flat 21,324 µm² because synthesis cannot optimise across module boundaries.</figcaption>
+ <figcaption><span class="ev measured">measured</span> <code>python3 docs/tools/atlas.py --area sky130_fd_sc_hd__tt_025C_1v80.lib</code> (Yosys 0.33, each module synthesized without flattening). The hierarchical sum, 29,493 µm², is larger than the flat 25,033 µm² because synthesis cannot optimise across module boundaries.</figcaption>
 </figure>
 <div id=areatable></div>
 

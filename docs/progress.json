@@ -23,7 +23,7 @@
       "name": "Tiny Tapeout GDS and pre-flight",
       "steps": [
         {"step": "cell area after synthesis, before placement", "state": "done",
-         "evidence": {"label": "measured", "version": "v20, Yosys 0.33, 2026-10-18", "command": "make -C test area", "result": "21,324 µm², 458 flip-flops: 59% of 1x2"}},
+         "evidence": {"label": "measured", "version": "main, Yosys 0.33, 2026-10-25", "command": "make -C test area", "result": "25,033 µm², 458 flip-flops: 69% of 1x2, with the cells the Tiny Tapeout flow may not use removed"}},
         {"step": "place and route at 1x2", "state": "blocked",
          "next": "LibreLane 3.0.14 stops at detailed placement (DPL-0036); a 2x2 copy hardens clean (DRC 0, LVS 0), so the tile size is the owner's call"},
         {"step": "Tiny Tapeout pre-flight", "state": "todo",

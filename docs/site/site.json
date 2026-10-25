@@ -224,7 +224,7 @@
     {
      "rung": "Synthesized",
      "state": "measured",
-     "why": "21,324 µm² of sky130 cells, 458 flip-flops: 59% of the 1x2 die (<code>make area</code>, Yosys 0.33, v20)."
+     "why": "25,033 µm² of sky130 cells, 458 flip-flops: 69% of the 1x2 die (<code>make area</code>, Yosys 0.33, main 2026-10-25, with the cells the Tiny Tapeout flow may not use removed)."
     },
     {
      "rung": "Placed and routed",

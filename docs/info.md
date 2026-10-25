@@ -38,7 +38,7 @@ microcontroller when the chip should run your code on its own.
 |---|---|
 | ✅ **RTL simulation** | 48 checks on the serial host port, 18 of them on framing errors, unknown commands, partial frames and late bytes (`cd test && make sim`), plus 5 cocotb tests from the pins only |
 | ✅ **FPGA (simulated)** | the whole Digilent Basys 3 design, driven like a PC at 115,200 baud: 7 checks (`make -C fpga/basys3 sim`) |
-| ✅ **Area (v20)** | 21,324 µm², 458 flip-flops, 59% of the 1 × 2 die (`make area`) |
+| ✅ **Area (main 2026-10-25)** | 25,033 µm², 458 flip-flops, 69% of the 1 × 2 die (`make area`) |
 | ✅ **Docs** | every link, image, `make` target and script mentioned exists (`make docs`, part of `make sim`) |
 | ❌ **Place and route at 1 × 2** | LibreLane 3.0.14 stops in detailed placement with `DPL-0036`. An experimental copy at 2 × 2 routes clean (DRC 0, LVS 0, antenna 0, setup +0.563 ns, hold +0.107 ns) and passes the Tiny Tapeout pre-flight 15/15 |
 | ⏳ **FPGA board** | Vivado build and a real Basys 3: `make bit && make prog` in `fpga/basys3` |
@@ -321,19 +321,20 @@ sky130 library; see the Area section.
 ## Area
 
 **Measured**, not estimated. Yosys maps the design onto the real sky130_fd_sc_hd standard cell
-library: 2,524 cells, 458 of them flip-flops, **20,400–21,300 µm²** depending on the Yosys version
-(about 20,400 with 0.52, 21,324 with 0.33). The table is the 21,324 µm² measurement:
+library, minus the 185 cells the Tiny Tapeout flow may not use (`no_synth.cells` in the PDK; most
+of the smallest drive strengths): 2,354 cells, 458 of them flip-flops, **25,033 µm²** (measured,
+main 2026-10-25, Yosys 0.33, `make -C test area`).
 
 | Tile | At 60% utilisation | At 70% | Verdict |
 |---|---:|---:|---|
-| 1x1 | 198% | 170% | does not fit |
-| **1x2** | **98%** | **84%** | **fits — this is the target** |
-| 2x2 | 47% | 40% | plenty of room |
+| 1x1 | 232% | 199% | does not fit |
+| 1x2 | 115% | 98% | tight: only at 70%, before the flow adds buffers |
+| **2x2** | **55%** | **47%** | **fits** |
 
-That is about 60% of the 1 × 2 tile's **placeable** area (161.00 × 225.76 µm minus the placement
-margins), before the flow adds buffers. Tiny Tapeout's default placement density of 60 would sit
-at or below the design's own utilization and fail with `GPL-0302`, so `src/config.json` sets 70 —
-the same reasoning as the main Tiqora repository, which uses 72.
+That is 69% of the 1 × 2 die before the flow adds buffers, taps and clock tree, which is why
+place and route at 1 × 2 stops with `DPL-0036`. Earlier versions of this table synthesized
+against the full library and reported 21,324 µm² (59% of 1x2), a number the real flow cannot
+reach: synthesis picked small cells that LibreLane excludes.
 
 A 1x1 was the original goal and it is not reachable with this feature
 set. The serial host port alone — receiver, transmitter and protocol
@@ -341,8 +342,9 @@ engine — is about 38% of a 1x1 tile, and the timebase, comparators and
 event queue take more than the rest. Cutting to one trigger and a 16-bit
 rate trim only got it to 160% of a 1x1.
 
-A pre-PDK estimate put this at 21,345 um^2, 3% high, so the estimating
-method is sound but no substitute for the real library.
+A pre-PDK estimate put this at 21,345 um^2: close to the full-library
+result, but 15% under what the real flow builds, so it is no substitute
+for the real library and its exclusion list.
 
 One optimisation was tried and reverted. Rewriting the comparator's
 `(now + 1) - deadline >= 0` as `now - deadline >= -1` looks like it saves

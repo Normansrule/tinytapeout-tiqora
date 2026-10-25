@@ -17,7 +17,7 @@
   <tr><th>Name</th><td>TinyPulse-Serial</td><td>renamed Tiqora-Serial; protocol, register map and pin functions unchanged</td><td>same</td><td>same</td></tr>
   <tr><th>RTL</th><td></td><td>no change to <code>src/</code> since the v20 source drop</td><td>unchanged</td><td>unchanged</td></tr>
   <tr><th>RTL checks</th><td>not recorded here</td><td>30 checks, 5 cocotb tests</td><td>same</td><td>+ the recorded session, 13 checks</td></tr>
-  <tr><th>Cell area</th><td></td><td>21,324 µm² <span class="ev measured">measured</span> <code>make area</code>, 59% of 1x2</td><td>unchanged RTL</td><td>per block, 24,406 µm² hierarchical</td></tr>
+  <tr><th>Cell area</th><td></td><td>25,033 µm² <span class="ev measured">measured</span> <code>make area</code>, 69% of 1x2</td><td>the full library let synthesis pick cells the real flow excludes (that gave 21,324 µm²)</td><td>per block, 29,493 µm² hierarchical</td></tr>
   <tr><th>Layout</th><td></td><td>1x2 fails placement <span class="ev fail">failed</span>; a 2x2 copy hardens clean <span class="ev experimental">experimental</span></td><td>unchanged</td><td>unchanged</td></tr>
   <tr><th>GitHub workflows</th><td></td><td>deleted by commit a040566, so nothing ran</td><td>restored</td><td>unchanged</td></tr>
   <tr><th>Documentation</th><td></td><td>datasheet PDF fails: web images and WebP</td><td>datasheet builds; <code>check_docs.py</code> guards it</td><td>this site, the atlas and the tours</td></tr>
