@@ -1,0 +1,70 @@
+# Cells Yosys may not use when it synthesizes this design (LibreLane SYNTH_EXCLUDED_CELL_FILE).
+#
+# This is the sky130A default list (open_pdks 8afc8346, the PDK the Tiny Tapeout
+# action uses: sky130/openlane/sky130_fd_sc_hd/no_synth.cells) with only its
+# drive-strength-1 entries removed. The default bans 141 *_1 cells, so every gate
+# maps to its _2 version and the design grows about 20%: at the configured tile
+# that leaves no room to place (GPL utilization 97.7%, then DPL-0036).
+# Cells with known layout problems stay banned through the PDK's separate
+# PNR_EXCLUDED_CELL_FILE (drc_exclude.cells), which this file does not touch.
+# Placement and CTS still resize any cell that needs more drive.
+#
+# Regenerate: git -C open_pdks show 8afc8346:sky130/openlane/sky130_fd_sc_hd/no_synth.cells | grep -v '_1$'
+sky130_fd_sc_hd__clkbuf_16
+sky130_fd_sc_hd__clkbuf_2
+sky130_fd_sc_hd__clkbuf_4
+sky130_fd_sc_hd__clkbuf_8
+sky130_fd_sc_hd__clkdlybuf4s15_2
+sky130_fd_sc_hd__clkdlybuf4s18_2
+sky130_fd_sc_hd__clkdlybuf4s25_2
+sky130_fd_sc_hd__clkdlybuf4s50_2
+sky130_fd_sc_hd__clkinv_16
+sky130_fd_sc_hd__clkinv_2
+sky130_fd_sc_hd__clkinv_4
+sky130_fd_sc_hd__clkinv_8
+sky130_fd_sc_hd__clkinvlp_2
+sky130_fd_sc_hd__clkinvlp_4
+sky130_fd_sc_hd__decap_12
+sky130_fd_sc_hd__decap_3
+sky130_fd_sc_hd__decap_4
+sky130_fd_sc_hd__decap_6
+sky130_fd_sc_hd__decap_8
+sky130_fd_sc_hd__diode_2
+sky130_fd_sc_hd__dlclkp_2
+sky130_fd_sc_hd__dlclkp_4
+sky130_fd_sc_hd__dlrbn_2
+sky130_fd_sc_hd__dlrbp_2
+sky130_fd_sc_hd__dlrtn_2
+sky130_fd_sc_hd__dlrtn_4
+sky130_fd_sc_hd__dlrtp_2
+sky130_fd_sc_hd__dlrtp_4
+sky130_fd_sc_hd__dlxbn_2
+sky130_fd_sc_hd__einvn_0
+sky130_fd_sc_hd__einvn_2
+sky130_fd_sc_hd__einvn_4
+sky130_fd_sc_hd__einvn_8
+sky130_fd_sc_hd__einvp_2
+sky130_fd_sc_hd__einvp_4
+sky130_fd_sc_hd__einvp_8
+sky130_fd_sc_hd__ha_2
+sky130_fd_sc_hd__ha_4
+sky130_fd_sc_hd__macro_sparecell
+sky130_fd_sc_hd__maj3_2
+sky130_fd_sc_hd__maj3_4
+sky130_fd_sc_hd__mux2i_2
+sky130_fd_sc_hd__mux2i_4
+sky130_fd_sc_hd__sdfbbn_2
+sky130_fd_sc_hd__sdfrbp_2
+sky130_fd_sc_hd__sdfrtp_2
+sky130_fd_sc_hd__sdfrtp_4
+sky130_fd_sc_hd__sdfsbp_2
+sky130_fd_sc_hd__sdfstp_2
+sky130_fd_sc_hd__sdfstp_4
+sky130_fd_sc_hd__sdfxbp_2
+sky130_fd_sc_hd__sdfxtp_2
+sky130_fd_sc_hd__sdfxtp_4
+sky130_fd_sc_hd__sdlclkp_2
+sky130_fd_sc_hd__sdlclkp_4
+sky130_fd_sc_hd__sedfxbp_2
+sky130_fd_sc_hd__sedfxtp_2
+sky130_fd_sc_hd__sedfxtp_4
