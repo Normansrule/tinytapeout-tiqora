@@ -11,7 +11,7 @@
  "footer": "Tiqora-Serial is Tiqora's timing unit with a serial host port instead of a processor, for a Tiny Tapeout 1x2 tile on SkyWater sky130. Nothing on these pages has run on real silicon or a real FPGA board; every number says how it was obtained.",
  "data": {
   "die": "docs/site/data/die.json",
-  "layout": "docs/site/data/serial_2x2_layout.json"
+  "layout": "docs/site/data/serial_1x2_layout.json"
  },
  "pages": [
   {
@@ -208,7 +208,7 @@
  "ladder": [
   {
    "target": "Tiny Tapeout tile, 1x2 (what info.yaml submits)",
-   "note": "Each rung needs the one below it. At 1x2 nothing above rung 3 has been reached; an experimental 2x2 copy reached rung 6's pre-flight.",
+   "note": "Each rung needs the one below it.",
    "rungs": [
     {
      "rung": "RTL tested",
@@ -224,25 +224,24 @@
     {
      "rung": "Synthesized",
      "state": "measured",
-     "why": "25,033 µm² of sky130 cells, 458 flip-flops: 69% of the 1x2 die (<code>make area</code>, Yosys 0.33, main 2026-10-25, with the cells the Tiny Tapeout flow may not use removed)."
+     "why": "21,324 µm² of sky130 cells, 458 flip-flops: 59% of the 1x2 die (<code>make area</code>, Yosys 0.33, main 2026-10-25, with the cells this design's flow excludes removed)."
     },
     {
      "rung": "Placed and routed",
-     "state": "fail",
-     "word": "failed at 1x2",
-     "why": "LibreLane 3.0.14 stops in detailed placement with DPL-0036 at 1x2. <span class='ev experimental'>experimental</span> The same RTL at 2x2 places and routes clean: DRC 0, LVS 0, antenna 0."
+     "state": "measured",
+     "why": "1x2: the <code>gds</code> workflow passes and the cocotb tests pass on the routed netlist (GitHub run 40161260168). A local LibreLane 3.0.14 run of the same source: DRC 0, LVS 0, antenna 0, 80% utilisation."
     },
     {
      "rung": "Timing checked",
-     "state": "none",
-     "word": "not at 1x2",
-     "why": "<span class='ev experimental'>experimental</span> The 2x2 copy meets setup (+0.563 ns worst slack) and hold (+0.107 ns) at every corner LibreLane checks."
+     "state": "fail",
+     "word": "missed at the slow corner",
+     "why": "Local LibreLane 3.0.14 run at 1x2, 50 MHz: hold met everywhere (+0.112 ns worst); setup met at the typical corner (+9.48 ns) and missed at ss_100C_1v60 by 1.30 ns on 29 paths, so the slow corner runs at about 47 MHz."
     },
     {
      "rung": "Submitted to a shuttle",
      "state": "none",
      "word": "not yet",
-     "why": "<span class='ev experimental'>experimental</span> The 2x2 copy passes the Tiny Tapeout pre-flight, 15/15. Submitting at 2x2 means changing <code>info.yaml</code>'s tile count: the owner's decision."
+     "why": "The Tiny Tapeout pre-flight passes at 1x2 (GitHub run 40161260168). Submitting is the owner's step."
     },
     {
      "rung": "Fabricated",

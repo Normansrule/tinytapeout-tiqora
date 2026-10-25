@@ -23,18 +23,18 @@
       "name": "Tiny Tapeout GDS and pre-flight",
       "steps": [
         {"step": "cell area after synthesis, before placement", "state": "done",
-         "evidence": {"label": "measured", "version": "main, Yosys 0.33, 2026-10-25", "command": "make -C test area", "result": "25,033 µm², 458 flip-flops: 69% of 1x2, with the cells the Tiny Tapeout flow may not use removed"}},
-        {"step": "place and route at 1x2", "state": "blocked",
-         "next": "LibreLane 3.0.14 stops at detailed placement (DPL-0036); a 2x2 copy hardens clean (DRC 0, LVS 0), so the tile size is the owner's call"},
-        {"step": "Tiny Tapeout pre-flight", "state": "todo",
-         "next": "runs after a clean GDS at the chosen tile size; the 2x2 copy passed 15/15"}
+         "evidence": {"label": "measured", "version": "main, Yosys 0.33, 2026-10-25", "command": "make -C test area", "result": "21,324 µm², 458 flip-flops: 59% of 1x2, with the cells this design's flow excludes (src/synth_exclude.cells) removed"}},
+        {"step": "place and route at 1x2", "state": "done",
+         "evidence": {"label": "measured", "version": "PR #4 fc8d5d5, LibreLane 3.0.14", "command": "GitHub run 40161260168: gds and gl_test", "result": "clean GDS; local run DRC 0, LVS 0, antenna 0"}},
+        {"step": "Tiny Tapeout pre-flight", "state": "done",
+         "evidence": {"label": "measured", "version": "PR #4 fc8d5d5", "command": "GitHub run 40161260168: precheck", "result": "pass"}}
       ]
     },
     {
       "name": "sky130 timing",
       "steps": [
-        {"step": "signoff timing after routing", "state": "todo",
-         "next": "comes with a clean GDS; the 2x2 copy met setup and hold at every corner"}
+        {"step": "signoff timing after routing", "state": "doing",
+         "evidence": {"label": "measured", "version": "verify-audits 2026-10-25, LibreLane 3.0.14 local", "command": "librelane on src/config.json at 1x2", "result": "hold met everywhere (+0.112 ns worst); setup at 50 MHz met at the typical corner (+9.48 ns) and missed at ss_100C_1v60 by 1.30 ns on 29 paths, so about 47 MHz at the slow corner"}}
       ]
     },
     {

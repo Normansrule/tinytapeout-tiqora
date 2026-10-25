@@ -702,10 +702,10 @@ html { overflow-x: clip; }
   <p>Replies on <code>uo_out[4]</code>. TRIG0 to TRIG2 on <code>uo_out[2:0]</code>, rising on the programmed tick. EVT, EVTP and OVF on <code>uo_out</code>, and the queue's count, channel and edge on <code>uio</code>, so a board can react to an event without asking. <a href="atlas.html#pins">The pinout</a>.</p>
  </div></div>
  <div class=qa><h3>What exists today?</h3><div>
-  <p>SystemVerilog RTL, a Python host library and command line, testbenches, a Basys 3 FPGA build and Tiny Tapeout packaging. <b>No chip and no board run.</b> At the 1x2 size <code>info.yaml</code> submits, the layout fails placement; an experimental copy at 2x2 hardens clean. <a href="physical.html">Physical design</a>.</p>
+  <p>SystemVerilog RTL, a Python host library and command line, testbenches, a Basys 3 FPGA build and Tiny Tapeout packaging. <b>No chip and no board run.</b> At the 1x2 size <code>info.yaml</code> submits, the layout is clean: the Tiny Tapeout <code>gds</code>, pre-flight and gate-level workflows pass (GitHub run 40161260168). <a href="physical.html">Physical design</a>.</p>
  </div></div>
  <div class=qa><h3>What is proven or measured?</h3><div>
-  <p><span class="ev measured">measured</span> 30 RTL checks, 5 cocotb tests, 13 tour checks, synthesized cell area. <span class="ev experimental">experimental</span> at 2x2: DRC, LVS and antenna clean, timing met, pre-flight 15/15. <span class="ev fail">failed</span> placement at 1x2. <span class="ev todo">not yet</span> formal proofs, a shuttle, silicon. <a href="evidence.html">The evidence ladder</a>.</p>
+  <p><span class="ev measured">measured</span> 48 RTL checks, 5 cocotb tests, 13 tour checks, synthesized cell area. <span class="ev measured">measured</span> at 1x2: DRC, LVS and antenna clean, pre-flight and gate-level tests pass, setup met at the typical corner. <span class="ev fail">failed</span> setup at the slow corner (ss_100C_1v60) by 1.30 ns at 50 MHz. <span class="ev todo">not yet</span> formal proofs, a shuttle, silicon. <a href="evidence.html">The evidence ladder</a>.</p>
  </div></div>
  <div class=qa><h3>What can I try?</h3><div>
 <pre class=cmd><span class=c># Icarus Verilog 12 and Python 3</span>

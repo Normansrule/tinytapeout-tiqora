@@ -1,24 +1,27 @@
 #!/usr/bin/env python3
 """dont_use.py — copy a sky130 liberty file, marking the cells the real flow may not use.
 
-LibreLane (the Tiny Tapeout GDS flow) synthesizes with SYNTH_EXCLUDED_CELL_FILE,
-the PDK's libs.tech/openlane/sky130_fd_sc_hd/no_synth.cells: 185 cells, among
-them most of the smallest drive strengths (dfxtp_1, nand2_1, mux2i_1, ...).
-Synthesis against the full library picks those small cells and reports an
-area the flow can never reach; measured on Tiqora v20, 50,880 um^2 with the
-full library against 60,750 um^2 with the excluded cells removed, which is
-what LibreLane 3.0.14 itself synthesizes (59,797 um^2).
+LibreLane (the Tiny Tapeout GDS flow) synthesizes with SYNTH_EXCLUDED_CELL_FILE.
+This design sets it to src/synth_exclude.cells; the PDK default is
+libs.tech/openlane/sky130_fd_sc_hd/no_synth.cells (185 cells, among them most
+of the smallest drive strengths). Synthesis against the full library can pick
+cells the flow never will and report an area the flow cannot reach, so every
+area and timing estimate here goes through this script.
 
-usage: python3 syn/dont_use.py IN.lib OUT.lib [no_synth.cells]
-With no cell list it looks next to the library, where every open_pdks
-install keeps it. Prints how many cells were marked; exits 2 if it cannot
-find the list (3 if it marks nothing), so a caller never reports the optimistic number silently.
+usage: python3 syn/dont_use.py IN.lib OUT.lib [cells-file]
+Without a cells file it uses src/synth_exclude.cells when the current
+directory has one (the repository root), and otherwise the PDK default next
+to the library. Prints how many cells were marked; exits 2 if it cannot find
+a list (3 if it marks nothing), so a caller never reports the optimistic
+number silently.
 """
 import os, re, sys
 
 lib_in, lib_out = sys.argv[1], sys.argv[2]
 if len(sys.argv) > 3:
     cells_file = sys.argv[3]
+elif os.path.isfile(os.path.join("src", "synth_exclude.cells")):
+    cells_file = os.path.join("src", "synth_exclude.cells")
 else:
     # <pdk>/sky130A/libs.ref/sky130_fd_sc_hd/lib/X.lib -> <pdk>/sky130A/libs.tech/openlane/...
     ref = os.path.dirname(os.path.dirname(os.path.dirname(os.path.realpath(lib_in))))
