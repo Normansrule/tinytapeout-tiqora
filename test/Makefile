@@ -41,13 +41,17 @@ COCOTB_TEST_MODULES = test
 
 .PHONY: sim lint synth area uart tour clean-sim explorer
 
-sim: uart tour shared docs
+sim: uart proto tour shared docs
 	@echo ""
 	@echo "all testbenches finished — check for FAILED above"
 
 uart:
 	iverilog -g2012 -o tb_uart.vvp -s tb_uart $(RTL) tb_uart.sv
-	vvp tb_uart.vvp
+	sh vv.sh tb_uart.vvp
+
+proto:
+	iverilog -g2012 -o tb_proto.vvp -s tb_proto $(RTL) tb_proto.sv
+	sh vv.sh tb_proto.vvp
 
 # The explorer's guided tours, recorded from this RTL at the submitted top's pins
 # at 115,200 baud: every narrated step checked, the trace written to

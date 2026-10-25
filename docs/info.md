@@ -36,7 +36,7 @@ microcontroller when the chip should run your code on its own.
 
 | | |
 |---|---|
-| ✅ **RTL simulation** | 30 checks on the serial host port (`cd test && make sim`), plus 5 cocotb tests from the pins only |
+| ✅ **RTL simulation** | 48 checks on the serial host port, 18 of them on framing errors, unknown commands, partial frames and late bytes (`cd test && make sim`), plus 5 cocotb tests from the pins only |
 | ✅ **FPGA (simulated)** | the whole Digilent Basys 3 design, driven like a PC at 115,200 baud: 7 checks (`make -C fpga/basys3 sim`) |
 | ✅ **Area (v20)** | 21,324 µm², 458 flip-flops, 59% of the 1 × 2 die (`make area`) |
 | ✅ **Docs** | every link, image, `make` target and script mentioned exists (`make docs`, part of `make sim`) |
@@ -283,6 +283,7 @@ at an internal flip-flop.
 | Check | Result |
 |---|---|
 | `tb_uart.sv`, driving only the serial pins | **30 / 30** |
+| `tb_proto.sv`, framing errors, glitches, all 253 unknown commands, partial frames, unmapped addresses, late bytes | **18 / 18** |
 | `test.py` cocotb, through the Tiny Tapeout pin interface | **5 / 5** |
 | `tpctl.py selftest`, host protocol with no hardware | **18 / 18** |
 | Verilator `-Wall` | **clean** (two documented waivers) |
@@ -294,6 +295,22 @@ running timebase, configure capture, capture an edge and read the event back,
 fire triggers, and arm a deadline. **The deadline armed over serial fires on
 the exact programmed tick** — the same cycle-exact behaviour the full chip has (exact relative
 to the supplied clock; oscillator error and pad delay are separate), checked through two pins.
+
+`tb_proto.sv` checks the port when the line or the host misbehaves (measured, main 2026-10-25,
+`make -C test proto`, 7 of 7 RTL mutants caught). A byte with a low stop bit is dropped, and a
+glitch under half a bit is not a byte. Every command byte other than 0x01, 0x02 and 0x03 gets one
+NAK. A write reaches the registers in a single clock with all 32 bits, and only after its sixth
+byte. Reads of offsets 3 to 15 return 0, and writes to the unmapped offsets 6 and 11 to 15 are
+acknowledged and change nothing. Only the low four address bits are decoded.
+
+Two limits follow from the design and are now measured rather than assumed:
+
+* **Wait for each reply.** Bytes that arrive while the chip is still sending are ignored, so a
+  host that sends its next command early loses it. `tpctl.py` always waits.
+* **There is no frame timeout.** If a host stops partway through a frame, the chip keeps waiting,
+  and the next bytes it receives finish that frame. A write cut short and followed by new commands
+  commits those bytes as its data. After a host-side timeout, reset the chip, or send the missing
+  bytes of a frame you know the state of, before trusting the link again.
 
 What has *not* been done yet: a placed and routed layout at 1 × 2 (it stops with `DPL-0036`),
 routed timing at 1 × 2, gate-level simulation, and a run on a real Basys 3. The area has been measured against the real

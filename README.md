@@ -76,7 +76,7 @@ Where the Tiny Tapeout tile stands on the way to silicon. Each rung needs the on
 
 | Stage | State | Evidence |
 |---|---|---|
-| RTL tested | ✅ done | 30 checks, 5 cocotb tests from the pins, recorded tour 13/13 (`make -C test sim`; v20) |
+| RTL tested | ✅ done | 48 checks (30 host port, 18 framing and bad input), 5 cocotb tests from the pins, recorded tour 13/13 (`make -C test sim`; main 2026-10-25) |
 | Formally checked | ⬜ not done | no formal proofs exist for this design |
 | Synthesized | ✅ done | 21,324 µm², 458 flip-flops, 59% of the 1 × 2 die (`make -C test area`, Yosys 0.33; v20) |
 | Placed and routed | ❌ failed at 1 × 2 | LibreLane 3.0.14 stops in detailed placement with `DPL-0036`. Experimental 2 × 2 copy: DRC 0, LVS 0, antenna 0 |
@@ -92,7 +92,7 @@ Where Tiqora-Serial stands on the way to silicon. Every ✅ and 🔄 below names
 
 | Milestone | Progress | Step | State | Evidence or next step |
 |---|---|---|---|---|
-| **FPGA simulation** | `██████████` 2/2 | RTL suites on the serial host port | ✅ | 30 checks and 5 cocotb tests pass; measured (v20, 2026-10-18, `make -C test sim`) |
+| **FPGA simulation** | `██████████` 2/2 | RTL suites on the serial host port | ✅ | 48 checks and 5 cocotb tests pass; measured (main, 2026-10-25, `make -C test sim`) |
 |  |  | whole Basys 3 design in simulation | ✅ | 7 checks; measured (v20, 2026-10-18, `make -C fpga/basys3 sim`) |
 | **Basys 3 board** | `░░░░░░░░░░` 0/2 | Vivado bitstream | ⬜ | next: make bit in fpga/basys3 on a machine with Vivado |
 |  |  | running on a real board | ⬜ | next: make prog in fpga/basys3, then drive it from the PC at 115,200 baud |
@@ -398,6 +398,7 @@ at an internal flip-flop.
 | Check | Result |
 |---|---|
 | `tb_uart.sv`, driving only the serial pins | **30 / 30** |
+| `tb_proto.sv`, framing errors, glitches, all 253 unknown commands, partial frames, unmapped addresses, late bytes | **18 / 18** |
 | `test.py` cocotb, through the Tiny Tapeout pin interface | **5 / 5** |
 | `tpctl.py selftest`, host protocol with no hardware | **18 / 18** |
 | Verilator `-Wall` | **clean** (two documented waivers) |
@@ -409,6 +410,22 @@ running timebase, configure capture, capture an edge and read the event back,
 fire triggers, and arm a deadline. **The deadline armed over serial fires on
 the exact programmed tick** — the same cycle-exact behaviour the full chip has (exact relative
 to the supplied clock; oscillator error and pad delay are separate), checked through two pins.
+
+`tb_proto.sv` checks the port when the line or the host misbehaves (measured, main 2026-10-25,
+`make -C test proto`, 7 of 7 RTL mutants caught). A byte with a low stop bit is dropped, and a
+glitch under half a bit is not a byte. Every command byte other than 0x01, 0x02 and 0x03 gets one
+NAK. A write reaches the registers in a single clock with all 32 bits, and only after its sixth
+byte. Reads of offsets 3 to 15 return 0, and writes to the unmapped offsets 6 and 11 to 15 are
+acknowledged and change nothing. Only the low four address bits are decoded.
+
+Two limits follow from the design and are now measured rather than assumed:
+
+* **Wait for each reply.** Bytes that arrive while the chip is still sending are ignored, so a
+  host that sends its next command early loses it. `tpctl.py` always waits.
+* **There is no frame timeout.** If a host stops partway through a frame, the chip keeps waiting,
+  and the next bytes it receives finish that frame. A write cut short and followed by new commands
+  commits those bytes as its data. After a host-side timeout, reset the chip, or send the missing
+  bytes of a frame you know the state of, before trusting the link again.
 
 What has *not* been done yet: a placed and routed layout at 1 × 2 (it stops with `DPL-0036`),
 routed timing at 1 × 2, gate-level simulation, and a run on a real Basys 3. The area has been
