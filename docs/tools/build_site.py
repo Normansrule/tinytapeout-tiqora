@@ -369,6 +369,22 @@ def page(ctx, tpl_path):
             "<path d='M6.5 15h3.5V9h4v6h3.5' fill='none' stroke='var(--accent)' stroke-width='2'/></svg>")
     theme_icon = ("<svg class=ico viewBox='0 0 16 16' aria-hidden='true'><circle cx='8' cy='8' r='5.5'/>"
                   "<path d='M8 2.5a5.5 5.5 0 0 1 0 11z' fill='currentColor' stroke='none'/></svg>")
+    # the GitHub mark (simplified, one path), for the link back to the source
+    gh_icon = ("<svg class=ico viewBox='0 0 16 16' aria-hidden='true'><path fill='currentColor' stroke='none' d='M8 .2a8 8 0 0 0-2.53 15.59c.4.07.55-.17.55-.38v-1.33"
+               "c-2.23.48-2.7-1.07-2.7-1.07-.36-.92-.89-1.17-.89-1.17-.73-.5.05-.49.05-.49.8.06 1.23.83 1.23.83.72 1.22 1.88.87 2.34.66.07-.52.28-.87.5-1.07"
+               "-1.78-.2-3.65-.89-3.65-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82a7.6 7.6 0 0 1 4 0c1.53-1.03 2.2-.82 2.2-.82"
+               ".44 1.1.16 1.92.08 2.12.51.56.82 1.28.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48v2.2c0 .21.15.46.55.38A8 8 0 0 0 8 .2z'/></svg>")
+    # the browser-tab icon: the same mark, with the light theme's colours written out (a favicon cannot read CSS variables)
+    favicon = "data:image/svg+xml," + (icon.replace("currentColor", "#141816").replace("var(--accent)", "#0b5f86").replace("'", "%27").replace("<", "%3C").replace(">", "%3E")
+                                       .replace(" aria-hidden=%27true%27", " xmlns=%27http://www.w3.org/2000/svg%27"))
+    # optional site.json keys: "url" (the published copy, for link previews) and "sibling" ({"name", "url"}: the other Tiqora chip)
+    url = site.get("url", "")
+    head_extra = (f'<meta property=og:type content=website>\n<meta property=og:site_name content="{esc(site["chip"])}">\n'
+                  f'<meta property=og:title content="{esc(meta["title"])} · {esc(site["chip"])}">\n'
+                  f'<meta property=og:description content="{esc(meta.get("description", ""))}">\n'
+                  f'<meta property=og:url content="{url}{"" if pid == "index" else pid + ".html"}">\n') if url else ""
+    sib = site.get("sibling")
+    sibling = f' Its sibling: <a href="{sib["url"]}">{esc(sib["name"])}</a>.' if sib else ""
     return f"""<!doctype html>
 <html lang=en>
 <head>
@@ -377,7 +393,10 @@ def page(ctx, tpl_path):
 <title>{esc(meta['title'])} · {esc(site['chip'])}</title>
 <meta name=description content="{esc(meta.get('description', ''))}">
 <meta name=generator content="docs/tools/build_site.py; edit docs/site/pages/{pid}.html, not this file">
-<style>
+<meta name=theme-color content="#f5f5f2" media="(prefers-color-scheme: light)">
+<meta name=theme-color content="#0b0d0c" media="(prefers-color-scheme: dark)">
+<link rel=icon href="{favicon}">
+{head_extra}<style>
 {css}</style>
 <script>try {{ const t = localStorage.getItem("tq-theme"); if (t) document.documentElement.dataset.theme = t; }} catch (e) {{}}</script>
 </head>
@@ -386,14 +405,15 @@ def page(ctx, tpl_path):
 <header class=top><div class=in>
 <a class=brand href=index.html>{icon}{esc(site['chip'].upper())}</a>
 <nav aria-label="Explorer pages">{nav}</nav>
-<button class=theme type=button id=theme aria-label="Switch between light and dark">{theme_icon}Theme</button>
+<div class=tools><a class=src href="{site['repo']}" aria-label="Source code on GitHub">{gh_icon}<span>GitHub</span></a>
+<button class=theme type=button id=theme aria-label="Switch between light and dark">{theme_icon}Theme</button></div>
 </div><div class=ruler aria-hidden=true><svg id=ruler-svg></svg><span class=now></span></div></header>
 <main id=main>
 {body}
 </main>
 <footer><div class=in>
 <p>{site['footer']}</p>
-<p>Built by <code>docs/tools/build_site.py</code> from the RTL's own recordings and measurements. Maintained by <a href="https://github.com/Normansrule">@Normansrule</a>. <a href="{site['repo']}">{esc(site['repo'].replace('https://', ''))}</a></p>
+<p>Built by <code>docs/tools/build_site.py</code> from the RTL's own recordings and measurements. Maintained by <a href="https://github.com/Normansrule">@Normansrule</a>. Source, tests and issues: <a href="{site['repo']}">{esc(site['repo'].replace('https://', ''))}</a>.{sibling}</p>
 </div></footer>
 {''.join(data)}
 {scripts}<script>
@@ -403,6 +423,10 @@ document.getElementById("theme").addEventListener("click", () => {{
   try {{ localStorage.setItem("tq-theme", r.dataset.theme); }} catch (e) {{}}
 }});
 const DATA = n => JSON.parse(document.getElementById("data-" + n).textContent);
+{{  // on a phone the page links scroll sideways: start with the current page in view
+  const nav = document.querySelector(".top nav"), cur = nav.querySelector("[aria-current]");
+  if (cur && nav.scrollWidth > nav.clientWidth) nav.scrollLeft = cur.offsetLeft - nav.offsetLeft - 10;
+}}
 (function () {{  // the cycle ruler: minor ticks every 16 px, a taller tick per section, the cursor at your place
   const r = document.querySelector(".ruler"), s = document.getElementById("ruler-svg"), now = r.querySelector(".now");
   function draw() {{
