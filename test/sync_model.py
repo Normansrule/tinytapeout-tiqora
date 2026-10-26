@@ -15,10 +15,15 @@ that behaviour that any change to the RTL has to agree with clock for clock.
 A trace from tb_sync_ref.sv holds the inputs and outputs of every clock; the
 model replays the inputs and compares every output. It also counts how
 often one promise is broken: that a pin event is either queued or recorded
-by the sticky overflow flag. It is broken in one case, found by this model
-and reported, not fixed: when a TMARK and a pin event reach the queue in the
-same clock, the mark takes the slot and the pin event is dropped with no
-overflow. Only Tiqora can hit it; Tiqora-Serial ties the Xpulse port off.
+by the sticky overflow flag. This model found two cases, reported and not
+yet fixed:
+
+  * Edges on several channels in one clock are queued one per clock from a
+    backlog. A new edge on any channel before the backlog drains replaces
+    it, and the events still waiting are dropped. Both chips can hit this.
+  * When a TMARK and a pin event reach the queue in the same clock, the mark
+    takes the slot and the pin event is dropped. Only Tiqora can hit this;
+    Tiqora-Serial ties the Xpulse port off.
 
 This file is identical in Tiqora and Tiqora-Serial (docs/shared_timing.sha256).
 """
@@ -101,12 +106,14 @@ class SyncModel:
 
     # ---- the clock edge ----
     def step(self, i):
-        """Advance one clock. Returns (hardware events seen, events queued, lost)."""
+        """Advance one clock. Returns (hardware events seen, events queued,
+        events lost to a TMARK, backlog events overwritten); both kinds of
+        loss leave the overflow flag clear."""
         if i["rst"]:
             mem = self.mem
             self.reset()
             self.mem = mem
-            return 0, 0, 0
+            return 0, 0, 0, 0
 
         tv, op, sub = i["t_valid"], i["t_op"], i["t_sub"]
         rs1, rs2 = i["t_rs1"], i["t_rs2"]
@@ -140,6 +147,8 @@ class SyncModel:
         ch = (work & -work).bit_length() - 1 if work else 0
         hw_word = (ch << 28) | (((wrise >> ch) & 1) << 27) | wts
 
+        # new edges replace the backlog rather than join it
+        overwritten = bin(self.pend_mask).count("1") if ev else 0
         if ev:
             self.pend_mask, self.pend_rise, self.pend_ts = ev & ~(1 << ch), rise, ts
         elif hw_push:
@@ -207,7 +216,7 @@ class SyncModel:
             self.frac = fsum & ((1 << self.fracw) - 1)
         self.now = (self.now + val + 1 if adj_we else self.now + step) & M32
 
-        return bin(ev).count("1"), int(queued), int(lost)
+        return bin(ev).count("1"), int(queued), int(lost), overwritten
 
 
 def parse(line):
@@ -230,7 +239,7 @@ def run(path, show=5):
     hdr = dict(kv.split("=") for kv in lines[0][1:].split())
     m = SyncModel(int(hdr["NCH"]), int(hdr["NCMP"]), int(hdr["DEPTH"]),
                   int(hdr["FRACW"]), int(hdr["FILTW"]), int(hdr["PWW"]))
-    bad = lost = 0
+    bad, lost = 0, [0, 0]
     for n, line in enumerate(lines[1:]):
         if "x" in line.split("|")[0].lower():
             # inputs are built from t_now, so unknown inputs mean time went X
@@ -248,7 +257,9 @@ def run(path, show=5):
                 bad += 1
                 if bad <= show:
                     print(f"  clock {n}: {k} is {v if v is None else hex(v)}, model says {hex(want[k]) if want[k] is not None else None}")
-        lost += m.step(i)[2]
+        r = m.step(i)
+        lost[0] += r[2]
+        lost[1] += r[3]
     return hdr, len(lines) - 1, bad, lost
 
 
@@ -265,7 +276,7 @@ SUITE = [
 def suite(cycles=60000, seed=1):
     import glob, subprocess
     srcs = ["../src/tp_pkg.sv"] + sorted(glob.glob("../src/sync/*.sv")) + ["tb_sync_ref.sv"]
-    fails = lost_all = 0
+    fails, lost_all = 0, [0, 0]
     for name, params in SUITE:
         ps = [f"-Ptb_sync_ref.{k}={v}" for k, v in params.items()]
         b = subprocess.run(["iverilog", "-g2012", "-o", "tb_sync_ref.vvp", "-s", "tb_sync_ref"] + ps + srcs,
@@ -277,12 +288,13 @@ def suite(cycles=60000, seed=1):
         subprocess.run(["vvp", "-n", "tb_sync_ref.vvp", f"+SEED={seed}", f"+CYCLES={cycles}"],
                        check=True, capture_output=True)
         hdr, n, bad, lost = run("sync_ref_trace.txt")
-        lost_all += lost
+        lost_all = [a + b for a, b in zip(lost_all, lost)]
         fails += bool(bad)
         print(f"  {'ok  ' if not bad else 'FAIL'}  {name}: {n} clocks, every output matches the model"
               if not bad else f"  FAIL  {name}: {bad} output mismatches in {n} clocks")
-    print(f"  note  {lost_all} pin events were dropped without raising overflow "
-          f"(a TMARK in the same clock took the queue slot; see the note at the top of this file)")
+    print(f"  note  pin events dropped without raising overflow (see the note at the top of this file):\n"
+          f"        {lost_all[0]} lost to a TMARK in the same clock, "
+          f"{lost_all[1]} backlog events overwritten by a newer edge")
     print(f"\n{len(SUITE)} checks, {fails} failures")
     print("SYNC REFERENCE MODEL PASSED\n" if not fails else "SYNC REFERENCE MODEL FAILED\n")
     return fails
@@ -292,5 +304,6 @@ if __name__ == "__main__":
     if sys.argv[1:] == ["--suite"]:
         sys.exit(1 if suite() else 0)
     hdr, n, bad, lost = run(sys.argv[1])
-    print(f"{n} clocks, {bad} output mismatches, {lost} pin events lost without overflow")
+    print(f"{n} clocks, {bad} output mismatches; pin events lost without overflow: "
+          f"{lost[0]} to a TMARK, {lost[1]} backlog overwritten")
     sys.exit(1 if bad else 0)

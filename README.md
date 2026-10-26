@@ -431,6 +431,15 @@ Two limits follow from the design and are now measured rather than assumed:
   commits those bytes as its data. After a host-side timeout, reset the chip, or send the missing
   bytes of a frame you know the state of, before trusting the link again.
 
+One gap was found by the timing unit's reference model (`make -C test syncref`) and is reported,
+not yet fixed, because the fix is in the timing unit shared with Tiqora:
+
+* **Edges that crowd a burst can be lost silently.** Edges on several channels in the same clock
+  are queued one per clock from a backlog. A new edge on any enabled channel before that backlog
+  drains (up to 7 clocks) replaces it, and the events still waiting are dropped without setting
+  overflow. Until it is fixed, treat events closer than 8 clocks after a multi-channel burst as
+  possibly incomplete.
+
 What has *not* been done yet: setup timing at the slow corner (it misses by 1.30 ns at 50 MHz),
 and a run on a real Basys 3. The area has been
 measured against the real sky130 library; see [Area](#area).
