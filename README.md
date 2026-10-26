@@ -2,6 +2,10 @@
 
 **Tiny Tapeout 1 × 2 tiles · SkyWater sky130 · Apache 2.0 · maintained by [@Normansrule](https://github.com/Normansrule)**
 
+### [▶ Open the project website: normansrule.github.io/tinytapeout-tiqora](https://normansrule.github.io/tinytapeout-tiqora/)
+
+Everything in this repository, explained and explorable in your browser: watch a serial session, type your own command bytes, open the chip atlas and check the evidence behind every number. No install, works on a phone.
+
 ![A ping and a register write recorded from the RTL: the host's bytes on RX, the host port's states, and the chip's replies on TX](docs/images/explorer/tour.gif)
 
 <sub>Recorded, not drawn: one window of `make -C test tour`, a simulation of the submitted top module
@@ -54,7 +58,7 @@ timing at the slow corner, by 1.30 ns at 50 MHz (local LibreLane 3.0.14 run).
 
 The same pages are in `docs/site/` and open from a clone with no network.
 The links above are the GitHub Pages copy, published by `.github/workflows/pages.yaml` on every push to
-`main`; if it is not up, the same pages open [through htmlpreview](https://htmlpreview.github.io/?https://github.com/Normansrule/tinytapeout-tiqora/blob/main/docs/site/index.html).
+`main`; should it ever be down, the same pages open [through htmlpreview](https://htmlpreview.github.io/?https://github.com/Normansrule/tinytapeout-tiqora/blob/main/docs/site/index.html).
 
 ![The overview's opening shot: Tiqora-Serial's name above its tile of real sky130 cells, tilted in perspective and settling flat as you scroll](docs/images/explorer/site-hero.jpg)
 
