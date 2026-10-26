@@ -17,6 +17,8 @@
 //   reconnect a host that vanishes mid-command leaves the port waiting for
 //             the rest (the next command is eaten as data); reset recovers
 //             it with nothing committed and the queue and flag cleared
+//   burst     an edge that arrives while a multi-pin burst is still being
+//             queued replaces the waiting event, and overflow says so
 //
 // Every check is printed with its result, and the run ends with a count.
 // Run with:  make proto
@@ -351,6 +353,20 @@ module tb_proto;
         chk(ok && req_count == req0, "after reset the next ping answers 5A 01 and the cut write never lands");
         do_read(8'h02, v, ok);
         chk(ok && v[4] && !v[6] && ovf === 1'b0, "reset also empties the queue and clears overflow");
+
+        // -------------------------------------------------------------
+        $display("\n[burst]");
+        cap = 8'h00;                                // capture is off after reset
+        do_write(8'h03, 32'h0000_0007, ok);        // CFG: CAP0..2, rising edges
+        @(negedge clk) cap[1:0] = 2'b11;           // two pins in one clock
+        @(negedge clk) cap[2]   = 1'b1;            // a third, one clock later
+        repeat (10) @(negedge clk);
+        chk(ok && ovf === 1'b1,
+            "an edge one clock after a two-pin burst drops the waiting CAP1 event and raises overflow");
+        do_read(8'h01, v, ok);
+        do_read(8'h01, d, ok2);
+        chk(ok && ok2 && v[31:27] == 5'b0_000_1 && d[31:27] == 5'b0_010_1 && d[26:0] - v[26:0] == 27'd1,
+            "the queue holds CAP0 then CAP2, one tick apart");
 
         $display("\n%0d checks, %0d failures", checks, errors);
         if (errors == 0) $display("SERIAL PROTOCOL PASSED\n");

@@ -74,8 +74,9 @@ module tb_sync_ref;
         end
     endfunction
 
-    integer fd, cycles, n, quiet;
+    integer fd, cycles, n, quiet, phase;
     reg [31:0] r;
+    reg        was_rst = 1'b0;
 
     initial begin
         if (!$value$plusargs("SEED=%d", seed))     seed = 1;
@@ -86,15 +87,23 @@ module tb_sync_ref;
 
         for (n = 0; n < cycles; n = n + 1) begin
             @(negedge clk);
-            // reset: the first three clocks, then rarely
-            rst = (n < 3) || (rnd() % 400 == 0);
+            // Three kinds of stretch, 300 clocks each. Busy: single flips
+            // often, several channels at once sometimes. Quiet: the queue
+            // drains, so overflow is reached from empty again and again.
+            // Burst: a few channels at once, then often one more edge before
+            // the backlog drains, with marks and pops racing them and resets
+            // often enough that the overflow flag is usually clear.
+            phase = (n / 300) % 3;
+            quiet = (phase == 1);
 
-            // pins: busy stretches (single flips often, several channels at
-            // once sometimes) alternate with quiet ones where the queue
-            // drains, so overflow is reached from empty again and again
-            quiet = (n / 300) % 2;
+            // reset: the first three clocks, then rarely (often in bursts)
+            rst = (n < 3) || (rnd() % ((phase == 2) ? 60 : 400) == 0);
+
             r = rnd();
-            if (quiet) begin
+            if (phase == 2) begin
+                if (r[3:0] == 0)       cap = cap ^ ((1 << (r[10:8] % NCH)) | (1 << (r[14:12] % NCH)));
+                else if (r[6:4] == 0)  cap = cap ^ (1 << (r[18:16] % NCH));
+            end else if (quiet) begin
                 if (r[6:0] == 0)   cap = cap ^ (1 << (r[10:8] % NCH));
             end else begin
                 if (r[3:0] == 0)       cap = cap ^ (1 << (r[10:8] % NCH));
@@ -103,8 +112,10 @@ module tb_sync_ref;
 
             // an Xpulse instruction about one clock in six
             r = rnd();
-            t_valid = quiet ? (r % 3 == 0) : (r % 6 == 0);
-            t_op    = (quiet && r[15:14] != 0) ? 3'b001 : rnd();   // quiet: mostly TPOP
+            t_valid = (phase != 0) ? (r % 3 == 0) : (r % 6 == 0);
+            t_op    = (quiet && r[15:14] != 0) ? 3'b001                     // quiet: mostly TPOP
+                    : (phase == 2 && r[15:14] != 0) ? (r[16] ? 3'b001 : 3'b110) // burst: TPOP, TMARK
+                    : rnd();
             t_sub   = (r[12:10] == 0) ? rnd() : (rnd() % 4);
             case (t_op)
                 3'b100:  t_rs1 = operand(0);                                    // TARM
@@ -126,6 +137,17 @@ module tb_sync_ref;
                 4'h9:       reg_wdata = operand(2);
                 default:    reg_wdata = rnd();
             endcase
+
+            // a burst stretch turns every channel back on straight after a
+            // reset (reset clears the enables), with random edge selection
+            if (phase == 2 && was_rst && !rst) begin
+                t_valid   = 1'b0;
+                reg_req   = 1'b1;
+                reg_we    = 1'b1;
+                reg_addr  = 4'h3;                                         // CFG
+                reg_wdata = {15'd0, r[16], r[15:8], 8'hFF};
+            end
+            was_rst = rst;
 
             // sample just before the rising edge: inputs and every output
             #4;

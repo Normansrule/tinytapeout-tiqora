@@ -76,9 +76,9 @@ Where the Tiny Tapeout tile stands on the way to silicon. Each rung needs the on
 
 | Stage | State | Evidence |
 |---|---|---|
-| RTL tested | ✅ done | 59 checks (30 host port; 26 framing, bad input, queue loss and reconnection; 3 timing-unit reference model), 5 cocotb tests from the pins, recorded tour 13/13 (`make -C test sim`; verify-audits 2026-10-26) |
+| RTL tested | ✅ done | 62 checks (30 host port; 28 framing, bad input, queue loss, reconnection and bursts; 4 timing-unit reference model), 5 cocotb tests from the pins, recorded tour 13/13 (`make -C test sim`; verify-audits 2026-10-26) |
 | Formally checked | ⬜ not done | no formal proofs exist for this design |
-| Synthesized | ✅ done | 21,324 µm², 458 flip-flops, 59% of the 1 × 2 die (`make -C test area`, Yosys 0.33, main 2026-10-25, with the cells this design's flow excludes (src/synth_exclude.cells) removed) |
+| Synthesized | ✅ done | 21,322 µm², 458 flip-flops, 59% of the 1 × 2 die (`make -C test area`, Yosys 0.33, verify-audits 2026-10-26, with the cells this design's flow excludes (src/synth_exclude.cells) removed) |
 | Placed and routed | ✅ done | 1 × 2: `gds` and `gl_test` pass (GitHub run 40161260168); local LibreLane 3.0.14 run: DRC 0, LVS 0, antenna 0, 80% utilisation |
 | Timing checked | ❌ missed at the slow corner | local LibreLane 3.0.14 run at 1 × 2: hold met everywhere (+0.112 ns worst); setup at 50 MHz met at the typical corner (+9.48 ns) and missed at ss_100C_1v60 by 1.30 ns on 29 paths, so about 47 MHz at the slow corner |
 | Submitted, fabricated, measured | ⬜ not yet | the Tiny Tapeout pre-flight passes at 1 × 2 (GitHub run 40161260168); submitting is the owner's step |
@@ -92,11 +92,11 @@ Where Tiqora-Serial stands on the way to silicon. Every ✅ and 🔄 below names
 
 | Milestone | Progress | Step | State | Evidence or next step |
 |---|---|---|---|---|
-| **FPGA simulation** | `██████████` 2/2 | RTL suites on the serial host port | ✅ | 59 checks and 5 cocotb tests pass; measured (verify-audits, 2026-10-26, `make -C test sim`) |
+| **FPGA simulation** | `██████████` 2/2 | RTL suites on the serial host port | ✅ | 62 checks and 5 cocotb tests pass; measured (verify-audits, 2026-10-26, `make -C test sim`) |
 |  |  | whole Basys 3 design in simulation | ✅ | 7 checks; measured (v20, 2026-10-18, `make -C fpga/basys3 sim`) |
 | **Basys 3 board** | `░░░░░░░░░░` 0/2 | Vivado bitstream | ⬜ | next: make bit in fpga/basys3 on a machine with Vivado |
 |  |  | running on a real board | ⬜ | next: make prog in fpga/basys3, then drive it from the PC at 115,200 baud |
-| **Tiny Tapeout GDS and pre-flight** | `██████████` 3/3 | cell area after synthesis, before placement | ✅ | 21,324 µm², 458 flip-flops: 59% of 1x2, with the cells this design's flow excludes (src/synth_exclude.cells) removed; measured (main, Yosys 0.33, 2026-10-25, `make -C test area`) |
+| **Tiny Tapeout GDS and pre-flight** | `██████████` 3/3 | cell area after synthesis, before placement | ✅ | 21,322 µm², 458 flip-flops: 59% of 1x2, with the cells this design's flow excludes (src/synth_exclude.cells) removed; measured (verify-audits, Yosys 0.33, 2026-10-26, `make -C test area`) |
 |  |  | place and route at 1x2 | ✅ | clean GDS; local run DRC 0, LVS 0, antenna 0; measured (PR #4 fc8d5d5, LibreLane 3.0.14, `GitHub run 40161260168: gds and gl_test`) |
 |  |  | Tiny Tapeout pre-flight | ✅ | pass; measured (PR #4 fc8d5d5, `GitHub run 40161260168: precheck`) |
 | **sky130 timing** | `░░░░░░░░░░` 0/1 | signoff timing after routing | 🔄 | hold met everywhere (+0.112 ns worst); setup at 50 MHz met at the typical corner (+9.48 ns) and missed at ss_100C_1v60 by 1.30 ns on 29 paths, so about 47 MHz at the slow corner; measured (verify-audits 2026-10-25, LibreLane 3.0.14 local, `librelane on src/config.json at 1x2`) |
@@ -398,8 +398,8 @@ at an internal flip-flop.
 | Check | Result |
 |---|---|
 | `tb_uart.sv`, driving only the serial pins | **30 / 30** |
-| `tb_proto.sv`, framing errors, glitches, all 253 unknown commands, partial frames, unmapped addresses, late bytes, queue loss, reconnection | **26 / 26** |
-| `sync_model.py`, the timing unit against a Python reference model, every output on every clock, three builds | **3 / 3** |
+| `tb_proto.sv`, framing errors, glitches, all 253 unknown commands, partial frames, unmapped addresses, late bytes, queue loss, reconnection, bursts | **28 / 28** |
+| `sync_model.py`, the timing unit against a Python reference model, every output on every clock, three builds, and no pin event lost without overflow | **4 / 4** |
 | `test.py` cocotb, through the Tiny Tapeout pin interface | **5 / 5** |
 | `tpctl.py selftest`, host protocol with no hardware | **18 / 18** |
 | Verilator `-Wall` | **clean** (two documented waivers) |
@@ -413,7 +413,7 @@ the exact programmed tick** — the same cycle-exact behaviour the full chip has
 to the supplied clock; oscillator error and pad delay are separate), checked through two pins.
 
 `tb_proto.sv` checks the port when the line or the host misbehaves (measured, verify-audits
-2026-10-26, `make -C test proto`, 14 of 14 RTL mutants caught). A byte with a low stop bit is dropped, and a
+2026-10-26, `make -C test proto`, 15 of 15 RTL mutants caught). A byte with a low stop bit is dropped, and a
 glitch under half a bit is not a byte. Every command byte other than 0x01, 0x02 and 0x03 gets one
 NAK. A write reaches the registers in a single clock with all 32 bits, and only after its sixth
 byte. Reads of offsets 3 to 15 return 0, and writes to the unmapped offsets 6 and 11 to 15 are
@@ -431,14 +431,10 @@ Two limits follow from the design and are now measured rather than assumed:
   commits those bytes as its data. After a host-side timeout, reset the chip, or send the missing
   bytes of a frame you know the state of, before trusting the link again.
 
-One gap was found by the timing unit's reference model (`make -C test syncref`) and is reported,
-not yet fixed, because the fix is in the timing unit shared with Tiqora:
-
-* **Edges that crowd a burst can be lost silently.** Edges on several channels in the same clock
-  are queued one per clock from a backlog. A new edge on any enabled channel before that backlog
-  drains (up to 7 clocks) replaces it, and the events still waiting are dropped without setting
-  overflow. Until it is fixed, treat events closer than 8 clocks after a multi-channel burst as
-  possibly incomplete.
+The timing unit's reference model (`make -C test syncref`) found that an edge arriving while a
+multi-pin burst was still being queued (up to 7 clocks) replaced the waiting events without a
+trace. Fixed 2026-10-26 in the timing unit shared with Tiqora: the waiting events are still
+dropped, but the overflow flag now says so, and `make proto` checks it.
 
 What has *not* been done yet: setup timing at the slow corner (it misses by 1.30 ns at 50 MHz),
 and a run on a real Basys 3. The area has been
@@ -450,8 +446,8 @@ measured against the real sky130 library; see [Area](#area).
 
 **Measured**, not estimated. Yosys maps the design onto the real sky130_fd_sc_hd standard cell
 library, minus the cells this design's flow excludes (`src/synth_exclude.cells`: the PDK's
-`no_synth.cells` without its drive-strength-1 entries): 2,524 cells, 458 of them flip-flops,
-**21,324 µm²** (measured, main 2026-10-25, Yosys 0.33, `make -C test area`).
+`no_synth.cells` without its drive-strength-1 entries): 2,529 cells, 458 of them flip-flops,
+**21,322 µm²** (measured, verify-audits 2026-10-26, Yosys 0.33, `make -C test area`).
 
 | Tile | At 60% utilisation | At 70% | Verdict |
 |---|---:|---:|---|
