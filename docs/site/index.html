@@ -1126,36 +1126,54 @@ make -C test sim                 <span class=c># every suite</span></pre>
     return (R._d = d);
   }
 
-  // one layer's wires, white on transparent, then tinted by its film gradient
-  function layerCanvas(d, li, px, minW) {
-    const c = document.createElement("canvas"); c.width = Math.ceil(d.W * px); c.height = Math.ceil(d.H * px);
-    const g = c.getContext("2d"), a = d.wires[li];
+  // A frame is the part of the die a canvas shows: px canvas pixels per unit, and the canvas's
+  // top-left corner at (ox, oy) pixels from the die's top-left. The whole die is the frame at 0, 0.
+  function wholeFrame(d, px) { return { px, ox: 0, oy: 0, W: Math.ceil(d.W * px), H: Math.ceil(d.H * px) }; }
+  function useFrame(g, d, f) { g.setTransform(f.px, 0, 0, -f.px, -f.ox, d.H * f.px - f.oy); }
+  // the frame's extent in die units, for skipping what lies outside it
+  function bounds(d, f, pad) {
+    return { x0: f.ox / f.px - pad, x1: (f.ox + f.W) / f.px + pad, y0: d.H - (f.oy + f.H) / f.px - pad, y1: d.H - f.oy / f.px + pad };
+  }
+
+  // one layer's wires, white on transparent, then tinted by its film gradient (fixed to the die, so a zoomed frame keeps its colours)
+  function layerCanvas(d, li, f, minW) {
+    const a = d.wires[li];
     if (!a.length) return null;
-    g.setTransform(px, 0, 0, -px, 0, c.height);
+    const c = document.createElement("canvas"); c.width = f.W; c.height = f.H;
+    const g = c.getContext("2d");
+    useFrame(g, d, f);
     g.fillStyle = "#fff";
-    const w = Math.max(d.width[li], minW / px), h = w / 2;
-    for (let i = 0; i < a.length; i += 4) g.fillRect(a[i] - h, a[i + 1] - h, a[i + 2] - a[i] + w, a[i + 3] - a[i + 1] + w);
+    const w = Math.max(d.width[li], minW / f.px), h = w / 2, B = bounds(d, f, w);
+    for (let i = 0; i < a.length; i += 4) {
+      if (a[i + 2] < B.x0 || a[i] > B.x1 || a[i + 3] < B.y0 || a[i + 1] > B.y1) continue;
+      g.fillRect(a[i] - h, a[i + 1] - h, a[i + 2] - a[i] + w, a[i + 3] - a[i + 1] + w);
+    }
     g.setTransform(1, 0, 0, 1, 0, 0);
     g.globalCompositeOperation = "source-in";
-    const f = FILM[d.layers[li]] || ["#fff", "#fff"], gr = g.createLinearGradient(0, c.height, c.width, 0);
-    gr.addColorStop(0, f[0]); gr.addColorStop(.5, f[1]); gr.addColorStop(1, f[0]);
+    const k = FILM[d.layers[li]] || ["#fff", "#fff"];
+    const gr = g.createLinearGradient(-f.ox, d.H * f.px - f.oy, d.W * f.px - f.ox, -f.oy);
+    gr.addColorStop(0, k[0]); gr.addColorStop(.5, k[1]); gr.addColorStop(1, k[0]);
     g.fillStyle = gr; g.fillRect(0, 0, c.width, c.height);
     return c;
   }
 
-  // the whole die, pre-rendered once: cells by class, the power grid, the metal layers added together
+  // the die (or a frame of it): cells by class, the power grid, the metal layers added together
   function render(R, px, opt) {
     opt = opt || {};
-    const d = decode(R);
-    const c = document.createElement("canvas"); c.width = Math.ceil(d.W * px); c.height = Math.ceil(d.H * px);
+    const d = decode(R), f = opt.frame || wholeFrame(d, px);
+    const c = document.createElement("canvas"); c.width = f.W; c.height = f.H;
     const g = c.getContext("2d");
     g.fillStyle = SCREEN; g.fillRect(0, 0, c.width, c.height);
-    g.setTransform(px, 0, 0, -px, 0, c.height);
-    const rowH = R.row - Math.min(R.row * .3, .8 / px);   // a hairline between rows, so the rows read
+    useFrame(g, d, f);
+    const B = bounds(d, f, R.row * 4);
+    const rowH = R.row - Math.min(R.row * .3, .8 / f.px);   // a hairline between rows, so the rows read
     d.cells.forEach((a, k) => {
       if (opt.classes && !opt.classes[k]) return;
       g.fillStyle = CLASS_FILL[k];
-      for (let i = 0; i < a.length; i += 3) g.fillRect(a[i], a[i + 1], a[i + 2], rowH);
+      for (let i = 0; i < a.length; i += 3) {
+        if (a[i] > B.x1 || a[i] + a[i + 2] < B.x0 || a[i + 1] > B.y1 || a[i + 1] + R.row < B.y0) continue;
+        g.fillRect(a[i], a[i + 1], a[i + 2], rowH);
+      }
     });
     // power: rails and straps, faint, so the grid reads as the chip's skeleton
     const p = d.power;
@@ -1167,12 +1185,12 @@ make -C test sim                 <span class=c># every suite</span></pre>
     mg.globalCompositeOperation = "lighter";
     d.layers.forEach((L, li) => {
       if (opt.layers && !opt.layers[L]) return;
-      const lc = layerCanvas(d, li, px, opt.minWirePx || .6);
+      const lc = layerCanvas(d, li, f, opt.minWirePx || .6);
       if (lc) { mg.globalAlpha = opt.alpha || .62; mg.drawImage(lc, 0, 0); }
     });
     g.globalCompositeOperation = "lighter";
     if (opt.bloom !== false && "filter" in g) {   // a soft glow under the wires (browsers without canvas filters skip it)
-      g.filter = `blur(${Math.max(2, 6 * px * 10).toFixed(1)}px)`; g.globalAlpha = .4; g.drawImage(metal, 0, 0);
+      g.filter = `blur(${Math.min(14, Math.max(2, 60 * f.px)).toFixed(1)}px)`; g.globalAlpha = .4; g.drawImage(metal, 0, 0);
       g.filter = "none"; g.globalAlpha = 1;
     }
     g.drawImage(metal, 0, 0);
@@ -1216,7 +1234,9 @@ make -C test sim                 <span class=c># every suite</span></pre>
   }
 
   // the clock tree at time t (0..1): nets up to the current depth glow, then the flip-flops flash
-  function drawClock(g, d, px, H, t, all) {
+  // k: how much the context is scaled up on screen, so lines and dots keep their size when zoomed
+  function drawClock(g, d, px, H, t, all, k) {
+    k = k || 1;
     const D = d.depth + 1, front = all ? D + 1 : t * (D + 1.2);
     g.save(); g.globalCompositeOperation = "lighter"; g.lineCap = "round";
     for (const c of d.clock) {
@@ -1225,7 +1245,7 @@ make -C test sim                 <span class=c># every suite</span></pre>
       const s = c.segs, fade = all ? 1 : Math.max(.35, 1 - (front - c.depth - 1) * .45);
       for (const [w, a] of [[5, .18], [1.8, .95]]) {
         g.strokeStyle = `rgba(255, ${190 + 40 * (c.depth % 2)}, 90, ${(a * fade).toFixed(3)})`;
-        g.lineWidth = w;
+        g.lineWidth = w / k;
         g.beginPath();
         for (let i = 0; i < s.length; i += 5) {
           g.moveTo(s[i + 1] * px, H - s[i + 2] * px); g.lineTo(s[i + 3] * px, H - s[i + 4] * px);
@@ -1238,7 +1258,7 @@ make -C test sim                 <span class=c># every suite</span></pre>
       g.fillStyle = `rgba(150, 255, 200, ${Math.min(1, flash).toFixed(3)})`;
       for (const c of d.clock) {
         const f = c.flops;
-        for (let i = 0; i < f.length; i += 2) g.fillRect(f[i] * px - 1.5, H - f[i + 1] * px - 1.5, 3, 3);
+        for (let i = 0; i < f.length; i += 2) g.fillRect(f[i] * px - 1.5 / k, H - f[i + 1] * px - 1.5 / k, 3 / k, 3 / k);
       }
     }
     g.restore();
@@ -1297,18 +1317,47 @@ make -C test sim                 <span class=c># every suite</span></pre>
       const s = fitScale();
       view = { x: (canvas.width - base.width * s) / 2, y: (canvas.height - base.height * s) / 2, s };
     }
+    // zoomed in, the prerendered die would blur, so the visible part is drawn again at the
+    // zoom's own scale once the view rests for a moment
+    let sharp = null, sharpTimer = 0;
+    const viewKey = () => `${view.s.toFixed(4)},${view.x.toFixed(1)},${view.y.toFixed(1)},${canvas.width}`;
+    function sharpen() {
+      sharpTimer = 0;
+      const pe = view.s * base.width / d.W;
+      sharp = render(R, pe, { layers: onL, classes: onC, minWirePx: .8,
+        frame: { px: pe, ox: -view.x, oy: -view.y, W: canvas.width, H: canvas.height } });
+      sharp._key = viewKey();
+      paint();
+    }
     function paint() {
       if (!base) return;
       g.setTransform(1, 0, 0, 1, 0, 0);
       g.fillStyle = SCREEN; g.fillRect(0, 0, canvas.width, canvas.height);
-      g.setTransform(view.s, 0, 0, view.s, view.x, view.y);
-      g.imageSmoothingEnabled = view.s < 1.5;
-      g.globalAlpha = edge !== null || still ? .32 : 1;   // the layout dims while the clock tree shows
-      g.drawImage(base, 0, 0);
+      const dim = edge !== null || still ? .32 : 1;   // the layout dims while the clock tree shows
+      g.globalAlpha = dim;
+      if (sharp && sharp._key === viewKey()) g.drawImage(sharp, 0, 0);
+      else {
+        g.setTransform(view.s, 0, 0, view.s, view.x, view.y);
+        g.imageSmoothingEnabled = view.s < 1.5;
+        g.drawImage(base, 0, 0);
+        clearTimeout(sharpTimer);
+        if (view.s > 1.25) sharpTimer = setTimeout(sharpen, 160);
+      }
       g.globalAlpha = 1;
-      if (edge !== null || still) drawClock(g, d, base.width / d.W, base.height, edge || 0, still);
+      g.setTransform(view.s, 0, 0, view.s, view.x, view.y);
+      if (edge !== null || still) drawClock(g, d, base.width / d.W, base.height, edge || 0, still, view.s);
       g.setTransform(1, 0, 0, 1, 0, 0);
+      scaleBar();
       if (readout) readout.textContent = `${Math.round(view.s / fitScale() * 100)}%`;
+    }
+    // a scale bar in the corner, a round number of micrometres long
+    function scaleBar() {
+      const um = 1000 / R.unit_nm * view.s * base.width / d.W, r = dpr();   // canvas pixels per micrometre
+      const L = [1, 2, 5, 10, 20, 50, 100, 200].find(v => v * um >= 70 * r) || 200, w = L * um, x = 14 * r, y = canvas.height - 16 * r;
+      g.setTransform(1, 0, 0, 1, 0, 0);
+      g.fillStyle = "rgba(5, 7, 10, .65)"; g.fillRect(x - 6 * r, y - 20 * r, w + 12 * r, 28 * r);
+      g.fillStyle = "#dfe4f2"; g.fillRect(x, y, w, 2 * r); g.fillRect(x, y - 4 * r, 1.5 * r, 6 * r); g.fillRect(x + w - 1.5 * r, y - 4 * r, 1.5 * r, 6 * r);
+      g.font = `${11 * r}px ui-monospace, monospace`; g.textBaseline = "bottom"; g.fillText(`${L} µm`, x, y - 4 * r);
     }
     function zoomAt(f, cx, cy) {
       const s = Math.max(fitScale(), Math.min(view.s * f, 12));
@@ -1347,10 +1396,10 @@ make -C test sim                 <span class=c># every suite</span></pre>
     });
     host.querySelectorAll("[data-layer]").forEach(b => { const li = d.layers.indexOf(b.dataset.layer); if (li < 0 || !d.wires[li].length) b.hidden = true; });
     host.querySelectorAll("[data-layer]").forEach(b => b.addEventListener("click", () => {
-      const L = b.dataset.layer; onL[L] = !onL[L]; b.setAttribute("aria-pressed", onL[L]); const v = view; rebuild(); view = v; paint();
+      const L = b.dataset.layer; onL[L] = !onL[L]; b.setAttribute("aria-pressed", onL[L]); sharp = null; rebuild();
     }));
     host.querySelectorAll("[data-class]").forEach(b => b.addEventListener("click", () => {
-      const k = +b.dataset.class; onC[k] = !onC[k]; b.setAttribute("aria-pressed", onC[k]); const v = view; rebuild(); view = v; paint();
+      const k = +b.dataset.class; onC[k] = !onC[k]; b.setAttribute("aria-pressed", onC[k]); sharp = null; rebuild();
     }));
     const send = host.querySelector("[data-clock]");
     if (send) send.addEventListener("click", () => {
