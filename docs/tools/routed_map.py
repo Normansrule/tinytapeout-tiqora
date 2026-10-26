@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """routed_map.py — the real routed layout, for the explorer (docs/site/data/routed.json).
 
-    python3 docs/tools/routed_map.py <LibreLane run dir> <sky130_fd_sc_hd.lef> [--pdk "label"]   write routed.json
+    python3 docs/tools/routed_map.py <LibreLane run dir> <sky130_fd_sc_hd.lef> [--pdk "label"] [--note "text"]   write routed.json
     python3 docs/tools/routed_map.py --check                                   fail if routed.json is malformed
     python3 docs/tools/routed_map.py --mutants                                 show that --check catches eight broken copies
 
@@ -97,6 +97,7 @@ def main():
         sys.exit(__doc__)
     run, lef = sys.argv[1], sys.argv[2]
     pdk_label = sys.argv[sys.argv.index("--pdk") + 1] if "--pdk" in sys.argv else None   # e.g. which open_pdks build, which the run does not record
+    note = sys.argv[sys.argv.index("--note") + 1] if "--note" in sys.argv else ""          # how the run differs from src/config.json, if it does
     defs = sorted(glob.glob(os.path.join(run, "*-openroad-fillinsertion", "*.def")))
     if not defs:
         sys.exit(f"routed_map.py: no fill-insertion DEF under {run} (the run must reach detailed routing and fill)")
@@ -197,7 +198,7 @@ def main():
         "row": 272,
         "source": {"flow": "LibreLane " + str(meta.get("librelane_version", "?")), "pdk": pdk_label or cfg.get("PDK", "?"),
                    "def": os.path.basename(os.path.dirname(defs[-1])) + "/" + os.path.basename(defs[-1]),
-                   "density_pct": cfg.get("PL_TARGET_DENSITY_PCT"), "clock_ns": cfg.get("CLOCK_PERIOD")},
+                   "density_pct": cfg.get("PL_TARGET_DENSITY_PCT"), "clock_ns": cfg.get("CLOCK_PERIOD"), "note": note},
         "classes": ["flip-flop", "logic", "buffer", "clock tree", "physical only"],
         "counts": [counts[k] for k in range(5)],
         "cells": [b64(cells[k]) for k in range(5)],

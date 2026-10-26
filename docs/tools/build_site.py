@@ -311,7 +311,7 @@ def routed_facts(r):
     return {"cells": f"{sum(r['counts']):,}", "signal": f"{signal:,}", "flops": f"{r['counts'][0]:,}", "phys": f"{r['counts'][4]:,}",
             "segments": f"{segs:,}", "wire_mm": f"{sum(r['wire_um']) / 1000:.1f}", "nets": f"{len(r['clock'])}", "levels": str(depth + 1),
             "clocked": f"{flops:,}", "die": f"{r['die'][0] * u:.2f} × {r['die'][1] * u:.2f}", "flow": esc(r["source"]["flow"]), "pdk": esc(r["source"]["pdk"]),
-            "density": str(r["source"]["density_pct"]), "layers": " ".join(f"{L} {n:,}" for L, n in zip(r["layers"], r["segments"]) if n)}
+            "density": str(r["source"]["density_pct"]), "note": esc(r["source"].get("note", "")), "layers": " ".join(f"{L} {n:,}" for L, n in zip(r["layers"], r["segments"]) if n)}
 
 
 def die_facts(d):

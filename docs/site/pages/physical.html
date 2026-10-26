@@ -47,7 +47,7 @@
  <p class=routed-hint>Scroll or pinch to zoom, drag to pan. With the keyboard: + and − zoom, arrows pan, 0 fits the die.</p>
 </div>
 <p>The clock button lights the clock tree the way an edge travels: from the <code>clk</code> pin through {{routed:levels}} levels of clock buffers ({{routed:nets}} nets) to the {{routed:clocked}} flip-flops, which flash when it arrives. Clock-tree buffers are drawn amber.</p>
-<p class=small>From a local {{routed:flow}} run on {{routed:pdk}}, placement density {{routed:density}}%, read from the DEF after detailed routing and fill by <code>docs/tools/routed_map.py</code>. Wire segments per layer: {{routed:layers}}. It is the run in the table above; the table counts cells the way OpenROAD reports them, so its total is split differently.</p>
+<p class=small>From a local {{routed:flow}} run on {{routed:pdk}}, placement density {{routed:density}}%{{routed:note}}, read from the DEF after detailed routing and fill by <code>docs/tools/routed_map.py</code>. Wire segments per layer: {{routed:layers}}. It is the run in the table above; the table counts cells the way OpenROAD reports them, so its total is split differently.</p>
 <script>TQLayout.explore(document.getElementById("routed"), DATA("routed"));</script>
 <p class=small>Power: the run reports a power figure, but no switching activity from a real workload was given to it, so it is not shown. There is no power map.</p>
 <script>
