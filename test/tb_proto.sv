@@ -12,6 +12,11 @@
 //   address   only the low four bits of the address byte are decoded;
 //             unmapped offsets read as zero and a write to one touches nothing
 //   late      bytes that arrive while the chip is still replying are ignored
+//   loss      a third edge into the 2-deep queue is dropped and raises the
+//             sticky overflow flag; the two queued events read back in order
+//   reconnect a host that vanishes mid-command leaves the port waiting for
+//             the rest (the next command is eaten as data); reset recovers
+//             it with nothing committed and the queue and flag cleared
 //
 // Every check is printed with its result, and the run ends with a count.
 // Run with:  make proto
@@ -196,7 +201,7 @@ module tb_proto;
         end
     endtask
 
-    logic       ok;
+    logic       ok, ok2;
     integer     seed = 1;      // +SEED=n to change; printed at the start
     integer     n, i, nak_bad, req0, str0, bad;
     reg  [31:0] v, d;
@@ -304,6 +309,48 @@ module tb_proto;
         drop_rx();
         do_ping(ok);
         chk(ok, "the port is ready for the next command afterwards");
+
+        // -------------------------------------------------------------
+        $display("\n[queue loss]");
+        do_write(8'h03, 32'h0000_0007, ok);        // CFG: CAP0..2, rising edges
+        @(negedge clk) cap[0] = 1'b1;
+        repeat (50) @(negedge clk);
+        cap[1] = 1'b1;
+        repeat (50) @(negedge clk);
+        cap[2] = 1'b1;
+        repeat (50) @(negedge clk);
+        chk(ok && ovf === 1'b1 && ev_count == 2'd2,
+            "three edges into the 2-deep queue: two queued, overflow pin high");
+        do_read(8'h02, v, ok);
+        chk(ok && v[1:0] == 2'd2 && v[5] && v[6], "STAT agrees: count 2, full, overflow");
+        do_read(8'h01, v, ok);
+        do_read(8'h01, d, ok2);
+        chk(ok && ok2 && v[31:27] == 5'b0_000_1 && d[31:27] == 5'b0_001_1 &&
+            d[26:0] - v[26:0] == 27'd50,
+            "the two oldest read back in order: CAP0 then CAP1, rising, 50 ticks apart");
+        do_read(8'h01, v, ok);
+        chk(ok && v === 32'd0, "a third read returns 0: the CAP2 edge was dropped, not delayed");
+        do_read(8'h02, v, ok);
+        chk(ok && v[4] && v[6] && ovf === 1'b1,
+            "the queue is empty and overflow stays set until reset");
+
+        // -------------------------------------------------------------
+        $display("\n[reconnection]");
+        req0 = req_count;
+        send_byte(8'h01); send_byte(8'h07); send_byte(8'hAA); send_byte(8'hBB);
+        settle(30, n);                              // the host goes away here
+        send_byte(8'h03);                           // and comes back with a ping
+        settle(30, n);
+        chk(n == 0 && req_count == req0,
+            "a ping after a cut write is taken as its fifth byte: no reply, nothing written");
+        @(negedge clk) rst = 1'b1;
+        repeat (4) @(negedge clk);
+        rst = 1'b0;
+        #(BIT_NS * 2);
+        do_ping(ok);
+        chk(ok && req_count == req0, "after reset the next ping answers 5A 01 and the cut write never lands");
+        do_read(8'h02, v, ok);
+        chk(ok && v[4] && !v[6] && ovf === 1'b0, "reset also empties the queue and clears overflow");
 
         $display("\n%0d checks, %0d failures", checks, errors);
         if (errors == 0) $display("SERIAL PROTOCOL PASSED\n");

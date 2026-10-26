@@ -40,9 +40,9 @@ COMPILE_ARGS += -g2012
 TOPLEVEL = tb
 COCOTB_TEST_MODULES = test
 
-.PHONY: warnings sim lint synth area uart tour clean-sim explorer
+.PHONY: warnings sim lint synth area uart tour clean-sim explorer proto shared syncref
 
-sim: uart proto tour shared docs
+sim: uart proto tour shared syncref docs
 	@echo ""
 	@echo "all testbenches finished — check for FAILED above"
 
@@ -109,8 +109,15 @@ explorer:
 	cd .. && python3 docs/tools/traces.py --check
 	cd .. && python3 docs/tools/check_site.py
 
-# The timing unit (src/sync/*.sv) is shared, byte for byte, between Tiqora and
+# The timing unit (src/sync/*.sv) and its reference model are shared, byte for byte, between Tiqora and
 # Tiqora-Serial. docs/shared_timing.sha256 is identical in both repositories;
 # editing one copy without updating both manifests fails here.
 shared:
-	cd .. && sha256sum -c --quiet docs/shared_timing.sha256 && echo "shared timing unit: 5 files match the manifest"
+	cd .. && sha256sum -c --quiet docs/shared_timing.sha256 && echo "shared timing unit: $$(wc -l < docs/shared_timing.sha256) files match the manifest"
+
+# The timing unit against a Python reference model (sync_model.py), every
+# output compared on every clock: 60,000 random clocks of pins, Xpulse
+# instructions and register accesses, in three configurations (Tiqora,
+# Tiqora-Serial, and a small stress build that overflows its queue often).
+syncref:
+	python3 sync_model.py --suite

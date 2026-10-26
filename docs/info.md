@@ -36,7 +36,7 @@ microcontroller when the chip should run your code on its own.
 
 | | |
 |---|---|
-| ✅ **RTL simulation** | 48 checks on the serial host port, 18 of them on framing errors, unknown commands, partial frames and late bytes (`cd test && make sim`), plus 5 cocotb tests from the pins only |
+| ✅ **RTL simulation** | 59 checks: 56 on the serial host port, 26 of them on framing errors, unknown commands, partial frames, late bytes, queue loss and reconnection, and 3 comparing the timing unit with a reference model (`cd test && make sim`), plus 5 cocotb tests from the pins only |
 | ✅ **FPGA (simulated)** | the whole Digilent Basys 3 design, driven like a PC at 115,200 baud: 7 checks (`make -C fpga/basys3 sim`) |
 | ✅ **Area (main 2026-10-25)** | 21,324 µm², 458 flip-flops, 59% of the 1 × 2 die (`make area`) |
 | ✅ **Docs** | every link, image, `make` target and script mentioned exists (`make docs`, part of `make sim`) |

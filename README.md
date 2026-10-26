@@ -76,7 +76,7 @@ Where the Tiny Tapeout tile stands on the way to silicon. Each rung needs the on
 
 | Stage | State | Evidence |
 |---|---|---|
-| RTL tested | ✅ done | 48 checks (30 host port, 18 framing and bad input), 5 cocotb tests from the pins, recorded tour 13/13 (`make -C test sim`; main 2026-10-25) |
+| RTL tested | ✅ done | 59 checks (30 host port; 26 framing, bad input, queue loss and reconnection; 3 timing-unit reference model), 5 cocotb tests from the pins, recorded tour 13/13 (`make -C test sim`; verify-audits 2026-10-26) |
 | Formally checked | ⬜ not done | no formal proofs exist for this design |
 | Synthesized | ✅ done | 21,324 µm², 458 flip-flops, 59% of the 1 × 2 die (`make -C test area`, Yosys 0.33, main 2026-10-25, with the cells this design's flow excludes (src/synth_exclude.cells) removed) |
 | Placed and routed | ✅ done | 1 × 2: `gds` and `gl_test` pass (GitHub run 40161260168); local LibreLane 3.0.14 run: DRC 0, LVS 0, antenna 0, 80% utilisation |
@@ -92,7 +92,7 @@ Where Tiqora-Serial stands on the way to silicon. Every ✅ and 🔄 below names
 
 | Milestone | Progress | Step | State | Evidence or next step |
 |---|---|---|---|---|
-| **FPGA simulation** | `██████████` 2/2 | RTL suites on the serial host port | ✅ | 48 checks and 5 cocotb tests pass; measured (main, 2026-10-25, `make -C test sim`) |
+| **FPGA simulation** | `██████████` 2/2 | RTL suites on the serial host port | ✅ | 59 checks and 5 cocotb tests pass; measured (verify-audits, 2026-10-26, `make -C test sim`) |
 |  |  | whole Basys 3 design in simulation | ✅ | 7 checks; measured (v20, 2026-10-18, `make -C fpga/basys3 sim`) |
 | **Basys 3 board** | `░░░░░░░░░░` 0/2 | Vivado bitstream | ⬜ | next: make bit in fpga/basys3 on a machine with Vivado |
 |  |  | running on a real board | ⬜ | next: make prog in fpga/basys3, then drive it from the PC at 115,200 baud |
@@ -398,12 +398,13 @@ at an internal flip-flop.
 | Check | Result |
 |---|---|
 | `tb_uart.sv`, driving only the serial pins | **30 / 30** |
-| `tb_proto.sv`, framing errors, glitches, all 253 unknown commands, partial frames, unmapped addresses, late bytes | **18 / 18** |
+| `tb_proto.sv`, framing errors, glitches, all 253 unknown commands, partial frames, unmapped addresses, late bytes, queue loss, reconnection | **26 / 26** |
+| `sync_model.py`, the timing unit against a Python reference model, every output on every clock, three builds | **3 / 3** |
 | `test.py` cocotb, through the Tiny Tapeout pin interface | **5 / 5** |
 | `tpctl.py selftest`, host protocol with no hardware | **18 / 18** |
 | Verilator `-Wall` | **clean** (two documented waivers) |
 | Yosys elaboration | **passes, no latches** |
-| Shared sync blocks | **byte-identical** to the main Tiqora chip, checked by `make shared` against a SHA-256 manifest kept in both repositories |
+| Shared sync blocks and their reference model | **byte-identical** to the main Tiqora chip, checked by `make shared` against a SHA-256 manifest kept in both repositories |
 
 The serial test does everything a host would: ping, reject garbage, read the
 running timebase, configure capture, capture an edge and read the event back,
@@ -411,12 +412,15 @@ fire triggers, and arm a deadline. **The deadline armed over serial fires on
 the exact programmed tick** — the same cycle-exact behaviour the full chip has (exact relative
 to the supplied clock; oscillator error and pad delay are separate), checked through two pins.
 
-`tb_proto.sv` checks the port when the line or the host misbehaves (measured, main 2026-10-25,
-`make -C test proto`, 7 of 7 RTL mutants caught). A byte with a low stop bit is dropped, and a
+`tb_proto.sv` checks the port when the line or the host misbehaves (measured, verify-audits
+2026-10-26, `make -C test proto`, 14 of 14 RTL mutants caught). A byte with a low stop bit is dropped, and a
 glitch under half a bit is not a byte. Every command byte other than 0x01, 0x02 and 0x03 gets one
 NAK. A write reaches the registers in a single clock with all 32 bits, and only after its sixth
 byte. Reads of offsets 3 to 15 return 0, and writes to the unmapped offsets 6 and 11 to 15 are
-acknowledged and change nothing. Only the low four address bits are decoded.
+acknowledged and change nothing. Only the low four address bits are decoded. A third edge into
+the 2-deep event queue is dropped and raises the overflow pin and STAT bit; the two queued events
+read back oldest first, and the flag stays set after the queue drains until reset. Reset recovers
+a link left mid-frame: nothing of the cut frame is committed and the next ping answers.
 
 Two limits follow from the design and are now measured rather than assumed:
 
