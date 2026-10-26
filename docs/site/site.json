@@ -16,7 +16,8 @@
  "footer": "Tiqora-Serial is Tiqora's timing unit with a serial host port instead of a processor, for a Tiny Tapeout 1x2 tile on SkyWater sky130. Nothing on these pages has run on real silicon or a real FPGA board; every number says how it was obtained.",
  "data": {
   "die": "docs/site/data/die.json",
-  "layout": "docs/site/data/serial_1x2_layout.json"
+  "layout": "docs/site/data/serial_1x2_layout.json",
+  "routed": "docs/site/data/routed.json"
  },
  "pages": [
   {

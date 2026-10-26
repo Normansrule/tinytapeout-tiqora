@@ -53,14 +53,14 @@ timing at the slow corner, by 1.30 ns at 50 MHz (local LibreLane 3.0.14 run).
 | [**Overview**](https://normansrule.github.io/tinytapeout-tiqora/index.html) | fire a deadline of your own; scroll from a grain of salt down to one flip-flop; what goes in, what happens inside, what comes out, what is proven |
 | [**Tours**](https://normansrule.github.io/tinytapeout-tiqora/tours.html) | six sequences recorded from the RTL, with play, step, scrub and captions; type your own command bytes and see the 8N1 frames and the reply |
 | [**Chip atlas**](https://normansrule.github.io/tinytapeout-tiqora/atlas.html) | every block from the elaborated RTL: ports, legal values, behaviour, tests, connections you can follow |
-| [**Physical design**](https://normansrule.github.io/tinytapeout-tiqora/physical.html) | measured cell area per block against the 1 × 2 die, and the routed 1 × 2 layout with its sign-off numbers |
+| [**Physical design**](https://normansrule.github.io/tinytapeout-tiqora/physical.html) | measured cell area per block against the 1 × 2 die, and the routed 1 × 2 layout with its sign-off numbers; zoom into every wire and send a clock edge down the real clock tree |
 | [**Evidence**](https://normansrule.github.io/tinytapeout-tiqora/evidence.html) | the ladder from RTL tests to silicon, with the command behind every rung |
 
 The same pages are in `docs/site/` and open from a clone with no network.
 The links above are the GitHub Pages copy, published by `.github/workflows/pages.yaml` on every push to
 `main`; should it ever be down, the same pages open [through htmlpreview](https://htmlpreview.github.io/?https://github.com/Normansrule/tinytapeout-tiqora/blob/main/docs/site/index.html).
 
-![The overview's opening shot: Tiqora-Serial's name above its tile of real sky130 cells, tilted in perspective and settling flat as you scroll](docs/images/explorer/site-hero.jpg)
+![The overview's opening shot: Tiqora-Serial's name above its real routed layout, tilted in perspective and settling flat as you scroll](docs/images/explorer/site-hero.jpg)
 
 | Fire a deadline | The zoom's last view |
 |---|---|
@@ -132,6 +132,20 @@ multiplexer, and Tiqora-Serial is one 1 × 2 block of tiles on it:
 the real 161.00 × 225.76 µm die outline. A treemap of measured numbers, not a placement:
 
 ![Treemap of each block's synthesized cell area inside the 1x2 die outline](docs/images/explorer/area_treemap.svg)
+
+**The real layout, routed.** Every cell where the placer put it and every wire the router drew,
+from a local LibreLane 3.0.14 run of the 1x2 configuration: `docs/tools/routed_map.py` reads the
+run's DEF into `docs/site/data/routed.json` and `docs/tools/routed_render.py` draws it. Only the
+colours are chosen: each metal layer has its own, and where layers cross they add.
+
+![The routed 1x2 layout of Tiqora-Serial: standard-cell rows under a dense mesh of metal wiring, each metal layer a different colour](docs/images/routed.jpg)
+
+**A clock edge, travelling.** The same layout dimmed, with the clock tree lit in the order an edge
+reaches it: from the `clk` pin through 4 levels of clock buffers to all 458 flip-flops, which flash.
+
+![The clock tree of the routed layout lighting up level by level from the clk pin until every flip-flop flashes](docs/images/routed_clock.gif)
+
+<sub>[Still image](docs/images/routed_clock.png) for readers with motion turned off. [Explore it on the website](https://normansrule.github.io/tinytapeout-tiqora/physical.html#routed-h): zoom, pan, turn layers on and off, and send the edge yourself.</sub>
 
 **An illustration, not a placement.** Every real sky130 cell of the synthesized design, drawn
 with its real geometry but packed into rows block by block by a simple script

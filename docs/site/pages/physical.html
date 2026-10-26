@@ -1,4 +1,4 @@
-<!-- {"title": "Physical design", "description": "Tiqora-Serial's layout at 1x2: measured cell area per block, the routed layout and its sign-off results.", "data": ["atlas", "layout"], "scripts": []} -->
+<!-- {"title": "Physical design", "description": "Tiqora-Serial's layout at 1x2: measured cell area per block, the routed layout and its sign-off results.", "data": ["atlas", "layout", "routed"], "scripts": ["die", "layout"]} -->
 <h1>Physical design</h1>
 <div class="note"><b>Tiqora-Serial has a clean layout at 1x2, the size <code>info.yaml</code> submits.</b> The Tiny Tapeout <code>gds</code>, pre-flight and gate-level workflows pass on GitHub (run 40161260168), and a local LibreLane run of the same source gives the numbers on this page. One result misses: setup timing at the slow corner (ss_100C_1v60), shown below. No chip exists yet.</div>
 
@@ -24,6 +24,31 @@
 </figure>
 <div class=tablewrap><table id=lt><caption class=sr>1x2 layout results</caption><thead><tr><th>Check</th><th>Result</th><th>Label</th></tr></thead><tbody></tbody></table></div>
 <p class=small id=lprov></p>
+<h2 id=routed-h>Explore the routed layout</h2>
+<p>Every cell where the placer put it and every wire the router drew: {{routed:signal}} cells that do the work, {{routed:phys}} more that only fill the rows (taps, fill and decoupling), and {{routed:segments}} wire segments, {{routed:wire_mm}} mm of metal, on the {{routed:die}} µm die. Each metal layer gets its own colour, and where layers cross, the colours add.</p>
+<div class=routed-x id=routed>
+ <div class=routed-bar role=group aria-label="What to show">
+  <span class=routed-group>
+   <button type=button data-layer=met1 aria-pressed=true><i class=sw-met1></i>metal 1</button>
+   <button type=button data-layer=met2 aria-pressed=true><i class=sw-met2></i>metal 2</button>
+   <button type=button data-layer=met3 aria-pressed=true><i class=sw-met3></i>metal 3</button>
+   <button type=button data-layer=met4 aria-pressed=true><i class=sw-met4></i>metal 4</button>
+  </span>
+  <span class=routed-group>
+   <button type=button data-class=0 aria-pressed=true><i class=sw-ff></i>flip-flops</button>
+   <button type=button data-class=1 aria-pressed=true><i class=sw-logic></i>logic</button>
+   <button type=button data-class=2 aria-pressed=true><i class=sw-buf></i>buffers</button>
+   <button type=button data-class=4 aria-pressed=true><i class=sw-phys></i>fill</button>
+  </span>
+  <button type=button class=routed-clock data-clock aria-pressed=false>Send a clock edge</button>
+  <span class=routed-readout aria-live=polite></span>
+ </div>
+ <canvas class=routed tabindex=0 role=img aria-label="The routed layout: {{routed:signal}} cells and {{routed:segments}} wire segments. Scroll or use plus and minus to zoom, drag or use the arrow keys to pan."></canvas>
+ <p class=routed-hint>Scroll or pinch to zoom, drag to pan. With the keyboard: + and − zoom, arrows pan, 0 fits the die.</p>
+</div>
+<p>The clock button lights the clock tree the way an edge travels: from the <code>clk</code> pin through {{routed:levels}} levels of clock buffers ({{routed:nets}} nets) to the {{routed:clocked}} flip-flops, which flash when it arrives. Clock-tree buffers are drawn amber.</p>
+<p class=small>From a local {{routed:flow}} run on {{routed:pdk}}, placement density {{routed:density}}%, read from the DEF after detailed routing and fill by <code>docs/tools/routed_map.py</code>. Wire segments per layer: {{routed:layers}}. It is the run in the table above; the table counts cells the way OpenROAD reports them, so its total is split differently.</p>
+<script>TQLayout.explore(document.getElementById("routed"), DATA("routed"));</script>
 <p class=small>Power: the run reports a power figure, but no switching activity from a real workload was given to it, so it is not shown. There is no power map.</p>
 <script>
 (function () {
