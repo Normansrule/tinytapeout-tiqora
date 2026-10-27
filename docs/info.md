@@ -14,7 +14,7 @@ from SkyWater's own cell geometry with KLayout (`docs/tools/zoom_animation.py`, 
 
 > **Looking for the programmable microcontroller?** That is the main Tiqora project:
 > [tiqora-skywater130](https://github.com/Normansrule/tiqora-skywater130), a RISC-V
-> microcontroller you program in C, over USB serial or from flash, in 2 × 2 tiles (280 €).
+> microcontroller you program in C, over USB serial or from flash, in 3 × 2 tiles (420 €).
 > This repository, **tinytapeout-tiqora**, is its low-cost sibling: the same timing hardware
 > with no CPU, driven by your computer, in 1 × 2 tiles (140 €).
 
@@ -36,11 +36,12 @@ microcontroller when the chip should run your code on its own.
 
 | | |
 |---|---|
-| ✅ **RTL simulation** | 30 checks on the serial host port (`cd test && make sim`), plus 5 cocotb tests from the pins only |
+| ✅ **RTL simulation** | 62 checks: 58 on the serial host port, 28 of them on framing errors, unknown commands, partial frames, late bytes, queue loss, reconnection and bursts, and 4 comparing the timing unit with a reference model (`cd test && make sim`), plus 5 cocotb tests from the pins only |
 | ✅ **FPGA (simulated)** | the whole Digilent Basys 3 design, driven like a PC at 115,200 baud: 7 checks (`make -C fpga/basys3 sim`) |
-| ✅ **Area (v20)** | 21,324 µm², 458 flip-flops, 59% of the 1 × 2 die (`make area`) |
+| ✅ **Area (verify-audits 2026-10-26)** | 21,322 µm², 458 flip-flops, 59% of the 1 × 2 die (`make area`) |
 | ✅ **Docs** | every link, image, `make` target and script mentioned exists (`make docs`, part of `make sim`) |
-| ❌ **Place and route at 1 × 2** | LibreLane 3.0.14 stops in detailed placement with `DPL-0036`. An experimental copy at 2 × 2 routes clean (DRC 0, LVS 0, antenna 0, setup +0.563 ns, hold +0.107 ns) and passes the Tiny Tapeout pre-flight 15/15 |
+| ✅ **Place and route at 1 × 2** | the Tiny Tapeout `gds`, pre-flight and gate-level workflows pass (GitHub run 40161260168); local LibreLane 3.0.14 run: DRC 0, LVS 0, antenna 0 |
+| ❌ **Setup timing, slow corner** | misses by 1.30 ns at 50 MHz at ss_100C_1v60 (29 paths), about 47 MHz there; met at the typical corner (+9.48 ns); hold met everywhere |
 | ⏳ **FPGA board** | Vivado build and a real Basys 3: `make bit && make prog` in `fpga/basys3` |
 | ⏳ **Silicon** | after submission to a Tiny Tapeout shuttle |
 
@@ -64,8 +65,8 @@ layers separate and rejoin:
 
 ![One sky130 D flip-flop exploded into its manufacturing layers](images/flipflop_exploded.svg)
 
-There is no routed layout at 1 × 2 yet. The explorer site, `docs/site/index.html`, shows the
-experimental 2 × 2 layout with its sign-off numbers.
+The explorer site, `docs/site/physical.html`, shows the routed 1 × 2 layout with its sign-off
+numbers.
 
 ## Run it on an FPGA today: Digilent Basys 3
 
@@ -283,6 +284,7 @@ at an internal flip-flop.
 | Check | Result |
 |---|---|
 | `tb_uart.sv`, driving only the serial pins | **30 / 30** |
+| `tb_proto.sv`, framing errors, glitches, all 253 unknown commands, partial frames, unmapped addresses, late bytes | **18 / 18** |
 | `test.py` cocotb, through the Tiny Tapeout pin interface | **5 / 5** |
 | `tpctl.py selftest`, host protocol with no hardware | **18 / 18** |
 | Verilator `-Wall` | **clean** (two documented waivers) |
@@ -295,8 +297,24 @@ fire triggers, and arm a deadline. **The deadline armed over serial fires on
 the exact programmed tick** — the same cycle-exact behaviour the full chip has (exact relative
 to the supplied clock; oscillator error and pad delay are separate), checked through two pins.
 
-What has *not* been done yet: a placed and routed layout at 1 × 2 (it stops with `DPL-0036`),
-routed timing at 1 × 2, gate-level simulation, and a run on a real Basys 3. The area has been measured against the real
+`tb_proto.sv` checks the port when the line or the host misbehaves (measured, main 2026-10-25,
+`make -C test proto`, 7 of 7 RTL mutants caught). A byte with a low stop bit is dropped, and a
+glitch under half a bit is not a byte. Every command byte other than 0x01, 0x02 and 0x03 gets one
+NAK. A write reaches the registers in a single clock with all 32 bits, and only after its sixth
+byte. Reads of offsets 3 to 15 return 0, and writes to the unmapped offsets 6 and 11 to 15 are
+acknowledged and change nothing. Only the low four address bits are decoded.
+
+Two limits follow from the design and are now measured rather than assumed:
+
+* **Wait for each reply.** Bytes that arrive while the chip is still sending are ignored, so a
+  host that sends its next command early loses it. `tpctl.py` always waits.
+* **There is no frame timeout.** If a host stops partway through a frame, the chip keeps waiting,
+  and the next bytes it receives finish that frame. A write cut short and followed by new commands
+  commits those bytes as its data. After a host-side timeout, reset the chip, or send the missing
+  bytes of a frame you know the state of, before trusting the link again.
+
+What has *not* been done yet: setup timing at the slow corner (it misses by 1.30 ns at 50 MHz),
+and a run on a real Basys 3. The area has been measured against the real
 sky130 library; see the Area section.
 
 ---
@@ -304,19 +322,20 @@ sky130 library; see the Area section.
 ## Area
 
 **Measured**, not estimated. Yosys maps the design onto the real sky130_fd_sc_hd standard cell
-library: 2,524 cells, 458 of them flip-flops, **20,400–21,300 µm²** depending on the Yosys version
-(about 20,400 with 0.52, 21,324 with 0.33). The table is the 21,324 µm² measurement:
+library, minus the cells this design's flow excludes (`src/synth_exclude.cells`: the PDK's
+`no_synth.cells` without its drive-strength-1 entries): 2,529 cells, 458 of them flip-flops,
+**21,322 µm²** (measured, verify-audits 2026-10-26, Yosys 0.33, `make -C test area`).
 
 | Tile | At 60% utilisation | At 70% | Verdict |
 |---|---:|---:|---|
 | 1x1 | 198% | 170% | does not fit |
-| **1x2** | **98%** | **84%** | **fits — this is the target** |
+| **1x2** | **98%** | **84%** | **fits: this is what it submits** |
 | 2x2 | 47% | 40% | plenty of room |
 
-That is about 60% of the 1 × 2 tile's **placeable** area (161.00 × 225.76 µm minus the placement
-margins), before the flow adds buffers. Tiny Tapeout's default placement density of 60 would sit
-at or below the design's own utilization and fail with `GPL-0302`, so `src/config.json` sets 70 —
-the same reasoning as the main Tiqora repository, which uses 72.
+That is 59% of the 1 × 2 die before the flow adds buffers, taps and clock tree; after placement
+the cells fill 80% of the core (local LibreLane 3.0.14 run). With the PDK's default list, which
+also bans the drive-strength-1 cells, the same design is 25,033 µm², 69% of the die, and placement
+fails with `DPL-0036`. That is why `src/config.json` points LibreLane at `src/synth_exclude.cells`.
 
 A 1x1 was the original goal and it is not reachable with this feature
 set. The serial host port alone — receiver, transmitter and protocol
@@ -324,8 +343,9 @@ engine — is about 38% of a 1x1 tile, and the timebase, comparators and
 event queue take more than the rest. Cutting to one trigger and a 16-bit
 rate trim only got it to 160% of a 1x1.
 
-A pre-PDK estimate put this at 21,345 um^2, 3% high, so the estimating
-method is sound but no substitute for the real library.
+A pre-PDK estimate put this at 21,345 um^2, within 0.1% of the measured
+number, but only because the flow's cell list allows the small cells: with
+the PDK's default list it is 17% low. No substitute for the real library.
 
 One optimisation was tried and reverted. Rewriting the comparator's
 `(now + 1) - deadline >= 0` as `now - deadline >= -1` looks like it saves

@@ -2,7 +2,8 @@
 # area_sky130.sh — REAL sky130 standard-cell area for this design.
 #
 # Maps the design onto the actual sky130_fd_sc_hd cell library from your
-# PDK install and reports total cell area against every Tiny Tapeout tile
+# PDK install, minus the cells the Tiny Tapeout flow excludes from
+# synthesis, and reports total cell area against every Tiny Tapeout tile
 # size. This replaces estimates with a measurement. It is still not place
 # and route — routing, tap cells and antenna diodes come on top, which is
 # why the tile columns are shown at 60% and 70% utilisation — but it is
@@ -58,8 +59,10 @@ fi
 TOP=$(grep -oP 'hierarchy -check -top \K\S+' syn/synth_check.ys)
 READS=$(grep '^read_verilog' syn/synth_check.ys)
 
-# yowasp runs sandboxed to the working directory, so stage the library here
-cp "$LIB" syn/.lib.tmp
+# yowasp runs sandboxed to the working directory, so stage the library here,
+# with the cells LibreLane may not use marked dont_use (see syn/dont_use.py).
+# NO_SYNTH=path/to/no_synth.cells overrides where the list is looked for.
+python3 syn/dont_use.py "$LIB" syn/.lib.tmp ${NO_SYNTH:+"$NO_SYNTH"}
 trap 'rm -f syn/.lib.tmp syn/.area.ys syn/.area.txt syn/.area.log' EXIT
 
 cat > syn/.area.ys <<YS

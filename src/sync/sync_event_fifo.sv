@@ -26,11 +26,12 @@ module sync_event_fifo #(
     input  wire  logic        push,
     input  wire  logic [31:0] wdata,
     input  wire  logic        pop,
+    input  wire  logic        lost,      // an event dropped before the queue
     output logic [31:0]       rdata,     // head, valid while !empty
     output logic              empty,
     output logic              full,
     output logic [PTRW:0]     count,
-    output logic              overflow   // sticky, cleared by clr_ovf
+    output logic              overflow   // sticky, cleared only by reset
 );
 
     logic [31:0]   mem [DEPTH-1:0];
@@ -66,8 +67,9 @@ module sync_event_fifo #(
                 default: cnt <= cnt;
             endcase
 
-            // a push that finds the queue full is a lost event: say so
-            if (push && full) overflow <= 1'b1;
+            // a push that finds the queue full is a lost event, and so is
+            // one dropped on the way in: say so
+            if ((push && full) || lost) overflow <= 1'b1;
         end
     end
 

@@ -219,7 +219,11 @@ def build(top, files, defines=()):
 def measure_area(lib, top, files, defines=()):
     y = yosys_bin()
     with tempfile.TemporaryDirectory() as tmp:
-        shutil.copy(lib, os.path.join(tmp, "c.lib"))
+        # mark the cells LibreLane may not use, as syn/area_sky130.sh does
+        r = subprocess.run([sys.executable, os.path.join(ROOT, "syn", "dont_use.py"), lib,
+                            os.path.join(tmp, "c.lib")], capture_output=True, text=True)
+        if r.returncode:
+            sys.exit("atlas.py: " + r.stderr.strip())
         d = " ".join("-D" + x for x in defines)
         reads = "\n".join(f"read_verilog -sv {d} {os.path.abspath(f)}" for f in files)
         ys = os.path.join(tmp, "a.ys")

@@ -216,10 +216,10 @@
   "simulator": "Icarus Verilog version 12.0 (stable) ()",
   "sources": {
    "src/sync/sync_capture.sv": "2a14d3051ed4d0f9c8d4c6158cb148cfe515bceb8111fc9da123d9b3f984a907",
-   "src/sync/sync_compare.sv": "532fda2a6751b3b1134744324ca9260de87b18ccb572aa18e21f0da8df998224",
-   "src/sync/sync_event_fifo.sv": "8072350d74f351b9ad8bbfbf90613ebb21058e3ccea1e7ea7e41ffdc945d1304",
+   "src/sync/sync_compare.sv": "979b57164e1255e6881f3e1526ea80ec914d5c096f3d8433f04869617fffa7a0",
+   "src/sync/sync_event_fifo.sv": "8fbd9d34936c2624b9292253f31aa6ad31866a2c1c32879ca7a76ef24724c03a",
    "src/sync/sync_timebase.sv": "c7a8d227e898022290a6fd1fade22e451c9b5adf532139151d7c8872ceb1f1ef",
-   "src/sync/sync_unit.sv": "9b659ce29646ac5f536a629f6fcf83acc039761c72c61e4e8a1b4b592be4f270",
+   "src/sync/sync_unit.sv": "7063a3b59bd7715cb3dbf95ccca771b2dd78e81fba995bd1c54eae5441270e50",
    "src/tp_pkg.sv": "8da187b5b062a40778534565ed50fbbe5c70afb2faa444fe44a47f324cdb42cd",
    "src/tp_sync_soc.sv": "462a14536fd2450134754e5f7c87a1fb90d28c6c95822d8596fed7975f1905aa",
    "src/tt_um_normansrule_tiqora_serial.sv": "09a201defac0fb179034a01edc9dbbc2f4828b927dc53658c01290469dc57efb",

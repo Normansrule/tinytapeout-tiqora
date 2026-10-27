@@ -1,34 +1,35 @@
-<!-- {"title": "Physical design", "description": "Where Tiqora-Serial stands on the way to a layout: measured cell area per block against the 1x2 die, the failed 1x2 placement, and the experimental 2x2 layout that hardens clean.", "data": ["atlas", "layout"], "scripts": []} -->
+<!-- {"title": "Physical design", "description": "Tiqora-Serial's layout at 1x2: measured cell area per block, the routed layout and its sign-off results.", "data": ["atlas", "layout"], "scripts": []} -->
 <h1>Physical design</h1>
-<div class="note bad"><b>At 1x2, the size <code>info.yaml</code> submits, there is no layout.</b> LibreLane 3.0.14 stops in detailed placement with <code>DPL-0036</code>. An experimental copy of the same RTL at 2x2 places, routes and passes every check below. Changing the tile count is the owner's decision, so the 2x2 results are labelled <span class="ev experimental">experimental</span> wherever they appear.</div>
+<div class="note"><b>Tiqora-Serial has a clean layout at 1x2, the size <code>info.yaml</code> submits.</b> The Tiny Tapeout <code>gds</code>, pre-flight and gate-level workflows pass on GitHub (run 40161260168), and a local LibreLane run of the same source gives the numbers on this page. One result misses: setup timing at the slow corner (ss_100C_1v60), shown below. No chip exists yet.</div>
 
 <h2>Three different areas</h2>
 <div class=grid>
- <div class=card><h3>Die area</h3><p><b>36,347 µm²</b> at 1x2: 161.0 × 225.76 µm, from Tiny Tapeout's template <code>tt_block_1x2_pg.def</code>. At 2x2, <b>75,602 µm²</b> (334.88 × 225.76 µm), as the 2x2 run reports.</p></div>
- <div class=card><h3>Core area</h3><p>Where cells may go, inside the power ring. <span class="ev experimental">experimental</span> at 2x2: <b><span id=core></span> µm²</b>, from LibreLane. Not known at 1x2, where no run got that far.</p></div>
- <div class=card><h3>Summed cell area</h3><p><b>21,324 µm²</b> <span class="ev measured">measured</span> flat synthesis (<code>make area</code>, Yosys 0.33): 59% of the 1x2 die. <span class="ev experimental">experimental</span> after placement at 2x2, with timing-repair buffers, taps and clock tree but no fill: <b><span id=placed></span> µm²</b>, <span id=util></span> of the core.</p></div>
+ <div class=card><h3>Die area</h3><p><b>36,347 µm²</b>: the 1x2 tile, 161.0 × 225.76 µm, from Tiny Tapeout's template <code>tt_block_1x2_pg.def</code>. Fixed by the tile count.</p></div>
+ <div class=card><h3>Core area</h3><p>Where cells may go, inside the power ring: <b><span id=core></span> µm²</b> <span class="ev measured">measured</span>, from LibreLane.</p></div>
+ <div class=card><h3>Summed cell area</h3><p><b>21,322 µm²</b> <span class="ev measured">measured</span> flat synthesis (<code>make area</code>, Yosys 0.33, the cells <code>src/synth_exclude.cells</code> leaves): 59% of the die. <span class="ev measured">measured</span> after placement, with timing-repair buffers, taps and clock tree but no fill: <b><span id=placed></span> µm²</b>, <span id=util></span> of the core.</p></div>
 </div>
 
 <h2>Where the cells go</h2>
 <p>Each block's cells, synthesized one module at a time and drawn <b>to scale</b> inside the 1x2 die outline. Positions mean nothing: this is proportion, not a floorplan.</p>
 <figure class=figure>
  <div class=treemap>{{static:treemap}}</div>
- <figcaption><span class="ev measured">measured</span> <code>python3 docs/tools/atlas.py --area sky130_fd_sc_hd__tt_025C_1v80.lib</code> (Yosys 0.33, each module synthesized without flattening). The hierarchical sum, 24,406 µm², is larger than the flat 21,324 µm² because synthesis cannot optimise across module boundaries.</figcaption>
+ <figcaption><span class="ev measured">measured</span> <code>python3 docs/tools/atlas.py --area sky130_fd_sc_hd__tt_025C_1v80.lib</code> (Yosys 0.33, each module synthesized without flattening). The hierarchical sum, 24,406 µm², is larger than the flat 21,322 µm² because synthesis cannot optimise across module boundaries.</figcaption>
 </figure>
 <div id=areatable></div>
 
-<h2>The experimental 2x2 layout</h2>
+<h2>The 1x2 layout</h2>
 <figure class=figure>
- <img src="{{img:docs/site/media/serial_2x2_render.jpg}}" alt="The routed 2x2 layout of Tiqora-Serial: standard cells fill the upper part of the die, and the rest is filler cells in even rows." width=1100 height=742>
- <figcaption><span class="ev experimental">experimental</span> A picture of the routed layout from the 2x2 run: the design's cells are in the upper part, the even rows below are filler. This is a layout, not a photograph of a chip; no chip exists. Drawn from the run's GDS in the same build session; the drawing settings were not recorded.</figcaption>
+ <img src="{{img:docs/site/media/serial_1x2_render.jpg}}" alt="The routed 1x2 layout of Tiqora-Serial: a tall rectangle covered edge to edge in standard-cell rows and metal wiring, with the pins along the top edge." width=760 height=1066>
+ <figcaption><span class="ev measured">measured</span> The routed layout from the local 1x2 run, drawn with KLayout from its GDS: diffusion, poly, local interconnect and metals 1 to 4. At 80% utilisation the cells fill the whole core. This is a layout, not a photograph of a chip; no chip exists.</figcaption>
 </figure>
-<div class=tablewrap><table id=lt><caption class=sr>Experimental 2x2 layout results</caption><thead><tr><th>Check</th><th>Result</th><th>Label</th></tr></thead><tbody></tbody></table></div>
+<div class=tablewrap><table id=lt><caption class=sr>1x2 layout results</caption><thead><tr><th>Check</th><th>Result</th><th>Label</th></tr></thead><tbody></tbody></table></div>
 <p class=small id=lprov></p>
 <p class=small>Power: the run reports a power figure, but no switching activity from a real workload was given to it, so it is not shown. There is no power map.</p>
 <script>
 (function () {
   const A = DATA("atlas"), L = DATA("layout"), m = L.metrics, area = A.area.modules_um2;
   const n = (v, d) => Number(v).toLocaleString("en-US", { maximumFractionDigits: d || 0 });
+  const sg = v => (v < 0 ? "" : "+") + v.toFixed(3);
   document.getElementById("core").textContent = n(m["design__core__area"]);
   document.getElementById("placed").textContent = n(m["design__instance__area__stdcell"]);
   document.getElementById("util").textContent = (100 * m["design__instance__utilization"]).toFixed(0) + "%";
@@ -37,14 +38,15 @@
     ["Routing DRC after the last router iteration", m["route__drc_errors"] + " errors"],
     ["Layout versus schematic (LVS)", m["design__lvs_error__count"] + " errors"],
     ["Antenna", m["route__antenna_violation__count"] + " violations"],
-    ["Setup slack, worst corner", "+" + m["timing__setup__ws"].toFixed(3) + " ns (ss_100C_1v60: +" + m["timing__setup__ws__corner:nom_ss_100C_1v60"].toFixed(3) + " ns)"],
-    ["Hold slack, worst corner", "+" + m["timing__hold__ws"].toFixed(3) + " ns"],
+    ["Setup slack at 50 MHz, typical corner (tt_025C_1v80)", sg(m["timing__setup__ws__corner:nom_tt_025C_1v80"]) + " ns"],
+    ["Setup slack at 50 MHz, worst corner (ss_100C_1v60)", sg(m["timing__setup__ws"]) + " ns, " + m["timing__setup_vio__count"] + " paths miss: the slow corner needs about 21.3 ns, so about 47 MHz"],
+    ["Hold slack, worst corner", sg(m["timing__hold__ws"]) + " ns"],
     ["Standard cells after placement", n(m["design__instance__count__stdcell"]) + " cells, " + n(m["design__instance__area__stdcell"]) + " µm²"],
     ["of which timing-repair buffers", n(m["design__instance__area__class:timing_repair_buffer"], 1) + " µm²"],
-    ["Tiny Tapeout pre-flight", "15/15 pass"]];
+    ["Tiny Tapeout pre-flight (precheck workflow, GitHub run 40161260168)", "pass"]];
   const tb = document.querySelector("#lt tbody");
-  rows.forEach(r => { const tr = document.createElement("tr"); r.concat([""]).forEach((x, i) => { const td = document.createElement("td"); if (i < 2) td.textContent = x; else td.innerHTML = "<span class='ev experimental'>experimental</span>"; tr.append(td); }); tb.append(tr); });
-  document.getElementById("lprov").textContent = L.what + " Tools: " + L.tools + ". Measured " + L.measured + ". Data: docs/site/data/serial_2x2_layout.json.";
+  rows.forEach(r => { const tr = document.createElement("tr"); r.concat([""]).forEach((x, i) => { const td = document.createElement("td"); if (i < 2) td.textContent = x; else td.innerHTML = r[1].startsWith("-") ? "<span class='ev fail'>failed</span>" : "<span class='ev measured'>measured</span>"; tr.append(td); }); tb.append(tr); });
+  document.getElementById("lprov").textContent = L.what + " Tools: " + L.tools + ". Measured " + L.measured + ". Data: docs/site/data/serial_1x2_layout.json.";
   const total = Object.values(area).reduce((s, v) => s + v, 0);
   const t = document.createElement("div"); t.className = "tablewrap";
   t.innerHTML = "<table><caption class=sr>Measured cell area per module</caption><thead><tr><th>Module</th><th>Block</th><th>Category</th><th class=num>µm²</th><th class=num>Share</th><th class=num>Flip-flop bits</th></tr></thead><tbody></tbody></table>";

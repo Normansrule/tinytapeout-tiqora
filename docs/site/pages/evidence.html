@@ -1,7 +1,7 @@
 <!-- {"title": "Evidence", "description": "The evidence ladder for Tiqora-Serial, from RTL tests to silicon, with the command behind every rung, and what changed from v19 to v20.1.", "data": [], "scripts": []} -->
 <h1>Evidence</h1>
-<p class=lede>A chip project climbs one ladder: tested RTL, then synthesis, layout, timing, a shuttle, a fabricated chip, a measured chip. Each rung says whether it has been reached at the tile size this repository submits, and names the run that showed it. Results from the experimental 2x2 copy are shown on the rungs they belong to, and labelled.</p>
-<p class=small>Labels: <span class="ev measured">measured</span> a tool run produced it · <span class="ev experimental">experimental</span> measured on a 2x2 copy, not the submitted 1x2 · <span class="ev fail">failed</span> run and did not pass · <span class="ev todo">not yet</span> not run or not reachable yet.</p>
+<p class=lede>A chip project climbs one ladder: tested RTL, then synthesis, layout, timing, a shuttle, a fabricated chip, a measured chip. Each rung says whether it has been reached at the tile size this repository submits, and names the run that showed it.</p>
+<p class=small>Labels: <span class="ev measured">measured</span> a tool run produced it · <span class="ev experimental">experimental</span> measured on a copy, not on what this repository submits · <span class="ev fail">failed</span> run and did not pass · <span class="ev todo">not yet</span> not run or not reachable yet.</p>
 <h2 id=ladder>The ladder</h2>
 {{static:ladder}}
 
@@ -17,8 +17,8 @@
   <tr><th>Name</th><td>TinyPulse-Serial</td><td>renamed Tiqora-Serial; protocol, register map and pin functions unchanged</td><td>same</td><td>same</td></tr>
   <tr><th>RTL</th><td></td><td>no change to <code>src/</code> since the v20 source drop</td><td>unchanged</td><td>unchanged</td></tr>
   <tr><th>RTL checks</th><td>not recorded here</td><td>30 checks, 5 cocotb tests</td><td>same</td><td>+ the recorded session, 13 checks</td></tr>
-  <tr><th>Cell area</th><td></td><td>21,324 µm² <span class="ev measured">measured</span> <code>make area</code>, 59% of 1x2</td><td>unchanged RTL</td><td>per block, 24,406 µm² hierarchical</td></tr>
-  <tr><th>Layout</th><td></td><td>1x2 fails placement <span class="ev fail">failed</span>; a 2x2 copy hardens clean <span class="ev experimental">experimental</span></td><td>unchanged</td><td>unchanged</td></tr>
+  <tr><th>Cell area</th><td></td><td>21,322 µm² <span class="ev measured">measured</span> <code>make area</code>, 59% of 1x2</td><td>unchanged RTL</td><td>per block, 24,406 µm² hierarchical; same with the layout's cell list</td></tr>
+  <tr><th>Layout</th><td></td><td>1x2 fails placement <span class="ev fail">failed</span>; a 2x2 copy hardens clean <span class="ev experimental">experimental</span></td><td>unchanged</td><td>1x2 with the drive-strength-1 cells allowed: <code>gds</code>, <code>precheck</code> and <code>gl_test</code> pass <span class="ev measured">measured</span> (GitHub run 40161260168)</td></tr>
   <tr><th>GitHub workflows</th><td></td><td>deleted by commit a040566, so nothing ran</td><td>restored</td><td>unchanged</td></tr>
   <tr><th>Documentation</th><td></td><td>datasheet PDF fails: web images and WebP</td><td>datasheet builds; <code>check_docs.py</code> guards it</td><td>this site, the atlas and the tours</td></tr>
  </tbody>

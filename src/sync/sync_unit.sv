@@ -76,7 +76,7 @@ module sync_unit
     logic [NCH-1:0]  pend_mask, pend_rise, work_mask, work_rise, sel_mask;
     logic [26:0]     pend_ts, work_ts;
     logic [2:0]      sel_ch;
-    logic            have_work;
+    logic            have_work, hw_taken, backlog_lost;
 
     logic            fifo_push, fifo_pop, fifo_empty, fifo_full, fifo_ovf;
     logic [31:0]     fifo_wdata, fifo_rdata;
@@ -162,16 +162,24 @@ module sync_unit
     assign fifo_push  = have_work;
     assign fifo_wdata = {1'b0, sel_ch, work_rise[sel_ch], work_ts};
 
+    // A TMARK in the same clock takes the queue slot; the pin event then
+    // stays in the backlog and goes in a clock later with its own timestamp.
+    assign hw_taken = have_work && !sw_push;
+
+    // New edges replace the backlog. Whatever was still waiting in it is
+    // lost, so it counts as an overflow rather than vanishing.
+    assign backlog_lost = (|evt) && (|pend_mask);
+
     always_ff @(posedge clk) begin
         if (rst) begin
             pend_mask <= '0;
             pend_rise <= '0;
             pend_ts   <= '0;
         end else if (|evt) begin
-            pend_mask <= evt & ~sel_mask;
+            pend_mask <= hw_taken ? (evt & ~sel_mask) : evt;
             pend_rise <= evt_rise;
             pend_ts   <= now[26:0];
-        end else if (have_work) begin
+        end else if (hw_taken) begin
             pend_mask <= work_mask & ~sel_mask;
         end
     end
@@ -182,6 +190,7 @@ module sync_unit
         .push    (fifo_push || sw_push),
         .wdata   (sw_push ? sw_wdata : fifo_wdata),
         .pop     (fifo_pop),
+        .lost    (backlog_lost),
         .rdata   (fifo_rdata),
         .empty   (fifo_empty),
         .full    (fifo_full),

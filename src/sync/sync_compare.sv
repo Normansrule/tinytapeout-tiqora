@@ -33,8 +33,8 @@ module sync_compare #(
 );
 
     logic [PWW-1:0] pw;
-    logic [31:0]    deadline [NCMP-1:0];
-    logic [PWW-1:0] pulse_cnt [NCMP-1:0];
+    (* mem2reg *) logic [31:0]    deadline [NCMP-1:0];
+    (* mem2reg *) logic [PWW-1:0] pulse_cnt [NCMP-1:0];
 
     genvar i;
     generate
