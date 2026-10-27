@@ -61,17 +61,12 @@ tour:
 	@iverilog -g2012 -o tb_tour.vvp -s tb_tour $(RTL) tb_tour.sv > tb_tour.log 2>&1 || { cat tb_tour.log; exit 1; }
 	vvp -n tb_tour.vvp +TRACE=tour_trace.txt > tour_out.txt; s=$$?; cat tour_out.txt; [ $$s -eq 0 ] && grep -q "TOUR TRACE PASSED" tour_out.txt
 
-# Two waivers, both deliberate:
-#   IMPORTSTAR   file-scope `import tp_pkg::*;` is the only import form
-#                Yosys's native frontend parses, and Yosys hardens the chip.
-#   UNUSEDPARAM  tp_pkg is shared with the full chip and carries the RV32I
-#                and Xpulse constants its core needs. This build has no
-#                core, so it intentionally uses none of them.
-# One waiver: tp_pkg is shared with the full chip and carries the RV32I
-# and Xpulse constants its core needs. This build has no core, so it
-# intentionally uses none of them.
+# Verilator -Wall with no command-line waivers. tp_pkg carries the full
+# chip's RV32I and Xpulse constants, which this build never uses; the
+# UNUSEDPARAM waiver for them sits inside the package (src/tp_pkg.sv),
+# so the Tiny Tapeout flow's own linter is silent too.
 lint:
-	verilator --lint-only -Wall -Wno-UNUSEDPARAM --timing $(RTL) --top-module tt_um_normansrule_tiqora_serial
+	verilator --lint-only -Wall --timing $(RTL) --top-module tt_um_normansrule_tiqora_serial
 
 # Zero tool warnings: Verilator -Wall and Yosys synthesis must both be silent.
 warnings: lint

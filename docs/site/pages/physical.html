@@ -68,7 +68,7 @@
     ["Hold slack, worst corner", sg(m["timing__hold__ws"]) + " ns"],
     ["Standard cells after placement", n(m["design__instance__count__stdcell"]) + " cells, " + n(m["design__instance__area__stdcell"]) + " µm²"],
     ["of which timing-repair buffers", n(m["design__instance__area__class:timing_repair_buffer"], 1) + " µm²"],
-    ["Tiny Tapeout pre-flight (precheck workflow, GitHub run 40161260168)", "pass"]];
+    ["Tiny Tapeout pre-flight (precheck workflow, GitHub run 40427835877)", "pass"]];
   const tb = document.querySelector("#lt tbody");
   rows.forEach(r => { const tr = document.createElement("tr"); r.concat([""]).forEach((x, i) => { const td = document.createElement("td"); if (i < 2) td.textContent = x; else td.innerHTML = r[1].startsWith("-") ? "<span class='ev fail'>failed</span>" : "<span class='ev measured'>measured</span>"; tr.append(td); }); tb.append(tr); });
   document.getElementById("lprov").textContent = L.what + " Tools: " + L.tools + ". Measured " + L.measured + ". Data: docs/site/data/serial_1x2_layout.json.";

@@ -103,6 +103,20 @@ r = subprocess.run([sys.executable, "docs/tools/build_site.py", "--check"], capt
 if r.returncode:
     fail(r.stdout.strip() or r.stderr.strip())
 site = json.load(open("docs/site/site.json"))
+# The atlas links every block to its source on GitHub at site["ref"], with the line
+# number read from this checkout. Both must agree: the line must declare the module
+# here, and the ref must be the branch this checkout is merged into, not an old tag
+# whose files have moved on.
+if site.get("ref", "main") != "main":
+    fail(f"site.json ref is {site['ref']!r}, but the atlas's line numbers come from this checkout; "
+         "its source links must point at main")
+for b in atlas["blocks"]:
+    try:
+        line = open(b["file"]).read().split("\n")[b["line"] - 1]
+    except (OSError, IndexError):
+        line = ""
+    if not re.match(rf"\s*module\s+{re.escape(b['module'])}\b", line):
+        fail(f"atlas: {b['module']} is not declared at {b['file']}:{b['line']}")
 ids = {f["id"] for f in fixtures}
 paths = {b["path"] for b in atlas["blocks"]}
 pages = 0
