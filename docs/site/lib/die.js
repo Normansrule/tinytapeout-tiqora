@@ -258,12 +258,13 @@
   // copy above it lifting away, so the page falls straight into the zoom below. Scroll sets the
   // target and the same critically damped spring follows it. With reduced motion the tile rests
   // flat and nothing is tied to scrolling; without JavaScript only the copy shows.
-  function reveal(host, die) {
+  // art, if given, is {canvas, ar}: another picture of the die (layout.js passes the routed one)
+  function reveal(host, die, art) {
     const reduce = root.matchMedia && root.matchMedia("(prefers-reduced-motion: reduce)").matches;
     const slot = host.querySelector(".chip3d");
-    const [TW, TH] = die.tile_um;
-    host.style.setProperty("--ar", (TW / TH).toFixed(3));   // the tile's shape, so a tall tile still fits the screen
-    const c = tileCanvas(die, Math.min(6, 1400 / TW), true);
+    const ar = art ? art.ar : die.tile_um[0] / die.tile_um[1];
+    host.style.setProperty("--ar", ar.toFixed(3));   // the tile's shape, so a tall tile still fits the screen
+    const c = art ? art.canvas : tileCanvas(die, Math.min(6, 1400 / die.tile_um[0]), true);
     c.setAttribute("aria-hidden", "true");
     slot.prepend(c);
     host.classList.add("on", reduce ? "still" : "live");

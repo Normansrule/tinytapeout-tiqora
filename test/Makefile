@@ -101,6 +101,8 @@ docs:
 	cd .. && python3 docs/tools/check_site.py
 	cd .. && python3 docs/tools/die_map.py --check
 	cd .. && python3 docs/tools/motion.py --check
+	cd .. && python3 docs/tools/routed_map.py --check
+	cd .. && python3 docs/tools/routed_map.py --mutants
 
 # the explorer site: atlas against the RTL (needs Yosys), tours against a fresh
 # simulation, then the site itself

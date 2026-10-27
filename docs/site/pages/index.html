@@ -1,4 +1,4 @@
-<!-- {"title": "Overview", "description": "Tiqora-Serial: hardware timestamping and cycle-exact triggers for a Tiny Tapeout 1x2 tile, controlled over USB serial with no processor. What goes in and out, and what is proven.", "data": ["tours", "die", "deadline", "site", "board"], "scripts": ["die", "labs", "board"]} -->
+<!-- {"title": "Overview", "description": "Tiqora-Serial: hardware timestamping and cycle-exact triggers for a Tiny Tapeout 1x2 tile, controlled over USB serial with no processor. What goes in and out, and what is proven.", "data": ["tours", "die", "routed", "deadline", "site", "board"], "scripts": ["die", "layout", "labs", "board"]} -->
 <section class="reveal bleed" id=reveal aria-labelledby=hero-h>
  <div class=reveal-stage>
   <div class=reveal-copy>
@@ -14,10 +14,10 @@
   <p class=small>Every waveform here was recorded from the RTL in simulation, at the chip's real 434 clocks per serial bit. Every number carries how it was obtained: <span class=evset><span class="ev measured">measured</span> <span class="ev experimental">experimental</span> <span class="ev fail">failed</span> <span class="ev todo">not yet</span></span></p>
  </div>
   <div class=reveal-chip aria-hidden=true><div class=chip3d><i class=sheen></i></div><i class=shadow></i></div>
-  <p class=reveal-cap>{{die:cells}} real sky130 cells, packed by a script into one Tiny Tapeout 1x2 tile. Keep scrolling to fall into it. <span class="ev illustrative">illustrative</span></p>
+  <p class=reveal-cap>The real layout: {{routed:signal}} cells where the placer put them and {{routed:segments}} wires where the router drew them, from a local {{routed:flow}} run of this design. Only the colours are chosen. <a href="physical.html#routed-h">Explore it</a>.</p>
  </div>
 </section>
-<script>TQDie.reveal(document.getElementById("reveal"), DATA("die"));</script>
+<script>TQLayout.hero(document.getElementById("reveal"), DATA("routed"));</script>
 
 
 <section class="zoom bleed" id=zoom aria-labelledby=zoom-h>

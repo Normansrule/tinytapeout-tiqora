@@ -20,7 +20,7 @@ import base64, html, json, math, os, re, sys
 SITE = "docs/site"
 LIB = SITE + "/lib"
 MEDIA = "docs/images/explorer"
-SCRIPTS = ["model", "wave", "player", "atlas", "die", "labs", "board"]
+SCRIPTS = ["model", "wave", "player", "atlas", "die", "layout", "labs", "board"]
 esc = lambda s: html.escape(str(s), quote=True)
 
 
@@ -301,6 +301,19 @@ def board_data(site):
 
 
 # ------------------------------------------------------------------ pages
+def routed_facts(r):
+    """The numbers the routed layout's captions quote, from routed.json (docs/tools/routed_map.py)."""
+    u = r["unit_nm"] / 1000
+    segs = sum(r["segments"])
+    depth = max((c["depth"] for c in r["clock"]), default=0)
+    flops = sum(len(base64.b64decode(c["flops"])) // 4 for c in r["clock"])
+    signal = r["counts"][0] + r["counts"][1] + r["counts"][2] + r["counts"][3]
+    return {"cells": f"{sum(r['counts']):,}", "signal": f"{signal:,}", "flops": f"{r['counts'][0]:,}", "phys": f"{r['counts'][4]:,}",
+            "segments": f"{segs:,}", "wire_mm": f"{sum(r['wire_um']) / 1000:.1f}", "nets": f"{len(r['clock'])}", "levels": str(depth + 1),
+            "clocked": f"{flops:,}", "die": f"{r['die'][0] * u:.2f} × {r['die'][1] * u:.2f}", "flow": esc(r["source"]["flow"]), "pdk": esc(r["source"]["pdk"]),
+            "density": str(r["source"]["density_pct"]), "note": esc(r["source"].get("note", "")), "layers": " ".join(f"{L} {n:,}" for L, n in zip(r["layers"], r["segments"]) if n)}
+
+
 def die_facts(d):
     """The numbers the die zoom's captions quote, from die.json (docs/tools/die_map.py)."""
     q = d["q_nm"] / 1000
@@ -345,6 +358,14 @@ def page(ctx, tpl_path):
                 sys.exit(f"build_site.py: {tpl_path}: unknown {{{{die:{mm.group(1)}}}}}")
             return facts[mm.group(1)]
         body = re.sub(r"\{\{die:(\w+)\}\}", dsub, body)
+    # {{routed:NAME}}: a number from docs/site/data/routed.json, the same way
+    if "{{routed:" in body:
+        facts = routed_facts(ctx["data"]["routed"])
+        def rsub(mm):
+            if mm.group(1) not in facts:
+                sys.exit(f"build_site.py: {tpl_path}: unknown {{{{routed:{mm.group(1)}}}}}")
+            return facts[mm.group(1)]
+        body = re.sub(r"\{\{routed:(\w+)\}\}", rsub, body)
     # {{img:path}}: an image in the repository, inlined so the page stays one file
     body = re.sub(r"\{\{img:([\w./-]+)\}\}", lambda mm: "data:image/" + {"jpg": "jpeg", "gif": "gif", "svg": "svg+xml"}.get(mm.group(1).rsplit(".", 1)[-1], "png") + ";base64," +
                   base64.b64encode(open(mm.group(1), "rb").read()).decode(), body)

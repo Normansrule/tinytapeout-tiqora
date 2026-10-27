@@ -540,6 +540,8 @@ html { overflow-x: clip; }
 .reveal-chip .shadow { position: absolute; left: 10%; right: 10%; bottom: -6%; height: 18%; border-radius: 50%; background: radial-gradient(closest-side, rgba(0, 0, 0, .75), transparent); filter: blur(6px); z-index: -1; }
 .reveal-cap { margin: 1.4rem auto 0; max-width: 46ch; text-align: center; font-size: .95rem; color: var(--screen-dim); }
 .reveal-cap .ev.illustrative { color: var(--screen-dim); }
+.routed-hero .reveal-cap { max-width: 70ch; }
+.reveal-cap a { color: #9ab0ff; }
 /* while scrolling: the stage holds still, the copy lifts away and the tile rises from below the fold and lands flat */
 .reveal.live { height: 230vh; }
 .reveal.live .reveal-stage { position: sticky; top: var(--top-h, 67px); height: calc(100vh - var(--top-h, 67px)); height: calc(100svh - var(--top-h, 67px));
@@ -552,6 +554,31 @@ html { overflow-x: clip; }
   .reveal.live .reveal-copy { opacity: calc(1 - var(--p) * 3.4); }
   .reveal.live .reveal-chip { width: min(92vw, calc((100svh - 150px) * var(--ar, 1.45))); transform: translate(-50%, calc(-50% + (1 - var(--p) * var(--p)) * 50vh)); } }
 .reveal + .zoom { margin-top: 0; }
+
+/* ------------------------------------------------------------ the routed layout (layout.js) */
+.chip3d canvas.glint { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; mix-blend-mode: screen; }
+.routed-hero .chip3d { box-shadow: 0 0 0 1px #2c3550, 0 0 60px -10px rgba(110, 120, 255, calc(.15 + .35 * var(--p))), 0 40px 90px -20px rgba(0, 0, 0, .95); }
+.routed-hero .chip3d .sheen { background: linear-gradient(105deg, transparent 30%, rgba(255, 255, 255, .10) 45%, rgba(160, 120, 255, .08) 52%, transparent 66%); background-size: 260% 100%; background-position: calc(120% - var(--p) * 140%) 0; }
+.routed-x { --rx-ink: #dfe4f2; --rx-dim: #8d95ab; --rx-line: #283048; position: relative; margin: 1.2rem 0; background: #05070a; color: var(--rx-ink); border-radius: var(--radius); overflow: hidden;
+  box-shadow: 0 0 0 1px var(--rx-line), 0 30px 70px -30px rgba(80, 90, 255, .35); }
+.routed-bar { display: flex; flex-wrap: wrap; gap: .5rem .9rem; align-items: center; padding: .7rem .8rem; border-bottom: 1px solid var(--rx-line); }
+.routed-group { display: inline-flex; flex-wrap: wrap; gap: .3rem; }
+.routed-bar button { font: 500 .82rem var(--sans); color: var(--rx-dim); background: transparent; border: 1px solid var(--rx-line); border-radius: 999px; padding: .28rem .7rem; cursor: pointer; display: inline-flex; align-items: center; gap: .4rem; }
+.routed-bar button[aria-pressed=true] { color: var(--rx-ink); border-color: #4a5578; background: rgba(120, 130, 255, .08); }
+.routed-bar button:focus-visible, canvas.routed:focus-visible { outline: 2px solid #9ab0ff; outline-offset: 2px; }
+.routed-bar button i { width: .7rem; height: .7rem; border-radius: 2px; display: inline-block; opacity: .35; }
+.routed-bar button[aria-pressed=true] i { opacity: 1; }
+.sw-met1 { background: linear-gradient(90deg, #6b5bff, #00d0ff); } .sw-met2 { background: linear-gradient(90deg, #00e0c0, #3c8cff); }
+.sw-met3 { background: linear-gradient(90deg, #ffc04d, #ff5fa2); } .sw-met4 { background: linear-gradient(90deg, #ff4f8b, #b06bff); }
+.sw-ff { background: #78e6aa; } .sw-logic { background: #96aac8; } .sw-buf { background: #6e8cff; } .sw-phys { background: #505a6e; }
+.routed-bar .routed-clock { color: #1a1206; background: #ffb000; border-color: #ffb000; font-weight: 600; }
+.routed-bar .routed-clock[aria-pressed=true] { color: #1a1206; background: #ffd27a; }
+.routed-readout { margin-left: auto; font: .8rem var(--mono); color: var(--rx-dim); }
+canvas.routed { display: block; width: 100%; height: auto; cursor: grab; touch-action: none; }
+canvas.routed:active { cursor: grabbing; }
+.routed-hint { margin: 0; padding: .55rem .8rem; font-size: .8rem; color: var(--rx-dim); border-top: 1px solid var(--rx-line); max-width: none; }
+.routed-x:not(.on) .routed-bar, .routed-x:not(.on) .routed-hint { display: none; }
+.routed-x noscript img, .reveal noscript img { display: block; width: 100%; height: auto; }
 .zoom.bleed:not(.scrolly) { margin-inline: 0; }
 .reveal:not(.on) .reveal-cap { display: none; }
 .zoom.bleed.scrolly .zoom-steps { padding-inline: max(0px, (100vw - 1200px) / 2); }
@@ -607,6 +634,7 @@ html { overflow-x: clip; }
   }
 }
 @media print {
+  .routed-bar, .routed-hint { display: none; }
   .top, .controls, .theme, .src, .skip { display: none; }
   body { background: #fff; color: #000; }
 }
