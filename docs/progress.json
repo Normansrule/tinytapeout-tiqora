@@ -5,7 +5,7 @@
       "name": "FPGA simulation",
       "steps": [
         {"step": "RTL suites on the serial host port", "state": "done",
-         "evidence": {"label": "measured", "version": "main, 2026-10-25", "command": "make -C test sim", "result": "48 checks and 5 cocotb tests pass"}},
+         "evidence": {"label": "measured", "version": "verify-audits, 2026-10-26", "command": "make -C test sim", "result": "62 checks and 5 cocotb tests pass"}},
         {"step": "whole Basys 3 design in simulation", "state": "done",
          "evidence": {"label": "measured", "version": "v20, 2026-10-18", "command": "make -C fpga/basys3 sim", "result": "7 checks"}}
       ]
@@ -23,7 +23,7 @@
       "name": "Tiny Tapeout GDS and pre-flight",
       "steps": [
         {"step": "cell area after synthesis, before placement", "state": "done",
-         "evidence": {"label": "measured", "version": "main, Yosys 0.33, 2026-10-25", "command": "make -C test area", "result": "21,324 µm², 458 flip-flops: 59% of 1x2, with the cells this design's flow excludes (src/synth_exclude.cells) removed"}},
+         "evidence": {"label": "measured", "version": "verify-audits, Yosys 0.33, 2026-10-26", "command": "make -C test area", "result": "21,322 µm², 458 flip-flops: 59% of 1x2, with the cells this design's flow excludes (src/synth_exclude.cells) removed"}},
         {"step": "place and route at 1x2", "state": "done",
          "evidence": {"label": "measured", "version": "PR #4 fc8d5d5, LibreLane 3.0.14", "command": "GitHub run 40161260168: gds and gl_test", "result": "clean GDS; local run DRC 0, LVS 0, antenna 0"}},
         {"step": "Tiny Tapeout pre-flight", "state": "done",

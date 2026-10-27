@@ -219,7 +219,7 @@
     {
      "rung": "RTL tested",
      "state": "measured",
-     "why": "48 checks and 5 cocotb tests from the pins (<code>make -C test sim</code>, main 2026-10-25), and the recorded tour, 13/13 (<code>make -C test tour</code>), whose every reply is checked against a model of the protocol."
+     "why": "62 checks and 5 cocotb tests from the pins (<code>make -C test sim</code>, verify-audits 2026-10-26), and the recorded tour, 13/13 (<code>make -C test tour</code>), whose every reply is checked against a model of the protocol."
     },
     {
      "rung": "Formally checked",
@@ -230,7 +230,7 @@
     {
      "rung": "Synthesized",
      "state": "measured",
-     "why": "21,324 µm² of sky130 cells, 458 flip-flops: 59% of the 1x2 die (<code>make area</code>, Yosys 0.33, main 2026-10-25, with the cells this design's flow excludes removed)."
+     "why": "21,322 µm² of sky130 cells, 458 flip-flops: 59% of the 1x2 die (<code>make area</code>, Yosys 0.33, verify-audits 2026-10-26, with the cells this design's flow excludes removed)."
     },
     {
      "rung": "Placed and routed",

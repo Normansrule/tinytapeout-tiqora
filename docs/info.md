@@ -36,9 +36,9 @@ microcontroller when the chip should run your code on its own.
 
 | | |
 |---|---|
-| ✅ **RTL simulation** | 48 checks on the serial host port, 18 of them on framing errors, unknown commands, partial frames and late bytes (`cd test && make sim`), plus 5 cocotb tests from the pins only |
+| ✅ **RTL simulation** | 62 checks: 58 on the serial host port, 28 of them on framing errors, unknown commands, partial frames, late bytes, queue loss, reconnection and bursts, and 4 comparing the timing unit with a reference model (`cd test && make sim`), plus 5 cocotb tests from the pins only |
 | ✅ **FPGA (simulated)** | the whole Digilent Basys 3 design, driven like a PC at 115,200 baud: 7 checks (`make -C fpga/basys3 sim`) |
-| ✅ **Area (main 2026-10-25)** | 21,324 µm², 458 flip-flops, 59% of the 1 × 2 die (`make area`) |
+| ✅ **Area (verify-audits 2026-10-26)** | 21,322 µm², 458 flip-flops, 59% of the 1 × 2 die (`make area`) |
 | ✅ **Docs** | every link, image, `make` target and script mentioned exists (`make docs`, part of `make sim`) |
 | ✅ **Place and route at 1 × 2** | the Tiny Tapeout `gds`, pre-flight and gate-level workflows pass (GitHub run 40161260168); local LibreLane 3.0.14 run: DRC 0, LVS 0, antenna 0 |
 | ❌ **Setup timing, slow corner** | misses by 1.30 ns at 50 MHz at ss_100C_1v60 (29 paths), about 47 MHz there; met at the typical corner (+9.48 ns); hold met everywhere |
@@ -323,8 +323,8 @@ sky130 library; see the Area section.
 
 **Measured**, not estimated. Yosys maps the design onto the real sky130_fd_sc_hd standard cell
 library, minus the cells this design's flow excludes (`src/synth_exclude.cells`: the PDK's
-`no_synth.cells` without its drive-strength-1 entries): 2,524 cells, 458 of them flip-flops,
-**21,324 µm²** (measured, main 2026-10-25, Yosys 0.33, `make -C test area`).
+`no_synth.cells` without its drive-strength-1 entries): 2,529 cells, 458 of them flip-flops,
+**21,322 µm²** (measured, verify-audits 2026-10-26, Yosys 0.33, `make -C test area`).
 
 | Tile | At 60% utilisation | At 70% | Verdict |
 |---|---:|---:|---|
