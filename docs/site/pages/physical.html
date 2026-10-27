@@ -1,6 +1,6 @@
 <!-- {"title": "Physical design", "description": "Tiqora-Serial's layout at 1x2: measured cell area per block, the routed layout and its sign-off results.", "data": ["atlas", "layout", "routed"], "scripts": ["die", "layout"]} -->
 <h1>Physical design</h1>
-<div class="note"><b>Tiqora-Serial has a clean layout at 1x2, the size <code>info.yaml</code> submits.</b> The Tiny Tapeout <code>gds</code>, pre-flight and gate-level workflows pass on GitHub (run 40161260168), and a local LibreLane run of the same source gives the numbers on this page. One result misses: setup timing at the slow corner (ss_100C_1v60), shown below. No chip exists yet.</div>
+<div class="note"><b>Tiqora-Serial has a clean layout at 1x2, the size <code>info.yaml</code> submits.</b> The Tiny Tapeout <code>gds</code>, pre-flight and gate-level workflows pass on GitHub for main 168fc84 (run 40427835877), and a local LibreLane 3.0.14 run of the same source (open_pdks 1.0.471, 2026-10-27) gives the numbers on this page. One result disagrees: the local run misses setup timing at the slow corner (max_ss_100C_1v60), shown below, while GitHub's flow, on PDK build open_pdks 8afc8346, reports no setup violation. Its slack numbers are not readable from here, so the local miss stands. No chip exists yet.</div>
 
 <h2>Three different areas</h2>
 <div class=grid>
@@ -20,7 +20,7 @@
 <h2>The 1x2 layout</h2>
 <figure class=figure>
  <img src="{{img:docs/site/media/serial_1x2_render.jpg}}" alt="The routed 1x2 layout of Tiqora-Serial: a tall rectangle covered edge to edge in standard-cell rows and metal wiring, with the pins along the top edge." width=760 height=1066>
- <figcaption><span class="ev measured">measured</span> The routed layout from the local 1x2 run, drawn with KLayout from its GDS: diffusion, poly, local interconnect and metals 1 to 4. At 80% utilisation the cells fill the whole core. This is a layout, not a photograph of a chip; no chip exists.</figcaption>
+ <figcaption><span class="ev measured">measured</span> The routed layout from the local 1x2 run, drawn with KLayout from its GDS: diffusion, poly, local interconnect and metals 1 to 4. At 79% utilisation the cells fill the whole core. This is a layout, not a photograph of a chip; no chip exists.</figcaption>
 </figure>
 <div class=tablewrap><table id=lt><caption class=sr>1x2 layout results</caption><thead><tr><th>Check</th><th>Result</th><th>Label</th></tr></thead><tbody></tbody></table></div>
 <p class=small id=lprov></p>
@@ -64,7 +64,7 @@
     ["Layout versus schematic (LVS)", m["design__lvs_error__count"] + " errors"],
     ["Antenna", m["route__antenna_violation__count"] + " violations"],
     ["Setup slack at 50 MHz, typical corner (tt_025C_1v80)", sg(m["timing__setup__ws__corner:nom_tt_025C_1v80"]) + " ns"],
-    ["Setup slack at 50 MHz, worst corner (ss_100C_1v60)", sg(m["timing__setup__ws"]) + " ns, " + m["timing__setup_vio__count"] + " paths miss: the slow corner needs about 21.3 ns, so about 47 MHz"],
+    ["Setup slack at 50 MHz, worst corner (max_ss_100C_1v60)", sg(m["timing__setup__ws__corner:max_ss_100C_1v60"]) + " ns, " + m["timing__setup_vio__count__corner:max_ss_100C_1v60"] + " paths miss: the slow corner needs about " + (20 - m["timing__setup__ws__corner:max_ss_100C_1v60"]).toFixed(1) + " ns, so about " + (1000 / (20 - m["timing__setup__ws__corner:max_ss_100C_1v60"])).toFixed(0) + " MHz. The GitHub flow reports no setup violation"],
     ["Hold slack, worst corner", sg(m["timing__hold__ws"]) + " ns"],
     ["Standard cells after placement", n(m["design__instance__count__stdcell"]) + " cells, " + n(m["design__instance__area__stdcell"]) + " µm²"],
     ["of which timing-repair buffers", n(m["design__instance__area__class:timing_repair_buffer"], 1) + " µm²"],

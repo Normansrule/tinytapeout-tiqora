@@ -34,7 +34,7 @@
       "name": "sky130 timing",
       "steps": [
         {"step": "signoff timing after routing", "state": "doing",
-         "evidence": {"label": "measured", "version": "verify-audits 2026-10-25, LibreLane 3.0.14 local", "command": "librelane on src/config.json at 1x2", "result": "hold met everywhere (+0.112 ns worst); setup at 50 MHz met at the typical corner (+9.48 ns) and missed at ss_100C_1v60 by 1.30 ns on 29 paths, so about 47 MHz at the slow corner"}}
+         "evidence": {"label": "measured", "version": "main 168fc84, 2026-10-27, LibreLane 3.0.14 local, open_pdks 1.0.471", "command": "tt_tool.py --create-user-config, then librelane on src/config_merged.json", "result": "hold met everywhere (+0.108 ns worst); setup at 50 MHz met at the typical corner (+9.56 ns) and missed at max_ss_100C_1v60 by 1.30 ns on 8 paths, so about 47 MHz at the slow corner. The GitHub flow (run 40427835877, open_pdks 8afc8346) reports no setup violation at any corner; its slack numbers are not readable from here"}}
       ]
     },
     {

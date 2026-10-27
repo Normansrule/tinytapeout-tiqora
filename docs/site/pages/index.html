@@ -114,7 +114,7 @@ TQLabs.deadline(document.getElementById("deadline"), DATA("deadline"), { clockNs
   <p>SystemVerilog RTL, a Python host library and command line, testbenches, a Basys 3 FPGA build and Tiny Tapeout packaging. <b>No chip and no board run.</b> At the 1x2 size <code>info.yaml</code> submits, the layout is clean: the Tiny Tapeout <code>gds</code>, pre-flight and gate-level workflows pass (GitHub run 40427835877). <a href="physical.html">Physical design</a>.</p>
  </div></div>
  <div class=qa><h3>What is proven or measured?</h3><div>
-  <p><span class="ev measured">measured</span> 62 RTL checks, 5 cocotb tests, 13 tour checks, synthesized cell area. <span class="ev measured">measured</span> at 1x2: DRC, LVS and antenna clean, pre-flight and gate-level tests pass, setup met at the typical corner. <span class="ev fail">failed</span> setup at the slow corner (ss_100C_1v60) by 1.30 ns at 50 MHz. <span class="ev todo">not yet</span> formal proofs, a shuttle, silicon. <a href="evidence.html">The evidence ladder</a>.</p>
+  <p><span class="ev measured">measured</span> 62 RTL checks, 5 cocotb tests, 13 tour checks, synthesized cell area. <span class="ev measured">measured</span> at 1x2: DRC, LVS and antenna clean, pre-flight and gate-level tests pass, setup met at the typical corner. <span class="ev fail">failed</span> setup at the slow corner (max_ss_100C_1v60) by 1.30 ns at 50 MHz in a local run; GitHub's flow reports no violation. <span class="ev todo">not yet</span> formal proofs, a shuttle, silicon. <a href="evidence.html">The evidence ladder</a>.</p>
  </div></div>
  <div class=qa><h3>What can I try?</h3><div>
 <pre class=cmd><span class=c># Icarus Verilog 12 and Python 3</span>

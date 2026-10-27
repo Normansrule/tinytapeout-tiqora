@@ -40,8 +40,8 @@ microcontroller when the chip should run your code on its own.
 | ✅ **FPGA, simulated (main 168fc84, 2026-10-27)** | the whole Digilent Basys 3 design, driven like a PC at 115,200 baud: 7 checks (`make -C fpga/basys3 sim`) |
 | ✅ **Area (main 168fc84, 2026-10-27)** | 21,322 µm², 458 flip-flops, 59% of the 1 × 2 die (`make area`) |
 | ✅ **Docs (main 168fc84, 2026-10-27)** | every link, image, `make` target and script mentioned exists (`make docs`, part of `make sim`) |
-| ✅ **Place and route at 1 × 2 (main 168fc84)** | the Tiny Tapeout `gds`, pre-flight and gate-level workflows pass, and the flow reports DRC, LVS and antenna passed (GitHub run 40427835877); local LibreLane 3.0.14 run: DRC 0, LVS 0, antenna 0 |
-| ❌ **Setup timing, slow corner** | misses by 1.30 ns at 50 MHz at ss_100C_1v60 (29 paths), about 47 MHz there; met at the typical corner (+9.48 ns); hold met everywhere |
+| ✅ **Place and route at 1 × 2 (main 168fc84)** | the Tiny Tapeout `gds`, pre-flight and gate-level workflows pass, and the flow reports DRC, LVS and antenna passed (GitHub run 40427835877); local LibreLane 3.0.14 run, open_pdks 1.0.471, main 168fc84, 2026-10-27: DRC 0, LVS 0, antenna 0 |
+| ❌ **Setup timing, slow corner** | local LibreLane 3.0.14 run, open_pdks 1.0.471, main 168fc84, 2026-10-27: misses by 1.30 ns at 50 MHz at max_ss_100C_1v60 (8 paths), about 47 MHz there; met at the typical corner (+9.56 ns); hold met everywhere (+0.108 ns worst). The GitHub flow (run 40427835877) reports no setup violation at any corner |
 | ⬜ **FPGA board (not yet)** | Vivado build and a real Basys 3: `make bit && make prog` in `fpga/basys3` |
 | ⬜ **Silicon (not yet)** | no chip exists; it needs a submission to a Tiny Tapeout shuttle |
 
@@ -313,7 +313,7 @@ Two limits follow from the design and are now measured rather than assumed:
   commits those bytes as its data. After a host-side timeout, reset the chip, or send the missing
   bytes of a frame you know the state of, before trusting the link again.
 
-What has *not* been done yet: setup timing at the slow corner (it misses by 1.30 ns at 50 MHz),
+What has *not* been done yet: setup timing at the slow corner (a local run misses by 1.30 ns at 50 MHz; GitHub's flow reports no violation),
 and a run on a real Basys 3. The area has been measured against the real
 sky130 library; see the Area section.
 

@@ -29,8 +29,9 @@ existing microcontroller, and you only need precise timing from the chip. Use th
 microcontroller when the chip should run your code on its own.
 
 It exists as tested RTL and a clean layout, not yet as a chip. At 1 × 2, the size it submits, the
-Tiny Tapeout GDS, pre-flight and gate-level workflows pass (GitHub run 40427835877). One result misses: setup
-timing at the slow corner, by 1.30 ns at 50 MHz (local LibreLane 3.0.14 run).
+Tiny Tapeout GDS, pre-flight and gate-level workflows pass (GitHub run 40427835877), and that flow reports no setup violations. One result disagrees: a
+local run of the same configuration misses setup timing at the slow corner by 1.30 ns at 50 MHz
+(local LibreLane 3.0.14 run, open_pdks 1.0.471, main 168fc84, 2026-10-27).
 
 **Key features**
 
@@ -83,8 +84,8 @@ Where the Tiny Tapeout tile stands on the way to silicon. Each rung needs the on
 | RTL tested | ✅ done | 62 checks (30 host port; 28 framing, bad input, queue loss, reconnection and bursts; 4 timing-unit reference model), 5 cocotb tests from the pins, recorded tour 13/13 (`make -C test sim`; main 168fc84, 2026-10-27) |
 | Formally checked | ⬜ not done | no formal proofs exist for this design |
 | Synthesized | ✅ done | 21,322 µm², 458 flip-flops, 59% of the 1 × 2 die (`make -C test area`, Yosys 0.33, main 168fc84, 2026-10-27, with the cells this design's flow excludes (src/synth_exclude.cells) removed) |
-| Placed and routed | ✅ done | 1 × 2: `gds` and `gl_test` pass (GitHub run 40427835877); local LibreLane 3.0.14 run: DRC 0, LVS 0, antenna 0, 80% utilisation |
-| Timing checked | ❌ missed at the slow corner | local LibreLane 3.0.14 run at 1 × 2: hold met everywhere (+0.112 ns worst); setup at 50 MHz met at the typical corner (+9.48 ns) and missed at ss_100C_1v60 by 1.30 ns on 29 paths, so about 47 MHz at the slow corner |
+| Placed and routed | ✅ done | 1 × 2: `gds` and `gl_test` pass (GitHub run 40427835877); local LibreLane 3.0.14 run, open_pdks 1.0.471, main 168fc84, 2026-10-27: DRC 0, LVS 0, antenna 0, 79% utilisation |
+| Timing checked | ❌ missed at the slow corner in the local run | local LibreLane 3.0.14 run, open_pdks 1.0.471, main 168fc84, 2026-10-27, 1 × 2: hold met everywhere (+0.108 ns worst); setup at 50 MHz met at the typical corner (+9.56 ns) and missed at max_ss_100C_1v60 by 1.30 ns on 8 paths, so about 47 MHz at the slow corner. The GitHub flow (run 40427835877, open_pdks 8afc8346) reports no setup violation at any corner; its slack numbers are not readable from here |
 | Submitted, fabricated, measured | ⬜ not yet | the Tiny Tapeout pre-flight passes at 1 × 2 (GitHub run 40427835877); submitting is the owner's step |
 | FPGA board | ⬜ not yet | the Basys 3 design passes in simulation, 7 checks; nothing has run on a board |
 
@@ -103,7 +104,7 @@ Where Tiqora-Serial stands on the way to silicon. Every ✅ and 🔄 below names
 | **Tiny Tapeout GDS and pre-flight** | `██████████` 3/3 | cell area after synthesis, before placement | ✅ | 21,322 µm², 458 flip-flops: 59% of 1x2, with the cells this design's flow excludes (src/synth_exclude.cells) removed; measured (main 168fc84, Yosys 0.33, 2026-10-27, `make -C test area`) |
 |  |  | place and route at 1x2 | ✅ | clean GDS; local run DRC 0, LVS 0, antenna 0; measured (main 168fc84, LibreLane 3.0.14, `GitHub run 40427835877: gds and gl_test`) |
 |  |  | Tiny Tapeout pre-flight | ✅ | pass; measured (main 168fc84, `GitHub run 40427835877: precheck`) |
-| **sky130 timing** | `░░░░░░░░░░` 0/1 | signoff timing after routing | 🔄 | hold met everywhere (+0.112 ns worst); setup at 50 MHz met at the typical corner (+9.48 ns) and missed at ss_100C_1v60 by 1.30 ns on 29 paths, so about 47 MHz at the slow corner; measured (verify-audits 2026-10-25, LibreLane 3.0.14 local, `librelane on src/config.json at 1x2`) |
+| **sky130 timing** | `░░░░░░░░░░` 0/1 | signoff timing after routing | 🔄 | hold met everywhere (+0.108 ns worst); setup at 50 MHz met at the typical corner (+9.56 ns) and missed at max_ss_100C_1v60 by 1.30 ns on 8 paths, so about 47 MHz at the slow corner. The GitHub flow (run 40427835877, open_pdks 8afc8346) reports no setup violation at any corner; its slack numbers are not readable from here; measured (main 168fc84, 2026-10-27, LibreLane 3.0.14 local, open_pdks 1.0.471, `tt_tool.py --create-user-config, then librelane on src/config_merged.json`) |
 | **Silicon** | `░░░░░░░░░░` 0/2 | shuttle submission | ⬜ | next: after a clean GDS and pre-flight |
 |  |  | first chip tested | ⬜ | next: after the shuttle returns |
 
@@ -454,7 +455,7 @@ multi-pin burst was still being queued (up to 7 clocks) replaced the waiting eve
 trace. Fixed 2026-10-26 in the timing unit shared with Tiqora: the waiting events are still
 dropped, but the overflow flag now says so, and `make proto` checks it.
 
-What has *not* been done yet: setup timing at the slow corner (it misses by 1.30 ns at 50 MHz),
+What has *not* been done yet: setup timing at the slow corner (a local run misses by 1.30 ns at 50 MHz; GitHub's flow reports no violation),
 and a run on a real Basys 3. The area has been
 measured against the real sky130 library; see [Area](#area).
 
