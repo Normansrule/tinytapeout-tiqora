@@ -235,13 +235,12 @@
     {
      "rung": "Placed and routed",
      "state": "measured",
-     "why": "1x2: the <code>gds</code> workflow passes and the cocotb tests pass on the routed netlist (GitHub run 40427835877). A local LibreLane 3.0.14 run of the same source (open_pdks 1.0.471, main 168fc84, 2026-10-27): DRC 0, LVS 0, antenna 0, 79% utilisation."
+     "why": "1x2: the <code>gds</code> workflow passes and the cocotb tests pass on the routed netlist (GitHub run 40624495043, src/ as on main 168fc84): DRC 0, LVS 0, antenna 0, 82% utilisation."
     },
     {
      "rung": "Timing checked",
-     "state": "fail",
-     "word": "missed at the slow corner in the local run",
-     "why": "Local LibreLane 3.0.14 run at 1x2 (open_pdks 1.0.471, main 168fc84, 2026-10-27), 50 MHz: hold met everywhere (+0.108 ns worst); setup met at the typical corner (+9.56 ns) and missed at max_ss_100C_1v60 by 1.30 ns on 8 paths, so the slow corner runs at about 47 MHz. The GitHub flow (run 40427835877, open_pdks 8afc8346) reports no setup violation at any corner; its slack numbers cannot be read here, so the local miss stands."
+     "state": "measured",
+     "why": "GitHub run 40624495043 at 1x2 (LibreLane 3.0.14, open_pdks 8afc8346, src/ as on main 168fc84), 50 MHz: setup met at all nine corners, +8.76 ns at the typical corner and +1.43 ns at the slowest (max_ss_100C_1v60); hold met everywhere (+0.112 ns worst). The run still reports max-slew warnings on 745 pins at the slowest corner."
     },
     {
      "rung": "Submitted to a shuttle",

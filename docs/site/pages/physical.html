@@ -1,6 +1,6 @@
 <!-- {"title": "Physical design", "description": "Tiqora-Serial's layout at 1x2: measured cell area per block, the routed layout and its sign-off results.", "data": ["atlas", "layout", "routed"], "scripts": ["die", "layout"]} -->
 <h1>Physical design</h1>
-<div class="note"><b>Tiqora-Serial has a clean layout at 1x2, the size <code>info.yaml</code> submits.</b> The Tiny Tapeout <code>gds</code>, pre-flight and gate-level workflows pass on GitHub for main 168fc84 (run 40427835877), and a local LibreLane 3.0.14 run of the same source (open_pdks 1.0.471, 2026-10-27) gives the numbers on this page. One result disagrees: the local run misses setup timing at the slow corner (max_ss_100C_1v60), shown below, while GitHub's flow, on PDK build open_pdks 8afc8346, reports no setup violation. Its slack numbers are not readable from here, so the local miss stands. No chip exists yet.</div>
+<div class="note"><b>Tiqora-Serial has a clean layout at 1x2, the size <code>info.yaml</code> submits.</b> The Tiny Tapeout <code>gds</code>, pre-flight and gate-level workflows pass on GitHub, and that run's own report gives the numbers in the table on this page (run 40624495043, src/ as on main 168fc84). It meets setup and hold timing at 50 MHz at all nine corners. No chip exists yet.</div>
 
 <h2>Three different areas</h2>
 <div class=grid>
@@ -20,7 +20,7 @@
 <h2>The 1x2 layout</h2>
 <figure class=figure>
  <img src="{{img:docs/site/media/serial_1x2_render.jpg}}" alt="The routed 1x2 layout of Tiqora-Serial: a tall rectangle covered edge to edge in standard-cell rows and metal wiring, with the pins along the top edge." width=760 height=1066>
- <figcaption><span class="ev measured">measured</span> The routed layout from the local 1x2 run, drawn with KLayout from its GDS: diffusion, poly, local interconnect and metals 1 to 4. At 79% utilisation the cells fill the whole core. This is a layout, not a photograph of a chip; no chip exists.</figcaption>
+ <figcaption><span class="ev measured">measured</span> A routed 1x2 layout of the same source from a local LibreLane 3.0.14 run (open_pdks 1.0.471, 2026-10-27), drawn with KLayout from its GDS: diffusion, poly, local interconnect and metals 1 to 4. GitHub's layout differs in detail; at 79 to 82% utilisation the cells fill the whole core either way. This is a layout, not a photograph of a chip; no chip exists.</figcaption>
 </figure>
 <div class=tablewrap><table id=lt><caption class=sr>1x2 layout results</caption><thead><tr><th>Check</th><th>Result</th><th>Label</th></tr></thead><tbody></tbody></table></div>
 <p class=small id=lprov></p>
@@ -47,7 +47,7 @@
  <p class=routed-hint>Scroll or pinch to zoom, drag to pan. With the keyboard: + and − zoom, arrows pan, 0 fits the die.</p>
 </div>
 <p>The clock button lights the clock tree the way an edge travels: from the <code>clk</code> pin through {{routed:levels}} levels of clock buffers ({{routed:nets}} nets) to the {{routed:clocked}} flip-flops, which flash when it arrives. Clock-tree buffers are drawn amber.</p>
-<p class=small>From a local {{routed:flow}} run on {{routed:pdk}}, placement density {{routed:density}}%{{routed:note}}, read from the DEF after detailed routing and fill by <code>docs/tools/routed_map.py</code>. Wire segments per layer: {{routed:layers}}. It is the run in the table above; the table counts cells the way OpenROAD reports them, so its total is split differently.</p>
+<p class=small>From a local {{routed:flow}} run on {{routed:pdk}}, placement density {{routed:density}}%{{routed:note}}, read from the DEF after detailed routing and fill by <code>docs/tools/routed_map.py</code>. Wire segments per layer: {{routed:layers}}. It is not the GitHub run in the table above, whose layout cannot be downloaded from here: the placement differs in detail, and that local run, built with a different OpenROAD, missed setup at the slowest corner by 1.30 ns where GitHub's meets it by 1.43 ns.</p>
 <script>TQLayout.explore(document.getElementById("routed"), DATA("routed"));</script>
 <p class=small>Power: the run reports a power figure, but no switching activity from a real workload was given to it, so it is not shown. There is no power map.</p>
 <script>
@@ -64,11 +64,11 @@
     ["Layout versus schematic (LVS)", m["design__lvs_error__count"] + " errors"],
     ["Antenna", m["route__antenna_violation__count"] + " violations"],
     ["Setup slack at 50 MHz, typical corner (tt_025C_1v80)", sg(m["timing__setup__ws__corner:nom_tt_025C_1v80"]) + " ns"],
-    ["Setup slack at 50 MHz, worst corner (max_ss_100C_1v60)", sg(m["timing__setup__ws__corner:max_ss_100C_1v60"]) + " ns, " + m["timing__setup_vio__count__corner:max_ss_100C_1v60"] + " paths miss: the slow corner needs about " + (20 - m["timing__setup__ws__corner:max_ss_100C_1v60"]).toFixed(1) + " ns, so about " + (1000 / (20 - m["timing__setup__ws__corner:max_ss_100C_1v60"])).toFixed(0) + " MHz. The GitHub flow reports no setup violation"],
+    ["Setup slack at 50 MHz, worst corner (max_ss_100C_1v60)", sg(m["timing__setup__ws__corner:max_ss_100C_1v60"]) + " ns, " + m["timing__setup_vio__count__corner:max_ss_100C_1v60"] + " paths miss"],
     ["Hold slack, worst corner", sg(m["timing__hold__ws"]) + " ns"],
     ["Standard cells after placement", n(m["design__instance__count__stdcell"]) + " cells, " + n(m["design__instance__area__stdcell"]) + " µm²"],
     ["of which timing-repair buffers", n(m["design__instance__area__class:timing_repair_buffer"], 1) + " µm²"],
-    ["Tiny Tapeout pre-flight (precheck workflow, GitHub run 40427835877)", "pass"]];
+    ["Tiny Tapeout pre-flight (precheck workflow, GitHub run 40624495043)", "pass"]];
   const tb = document.querySelector("#lt tbody");
   rows.forEach(r => { const tr = document.createElement("tr"); r.concat([""]).forEach((x, i) => { const td = document.createElement("td"); if (i < 2) td.textContent = x; else td.innerHTML = r[1].startsWith("-") ? "<span class='ev fail'>failed</span>" : "<span class='ev measured'>measured</span>"; tr.append(td); }); tb.append(tr); });
   document.getElementById("lprov").textContent = L.what + " Tools: " + L.tools + ". Measured " + L.measured + ". Data: docs/site/data/serial_1x2_layout.json.";

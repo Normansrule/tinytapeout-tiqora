@@ -29,9 +29,8 @@ existing microcontroller, and you only need precise timing from the chip. Use th
 microcontroller when the chip should run your code on its own.
 
 It exists as tested RTL and a clean layout, not yet as a chip. At 1 × 2, the size it submits, the
-Tiny Tapeout GDS, pre-flight and gate-level workflows pass (GitHub run 40427835877), and that flow reports no setup violations. One result disagrees: a
-local run of the same configuration misses setup timing at the slow corner by 1.30 ns at 50 MHz
-(local LibreLane 3.0.14 run, open_pdks 1.0.471, main 168fc84, 2026-10-27).
+Tiny Tapeout GDS, pre-flight and gate-level workflows pass, and the routed layout meets setup and
+hold timing at 50 MHz at all nine corners, +1.43 ns at the slowest (GitHub run 40624495043).
 
 **Key features**
 
@@ -84,8 +83,8 @@ Where the Tiny Tapeout tile stands on the way to silicon. Each rung needs the on
 | RTL tested | ✅ done | 62 checks (30 host port; 28 framing, bad input, queue loss, reconnection and bursts; 4 timing-unit reference model), 5 cocotb tests from the pins, recorded tour 13/13 (`make -C test sim`; main 168fc84, 2026-10-27) |
 | Formally checked | ⬜ not done | no formal proofs exist for this design |
 | Synthesized | ✅ done | 21,322 µm², 458 flip-flops, 59% of the 1 × 2 die (`make -C test area`, Yosys 0.33, main 168fc84, 2026-10-27, with the cells this design's flow excludes (src/synth_exclude.cells) removed) |
-| Placed and routed | ✅ done | 1 × 2: `gds` and `gl_test` pass (GitHub run 40427835877); local LibreLane 3.0.14 run, open_pdks 1.0.471, main 168fc84, 2026-10-27: DRC 0, LVS 0, antenna 0, 79% utilisation |
-| Timing checked | ❌ missed at the slow corner in the local run | local LibreLane 3.0.14 run, open_pdks 1.0.471, main 168fc84, 2026-10-27, 1 × 2: hold met everywhere (+0.108 ns worst); setup at 50 MHz met at the typical corner (+9.56 ns) and missed at max_ss_100C_1v60 by 1.30 ns on 8 paths, so about 47 MHz at the slow corner. The GitHub flow (run 40427835877, open_pdks 8afc8346) reports no setup violation at any corner; its slack numbers are not readable from here |
+| Placed and routed | ✅ done | 1 × 2: `gds` and `gl_test` pass (GitHub run 40427835877); GitHub run 40624495043: DRC 0, LVS 0, antenna 0, 82% utilisation |
+| Timing checked | ✅ met at every corner | GitHub run 40624495043, 2026-10-28 (tt-gds-action ttsky26d, LibreLane 3.0.14, open_pdks 8afc8346; src/ as on main 168fc84), 1 × 2: setup met at all nine corners at 50 MHz: +8.76 ns at the typical corner (nom_tt_025C_1v80), +1.43 ns at the slowest (max_ss_100C_1v60); hold met everywhere (+0.112 ns worst). The run still reports max-slew warnings on 745 pins at max_ss_100C_1v60 and 21 at nom_tt_025C_1v80 |
 | Submitted, fabricated, measured | ⬜ not yet | the Tiny Tapeout pre-flight passes at 1 × 2 (GitHub run 40427835877); submitting is the owner's step |
 | FPGA board | ⬜ not yet | the Basys 3 design passes in simulation, 7 checks; nothing has run on a board |
 
@@ -102,9 +101,9 @@ Where Tiqora-Serial stands on the way to silicon. Every ✅ and 🔄 below names
 | **Basys 3 board** | `░░░░░░░░░░` 0/2 | Vivado bitstream | ⬜ | next: make bit in fpga/basys3 on a machine with Vivado |
 |  |  | running on a real board | ⬜ | next: make prog in fpga/basys3, then drive it from the PC at 115,200 baud |
 | **Tiny Tapeout GDS and pre-flight** | `██████████` 3/3 | cell area after synthesis, before placement | ✅ | 21,322 µm², 458 flip-flops: 59% of 1x2, with the cells this design's flow excludes (src/synth_exclude.cells) removed; measured (main 168fc84, Yosys 0.33, 2026-10-27, `make -C test area`) |
-|  |  | place and route at 1x2 | ✅ | clean GDS; local run DRC 0, LVS 0, antenna 0; measured (main 168fc84, LibreLane 3.0.14, `GitHub run 40427835877: gds and gl_test`) |
+|  |  | place and route at 1x2 | ✅ | clean GDS: DRC 0, LVS 0, antenna 0, 82% utilisation; measured (src/ as on main 168fc84, LibreLane 3.0.14, open_pdks 8afc8346, `GitHub run 40624495043: gds and gl_test`) |
 |  |  | Tiny Tapeout pre-flight | ✅ | pass; measured (main 168fc84, `GitHub run 40427835877: precheck`) |
-| **sky130 timing** | `░░░░░░░░░░` 0/1 | signoff timing after routing | 🔄 | hold met everywhere (+0.108 ns worst); setup at 50 MHz met at the typical corner (+9.56 ns) and missed at max_ss_100C_1v60 by 1.30 ns on 8 paths, so about 47 MHz at the slow corner. The GitHub flow (run 40427835877, open_pdks 8afc8346) reports no setup violation at any corner; its slack numbers are not readable from here; measured (main 168fc84, 2026-10-27, LibreLane 3.0.14 local, open_pdks 1.0.471, `tt_tool.py --create-user-config, then librelane on src/config_merged.json`) |
+| **sky130 timing** | `██████████` 1/1 | signoff timing after routing | ✅ | setup met at all nine corners at 50 MHz: +8.76 ns at the typical corner (nom_tt_025C_1v80), +1.43 ns at the slowest (max_ss_100C_1v60); hold met everywhere (+0.112 ns worst). The run still reports max-slew warnings on 745 pins at max_ss_100C_1v60 and 21 at nom_tt_025C_1v80; measured (src/ as on main 168fc84, 2026-10-28, LibreLane 3.0.14, open_pdks 8afc8346, `GitHub run 40624495043: gds, signoff timing per corner`) |
 | **Silicon** | `░░░░░░░░░░` 0/2 | shuttle submission | ⬜ | next: after a clean GDS and pre-flight |
 |  |  | first chip tested | ⬜ | next: after the shuttle returns |
 
@@ -455,8 +454,7 @@ multi-pin burst was still being queued (up to 7 clocks) replaced the waiting eve
 trace. Fixed 2026-10-26 in the timing unit shared with Tiqora: the waiting events are still
 dropped, but the overflow flag now says so, and `make proto` checks it.
 
-What has *not* been done yet: setup timing at the slow corner (a local run misses by 1.30 ns at 50 MHz; GitHub's flow reports no violation),
-and a run on a real Basys 3. The area has been
+What has *not* been done yet: a run on a real Basys 3. The area has been
 measured against the real sky130 library; see [Area](#area).
 
 ---
@@ -475,7 +473,7 @@ library, minus the cells this design's flow excludes (`src/synth_exclude.cells`:
 | 2x2 | 47% | 40% | plenty of room |
 
 That is 59% of the 1 × 2 die before the flow adds buffers, taps and clock tree; after placement
-the cells fill 80% of the core (local LibreLane 3.0.14 run). With the PDK's default list, which
+the cells fill 82% of the core (GitHub run 40624495043). With the PDK's default list, which
 also bans the drive-strength-1 cells, the same design is 25,033 µm², 69% of the die, and placement
 fails with `DPL-0036`. That is why `src/config.json` points LibreLane at `src/synth_exclude.cells`.
 
