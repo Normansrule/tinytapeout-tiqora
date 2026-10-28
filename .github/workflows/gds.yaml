@@ -25,7 +25,7 @@ jobs:
         shell: bash
         run: |
           python3 - <<'PY' | tee -a "$GITHUB_STEP_SUMMARY"
-          import json, os
+          import json, os, sys
           p = "runs/wokwi/final/metrics.json"
           if not os.path.exists(p):
               raise SystemExit(f"{p} missing: the flow did not finish")
@@ -42,6 +42,10 @@ jobs:
           for k in ["timing__setup__ws", "timing__hold__ws", "design__instance__utilization", "design__instance__count__stdcell",
                     "route__drc_errors", "magic__drc_error__count", "design__lvs_error__count", "route__antenna_violation__count"]:
               print(f"- {k}: {g(k)}")
+          # The whole file goes to the log only (stderr skips the summary), for the docs' tables.
+          print("::group::final/metrics.json", file=sys.stderr)
+          print(json.dumps(m, sort_keys=True), file=sys.stderr)
+          print("::endgroup::", file=sys.stderr)
           PY
 
   precheck:
