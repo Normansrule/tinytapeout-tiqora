@@ -6,7 +6,7 @@
   "name": "Tiqora, the full microcontroller",
   "url": "https://normansrule.github.io/tiqora-skywater130/"
  },
- "ref": "v20.1",
+ "ref": "main",
  "clock_ns": 20,
  "die_um": [
   161.0,
@@ -219,7 +219,7 @@
     {
      "rung": "RTL tested",
      "state": "measured",
-     "why": "62 checks and 5 cocotb tests from the pins (<code>make -C test sim</code>, verify-audits 2026-10-26), and the recorded tour, 13/13 (<code>make -C test tour</code>), whose every reply is checked against a model of the protocol."
+     "why": "62 checks and 5 cocotb tests from the pins (<code>make -C test sim</code>, main 168fc84, 2026-10-27), and the recorded tour, 13/13 (<code>make -C test tour</code>), whose every reply is checked against a model of the protocol."
     },
     {
      "rung": "Formally checked",
@@ -230,24 +230,23 @@
     {
      "rung": "Synthesized",
      "state": "measured",
-     "why": "21,322 µm² of sky130 cells, 458 flip-flops: 59% of the 1x2 die (<code>make area</code>, Yosys 0.33, verify-audits 2026-10-26, with the cells this design's flow excludes removed)."
+     "why": "21,322 µm² of sky130 cells, 458 flip-flops: 59% of the 1x2 die (<code>make area</code>, Yosys 0.33, main 168fc84, 2026-10-27, with the cells this design's flow excludes removed)."
     },
     {
      "rung": "Placed and routed",
      "state": "measured",
-     "why": "1x2: the <code>gds</code> workflow passes and the cocotb tests pass on the routed netlist (GitHub run 40161260168). A local LibreLane 3.0.14 run of the same source: DRC 0, LVS 0, antenna 0, 80% utilisation."
+     "why": "1x2: the <code>gds</code> workflow passes and the cocotb tests pass on the routed netlist (GitHub run 40624495043, src/ as on main 168fc84): DRC 0, LVS 0, antenna 0, 82% utilisation."
     },
     {
      "rung": "Timing checked",
-     "state": "fail",
-     "word": "missed at the slow corner",
-     "why": "Local LibreLane 3.0.14 run at 1x2, 50 MHz: hold met everywhere (+0.112 ns worst); setup met at the typical corner (+9.48 ns) and missed at ss_100C_1v60 by 1.30 ns on 29 paths, so the slow corner runs at about 47 MHz."
+     "state": "measured",
+     "why": "GitHub run 40624495043 at 1x2 (LibreLane 3.0.14, open_pdks 8afc8346, src/ as on main 168fc84), 50 MHz: setup met at all nine corners, +8.76 ns at the typical corner and +1.43 ns at the slowest (max_ss_100C_1v60); hold met everywhere (+0.112 ns worst). The run still reports max-slew warnings on 745 pins at the slowest corner."
     },
     {
      "rung": "Submitted to a shuttle",
      "state": "none",
      "word": "not yet",
-     "why": "The Tiny Tapeout pre-flight passes at 1x2 (GitHub run 40161260168). Submitting is the owner's step."
+     "why": "The Tiny Tapeout pre-flight passes at 1x2 (GitHub run 40427835877). Submitting is the owner's step."
     },
     {
      "rung": "Fabricated",

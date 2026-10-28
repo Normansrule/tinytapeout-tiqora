@@ -36,14 +36,14 @@ microcontroller when the chip should run your code on its own.
 
 | | |
 |---|---|
-| ✅ **RTL simulation** | 62 checks: 58 on the serial host port, 28 of them on framing errors, unknown commands, partial frames, late bytes, queue loss, reconnection and bursts, and 4 comparing the timing unit with a reference model (`cd test && make sim`), plus 5 cocotb tests from the pins only |
-| ✅ **FPGA (simulated)** | the whole Digilent Basys 3 design, driven like a PC at 115,200 baud: 7 checks (`make -C fpga/basys3 sim`) |
-| ✅ **Area (verify-audits 2026-10-26)** | 21,322 µm², 458 flip-flops, 59% of the 1 × 2 die (`make area`) |
-| ✅ **Docs** | every link, image, `make` target and script mentioned exists (`make docs`, part of `make sim`) |
-| ✅ **Place and route at 1 × 2** | the Tiny Tapeout `gds`, pre-flight and gate-level workflows pass (GitHub run 40161260168); local LibreLane 3.0.14 run: DRC 0, LVS 0, antenna 0 |
-| ❌ **Setup timing, slow corner** | misses by 1.30 ns at 50 MHz at ss_100C_1v60 (29 paths), about 47 MHz there; met at the typical corner (+9.48 ns); hold met everywhere |
-| ⏳ **FPGA board** | Vivado build and a real Basys 3: `make bit && make prog` in `fpga/basys3` |
-| ⏳ **Silicon** | after submission to a Tiny Tapeout shuttle |
+| ✅ **RTL simulation (main 168fc84, 2026-10-27)** | 62 checks: 58 on the serial host port, 28 of them on framing errors, unknown commands, partial frames, late bytes, queue loss, reconnection and bursts, and 4 comparing the timing unit with a reference model (`cd test && make sim`), plus 5 cocotb tests from the pins only |
+| ✅ **FPGA, simulated (main 168fc84, 2026-10-27)** | the whole Digilent Basys 3 design, driven like a PC at 115,200 baud: 7 checks (`make -C fpga/basys3 sim`) |
+| ✅ **Area (main 168fc84, 2026-10-27)** | 21,322 µm², 458 flip-flops, 59% of the 1 × 2 die (`make area`) |
+| ✅ **Docs (main 168fc84, 2026-10-27)** | every link, image, `make` target and script mentioned exists (`make docs`, part of `make sim`) |
+| ✅ **Place and route at 1 × 2 (main 168fc84)** | the Tiny Tapeout `gds`, pre-flight and gate-level workflows pass, and the flow reports DRC, LVS and antenna passed (GitHub run 40427835877); GitHub run 40624495043: DRC 0, LVS 0, antenna 0, 82% utilisation |
+| ✅ **Routed timing at 50 MHz** | setup met at all nine corners at 50 MHz: +8.76 ns at the typical corner (nom_tt_025C_1v80), +1.43 ns at the slowest (max_ss_100C_1v60); hold met everywhere (+0.112 ns worst). The run still reports max-slew warnings on 745 pins at max_ss_100C_1v60 and 21 at nom_tt_025C_1v80 (GitHub run 40624495043) |
+| ⬜ **FPGA board (not yet)** | Vivado build and a real Basys 3: `make bit && make prog` in `fpga/basys3` |
+| ⬜ **Silicon (not yet)** | no chip exists; it needs a submission to a Tiny Tapeout shuttle |
 
 ## What it looks like
 
@@ -313,8 +313,7 @@ Two limits follow from the design and are now measured rather than assumed:
   commits those bytes as its data. After a host-side timeout, reset the chip, or send the missing
   bytes of a frame you know the state of, before trusting the link again.
 
-What has *not* been done yet: setup timing at the slow corner (it misses by 1.30 ns at 50 MHz),
-and a run on a real Basys 3. The area has been measured against the real
+What has *not* been done yet: a run on a real Basys 3. The area has been measured against the real
 sky130 library; see the Area section.
 
 ---
@@ -324,7 +323,7 @@ sky130 library; see the Area section.
 **Measured**, not estimated. Yosys maps the design onto the real sky130_fd_sc_hd standard cell
 library, minus the cells this design's flow excludes (`src/synth_exclude.cells`: the PDK's
 `no_synth.cells` without its drive-strength-1 entries): 2,529 cells, 458 of them flip-flops,
-**21,322 µm²** (measured, verify-audits 2026-10-26, Yosys 0.33, `make -C test area`).
+**21,322 µm²** (measured, main 168fc84, 2026-10-27, Yosys 0.33, `make -C test area`).
 
 | Tile | At 60% utilisation | At 70% | Verdict |
 |---|---:|---:|---|
@@ -333,7 +332,7 @@ library, minus the cells this design's flow excludes (`src/synth_exclude.cells`:
 | 2x2 | 47% | 40% | plenty of room |
 
 That is 59% of the 1 × 2 die before the flow adds buffers, taps and clock tree; after placement
-the cells fill 80% of the core (local LibreLane 3.0.14 run). With the PDK's default list, which
+the cells fill 82% of the core (GitHub run 40624495043). With the PDK's default list, which
 also bans the drive-strength-1 cells, the same design is 25,033 µm², 69% of the die, and placement
 fails with `DPL-0036`. That is why `src/config.json` points LibreLane at `src/synth_exclude.cells`.
 

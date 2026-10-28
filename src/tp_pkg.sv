@@ -4,6 +4,12 @@
 
 package tp_pkg;
 
+    // Tiqora-Serial has no core, so it uses none of the RV32I and Xpulse
+    // constants below; they stay so this package matches the full chip's.
+    // The waiver covers this package only: an unused parameter anywhere
+    // else still fails `make lint` and the Tiny Tapeout linter.
+    /* verilator lint_off UNUSEDPARAM */
+
     // ---------------------------------------------------------------
     // RV32I base opcodes (inst[6:0])
     // ---------------------------------------------------------------
@@ -128,5 +134,7 @@ package tp_pkg;
     localparam logic [3:0] DEV_FLASH = 4'h0;  // 0x0xxx_xxxx external QSPI flash
     localparam logic [3:0] DEV_PSRAM = 4'h1;  // 0x1xxx_xxxx external QSPI PSRAM
     localparam logic [3:0] DEV_SYNC  = 4'h2;  // 0x2xxx_xxxx sync unit registers
+
+    /* verilator lint_on UNUSEDPARAM */
 
 endpackage : tp_pkg
