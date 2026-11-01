@@ -55,6 +55,30 @@ module tb_tour;
     end
     always @(posedge clk) if (rst_n) cycle <= cycle + 1;
 
+    // ---------------------------------------------------------------- schematic probe
+    // docs/tools/schematic.py draws deadline channel 0's logic from these
+    // values: every wire it lights is read here, inside sync_compare, on the
+    // same falling edge as the trace above. One line per clock while the
+    // channel is being armed, is armed, or is counting its pulse out, and
+    // for three clocks after, so the drawing can show the pin falling.
+    integer pfd = 0, ptail = 0;
+    reg [8*256:1] probefile;
+    initial if ($value$plusargs("PROBE=%s", probefile)) begin
+        pfd = $fopen(probefile, "w");
+        $fwrite(pfd, "cycle now arm_we arm_sel arm_time arm_m1 dm1 reached fire armed pcnt pw pulse_we trig pin\n");
+    end
+    always @(negedge clk) if (pfd != 0 && rst_n) begin
+        if (dut.u_soc.u_sync.u_cmp.arm_we || dut.u_soc.u_sync.u_cmp.armed[0] ||
+            dut.u_soc.u_sync.u_cmp.pulse_cnt[0] != 0 || dut.u_soc.u_sync.u_cmp.g_cmp[0].fire) ptail = 4;
+        if (ptail > 0) $fwrite(pfd, "%0d %h %h %h %h %h %h %h %h %h %h %h %h %h %h\n", cycle,
+            dut.u_soc.u_sync.now, dut.u_soc.u_sync.u_cmp.arm_we, dut.u_soc.u_sync.u_cmp.arm_sel,
+            dut.u_soc.u_sync.u_cmp.arm_time, dut.u_soc.u_sync.u_cmp.arm_time_m1, dut.u_soc.u_sync.u_cmp.deadline_m1[0],
+            dut.u_soc.u_sync.u_cmp.g_cmp[0].reached, dut.u_soc.u_sync.u_cmp.g_cmp[0].fire,
+            dut.u_soc.u_sync.u_cmp.armed[0], dut.u_soc.u_sync.u_cmp.pulse_cnt[0], dut.u_soc.u_sync.u_cmp.pw,
+            dut.u_soc.u_sync.u_cmp.pulse_we, dut.u_soc.u_sync.u_cmp.trig[0], uo_out[0]);
+        if (ptail > 0) ptail = ptail - 1;
+    end
+
     // ---------------------------------------------------------------- host
     task send_byte(input [7:0] b);
         integer i;

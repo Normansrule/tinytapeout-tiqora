@@ -108,7 +108,7 @@ kbd { border: 1px solid var(--line-2); border-bottom-width: 2px; border-radius: 
 h1, h2, h3 { line-height: 1.15; text-wrap: balance; }
 h1, h2 { font-family: var(--display); font-weight: 600; }
 h1 { font-size: clamp(2.4rem, 6vw, 4rem); line-height: 1.02; letter-spacing: -.008em; margin: 2.6rem 0 .9rem; max-width: 24ch; }
-h2 { font-size: clamp(1.6rem, 3vw, 2.15rem); letter-spacing: -.005em; margin: 3.4rem 0 .7rem; }
+h2 { font-size: clamp(1.7rem, 3.4vw, 2.5rem); letter-spacing: -.012em; line-height: 1.08; margin: 4rem 0 .8rem; }
 /* a page section opens with the same mark the cycle ruler gives it */
 main > h2::before, section > h2::before { content: ""; display: block; width: 28px; height: 2px; margin-bottom: .7rem; background: var(--trace); }
 h3 { font-size: 1.1rem; font-weight: 700; margin: 1.8rem 0 .4rem; }
@@ -127,6 +127,16 @@ html { scrollbar-color: var(--line-2) var(--bg); }
 .ruler .sec { stroke: var(--trace); stroke-width: 1.5; }
 .ruler .now { position: absolute; top: 0; bottom: 0; width: 2px; left: 0; background: var(--cursor); transform: translateX(var(--x, 0px)); }
 .top { position: sticky; top: 0; z-index: 5; background: var(--bg); border-bottom: 1px solid var(--line); }
+/* the header is a material over the page, where the browser can blur behind it; solid for readers who asked for less transparency */
+@supports ((-webkit-backdrop-filter: blur(1px)) or (backdrop-filter: blur(1px))) {
+  .top { background: color-mix(in srgb, var(--bg) 80%, transparent); -webkit-backdrop-filter: saturate(170%) blur(18px); backdrop-filter: saturate(170%) blur(18px); }
+}
+@media (prefers-reduced-transparency: reduce) { .top { background: var(--bg); -webkit-backdrop-filter: none; backdrop-filter: none; } }
+@media (prefers-contrast: more) {
+  :root { --line: var(--line-2); --muted: var(--ink-2); }
+  .top { background: var(--bg); -webkit-backdrop-filter: none; backdrop-filter: none; border-bottom-color: var(--ink); }
+  .btn.ghost, .src, .theme { border-color: var(--ink); }
+}
 .top .in { display: flex; gap: 1rem; align-items: center; max-width: 1200px; margin: 0 auto; padding: .5rem 16px; flex-wrap: wrap; }
 .brand { font-family: var(--display); font-weight: 600; letter-spacing: .04em; font-size: 1.15rem; color: var(--ink); text-decoration: none; display: flex; align-items: center; gap: .45rem; }
 .brand svg { width: 22px; height: 22px; }
@@ -611,7 +621,17 @@ canvas.routed:active { cursor: grabbing; }
     .stat { animation: stat-in linear both; animation-timeline: view(); animation-range: entry 0% cover 30%; }
     .stat:nth-child(2) { animation-range: entry 6% cover 34%; } .stat:nth-child(3) { animation-range: entry 12% cover 38%; } .stat:nth-child(4) { animation-range: entry 18% cover 42%; }
     @keyframes stat-in { from { opacity: 0; transform: translateY(28px); } }
+    /* each section's heading and the schematic arrive as they scroll in; driven by your scrolling, never on a timer */
+    main section > h2, .schem-stage { animation: rise-in linear both; animation-timeline: view(); animation-range: entry 0% cover 22%; }
+    @keyframes rise-in { from { opacity: 0; transform: translateY(18px); } }
   }
+  /* the schematic: a wire that turns on draws itself from source to sink; a register flashes as its clock edge lands */
+  .sc .w.on.flow { stroke-dasharray: 1; animation: sc-flow 420ms var(--ease-out) both; }
+  @keyframes sc-flow { from { stroke-dashoffset: 1; } to { stroke-dashoffset: 0; } }
+  .sc .part.tick .ff, .sc .part.tick .box { animation: sc-tick 620ms var(--ease-out); }
+  @keyframes sc-tick { from { stroke: var(--sch-hi); stroke-width: 3; } }
+  .sc .glow { transition: opacity 260ms ease; }
+  .schem-strip .cur { transition: x 300ms var(--ease-out); }
 }
 @media print {
   .routed-bar, .routed-hint { display: none; }
@@ -626,3 +646,34 @@ canvas.routed:active { cursor: grabbing; }
 .reel figcaption { margin-top: .45rem; display: flex; flex-wrap: wrap; gap: .3rem .7rem; align-items: baseline; }
 .reel-bar { display: flex; flex-wrap: wrap; gap: .4rem .9rem; align-items: center; }
 .reels[data-paused] svg, .reels[data-paused] svg * { animation-play-state: paused !important; }
+
+/* the deadline schematic (docs/tools/schematic.py, docs/site/lib/schematic.js). Paper in light mode, the
+   instrument's screen in dark; a 1 on a wire is the recorded trace's amber. */
+:root { --sch-bg: #fdfdfb; --sch-box: #f2f2ee; --sch-edge: #bcbfb8; --sch-ink: #121416; --sch-muted: #575d63;
+  --sch-off: #c4c7c0; --sch-hi: #d27300; --sch-bus: #0b7a5f; --sch-lane: #f1f1ec; --sch-cur: #0b5f86; }
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) { --sch-bg: #0f1214; --sch-box: #161a1d; --sch-edge: #3a4247; --sch-ink: #e8ebe9; --sch-muted: #9aa3a7;
+    --sch-off: #3a4247; --sch-hi: #ffb000; --sch-bus: #3fc49b; --sch-lane: #12161a; --sch-cur: #7cc6ea; }
+}
+:root[data-theme="dark"] { --sch-bg: #0f1214; --sch-box: #161a1d; --sch-edge: #3a4247; --sch-ink: #e8ebe9; --sch-muted: #9aa3a7;
+  --sch-off: #3a4247; --sch-hi: #ffb000; --sch-bus: #3fc49b; --sch-lane: #12161a; --sch-cur: #7cc6ea; }
+.schem { margin: 1.4rem 0 0; background: var(--sch-bg); border: 1px solid var(--line); border-radius: 16px; padding: 10px 10px 1.1rem;
+  box-shadow: 0 1px 2px color-mix(in srgb, var(--ink) 6%, transparent), 0 18px 48px -24px color-mix(in srgb, var(--ink) 22%, transparent); }
+.schem-stage { border-radius: 12px; outline-offset: 3px; }
+.schem-stage svg, .schem-strip svg { display: block; width: 100%; height: auto; }
+.schem-bar { display: flex; flex-wrap: wrap; gap: .5rem; align-items: center; padding: .7rem .5rem .2rem; }
+.schem-bar[hidden] { display: none; }
+.schem-bar .btn { min-width: 44px; justify-content: center; }
+.schem-bar input[type=range] { flex: 1 1 220px; accent-color: var(--sch-hi); min-height: 44px; }
+.schem-bar output { font-size: .9rem; color: var(--ink-2); font-variant-numeric: tabular-nums; min-width: 22ch; }
+.schem-strip { padding: 0 .5rem; }
+.schem-cap { font-size: 1.05rem; line-height: 1.5; color: var(--ink); max-width: 72ch; min-height: 4.6em; margin: .6rem .5rem .4rem; }
+.schem figcaption { font-size: .92rem; color: var(--ink-2); margin: .2rem .5rem 0; max-width: 80ch; }
+.schem details { margin-top: .5rem; }
+.schem summary { cursor: pointer; font-weight: 700; }
+.schem-parts { columns: 2 18rem; margin: .4rem 0 0; padding-left: 1.1rem; }
+@media (max-width: 700px) {
+  .schem-stage { overflow-x: auto; overscroll-behavior-x: contain; } .schem-stage svg { width: 780px; max-width: none; }
+  .schem-cap { min-height: 7.5em; }
+}
+@media (prefers-contrast: more) { .schem { border-color: var(--ink); } }

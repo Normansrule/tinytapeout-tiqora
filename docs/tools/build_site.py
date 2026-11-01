@@ -20,7 +20,7 @@ import base64, html, json, math, os, re, sys
 SITE = "docs/site"
 LIB = SITE + "/lib"
 MEDIA = "docs/images/explorer"
-SCRIPTS = ["model", "wave", "player", "atlas", "die", "layout", "labs", "board"]
+SCRIPTS = ["model", "wave", "player", "atlas", "die", "layout", "labs", "board", "schematic"]
 esc = lambda s: html.escape(str(s), quote=True)
 
 
@@ -108,7 +108,34 @@ def static_motion(ctx):
             f"<div class=reels id=reels>{''.join(out)}</div>")
 
 
-STATIC = {"atlas_table": static_atlas_table, "pins": static_pins, "progress": static_progress,
+def static_schematic(ctx):
+    """Deadline channel 0 as logic (docs/tools/schematic.py), at the clock the pin rises: complete without
+    JavaScript; docs/site/lib/schematic.js steps it through the rest of the recording."""
+    import schematic as sc
+    d = ctx["data"]["schematic"]
+    e, s, site = d["edge"], d["steps"][d["edge"]], ctx["site"]
+    src = f"{site['repo']}/blob/{site['ref']}/{d['rtl']}"
+    parts = "".join(f"<li><a href='{src}#L{d['lines'][k]}'>{esc(v)}</a> <span class=small>line {d['lines'][k]}</span></li>"
+                    for k, v in sorted(d["parts"].items(), key=lambda kv: d["lines"][kv[0]]))
+    return (f"<figure class=schem id=schem>"
+            f"<div class=schem-stage tabindex=0 role=group aria-label='The deadline logic. Left and right arrows step one clock; space plays.'>"
+            f"{sc.site_svg(d, e)}</div>"
+            f"<div class=schem-bar hidden><button class=btn type=button data-play aria-pressed=false>Play</button>"
+            f"<button class='btn ghost' type=button data-step=-1 aria-label='Previous clock'>&#8249;</button>"
+            f"<button class='btn ghost' type=button data-step=1 aria-label='Next clock'>&#8250;</button>"
+            f"<input type=range min=0 max={len(d['steps']) - 1} value={e} aria-label='Recorded clock'>"
+            f"<output class=mono>cycle {s['cycle']:,} · now {s['now']:,}</output></div>"
+            f"<div class=schem-strip>{sc.strip_svg(d, e)}</div>"
+            f"<p class=schem-cap aria-live=polite>{esc(s['text'])}</p>"
+            f"<figcaption><span class='ev recorded'>recorded</span> Every 0 and 1 on a wire, and every value in a register, was read inside "
+            f"<code>sync_compare</code> by <code>test/tb_tour.sv</code> during <code>make -C test tour</code>; "
+            f"<code>docs/tools/schematic.py</code> checks each of the {len(d['steps'])} clocks against the RTL's equations, "
+            f"rewritten in Python, before drawing them. Two values are arithmetic on recorded ones: the subtractor's output and "
+            f"<code>cnt−1</code>. The gates are drawn from the RTL, not from the synthesized netlist, which builds the same logic out of sky130 cells."
+            f"<details><summary>Each part, in <code>{esc(d['rtl'])}</code></summary><ul class=schem-parts>{parts}</ul></details></figcaption></figure>")
+
+
+STATIC = {"schematic": static_schematic, "atlas_table": static_atlas_table, "pins": static_pins, "progress": static_progress,
           "ladder": static_ladder, "flow": static_flow, "treemap": static_treemap, "motion": static_motion}
 
 

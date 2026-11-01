@@ -561,7 +561,7 @@
  "provenance": {
   "command": "make -C test tour  (then python3 docs/tools/traces.py)",
   "sampling": "sampled on the falling edge of every clock; a line is kept only where a traced signal other than the timebase changes. Cycle 0 is the first rising edge after reset is released; reset holds the count. 1 cycle = 20 ns at 50 MHz; one serial bit is 434 cycles (115,200 baud)",
-  "simulator": "Icarus Verilog version 13.0 (stable) (v13_0)",
+  "simulator": "Icarus Verilog version 12.0 (stable) ()",
   "sources": {
    "src/sync/sync_capture.sv": "2a14d3051ed4d0f9c8d4c6158cb148cfe515bceb8111fc9da123d9b3f984a907",
    "src/sync/sync_compare.sv": "0910608252174b2b17e2909903257ec0e2a1c7cd8b2cdeb8785888bdad3308c3",
@@ -574,7 +574,7 @@
    "src/uart/tp_host_uart.sv": "e131a7447cb016ede4b67bfcfdea0d5f9faca7cbfd2d0fc7de93b74e1656c449",
    "src/uart/tp_uart_rx.sv": "74ac23194c71027eff9a5fa8fef0acd5eb32af71e996affae7d25d0c01bc2f1a",
    "src/uart/tp_uart_tx.sv": "32458039699f7e41740457c80a820cc7132a2366a3f64bc58ee1675d674cb49a",
-   "test/tb_tour.sv": "d945170f97dfe0cc1ba3a649e869d12704b73e116172df78473cad3c34a8524b"
+   "test/tb_tour.sv": "b5ab9ff3e8eef568ab9253ed6a5ed60afb2140997e8439593fbafd28eb22ac5a"
   },
   "testbench": "test/tb_tour.sv"
  },

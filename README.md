@@ -341,6 +341,16 @@ chip — see its README.
 
 <sub>Recorded from `make -C test tour` and drawn by `docs/tools/motion.py`. [Step through it](https://normansrule.github.io/tinytapeout-tiqora/tours.html#seq=deadline). With reduced motion on, it is a still of the whole window.</sub>
 
+**And inside the timing unit, the logic itself.** The same recording, one level down: deadline
+channel 0 of `src/sync/sync_compare.sv` drawn as gates and registers, every wire lit by the value
+the testbench read inside the RTL on that clock. The channel stores the deadline minus one, a
+subtractor compares it with the timebase every clock, and `fire` rises one clock early because the
+pin comes out of a register: so the pin rises on the deadline itself.
+
+![Recorded from the RTL: deadline channel 0 drawn as logic, lit clock by clock, from arming to the trigger pin rising on exactly the deadline tick](docs/images/schematic_deadline.svg)
+
+<sub>Probed inside `sync_compare` by `test/tb_tour.sv` during `make -C test tour`; `docs/tools/schematic.py` checks every clock against the RTL's equations before drawing it. [Step through it on the website](https://normansrule.github.io/tinytapeout-tiqora/#sc-h): play, pause, or use the arrow keys.</sub>
+
 **An edge, queued and read.** A capture pin's edge becomes a timestamped event at once; a serial read pops it:
 
 ![Recorded from the RTL: an edge on CAP0 queued as an event, then popped by a serial read](docs/images/motion/event.svg)

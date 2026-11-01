@@ -1,4 +1,4 @@
-<!-- {"title": "Overview", "description": "Tiqora-Serial: hardware timestamping and cycle-exact triggers for a Tiny Tapeout 1x2 tile, controlled over USB serial with no processor. What goes in and out, and what is proven.", "data": ["tours", "die", "routed", "deadline", "site", "board"], "scripts": ["die", "layout", "labs", "board"]} -->
+<!-- {"title": "Overview", "description": "Tiqora-Serial: hardware timestamping and cycle-exact triggers for a Tiny Tapeout 1x2 tile, controlled over USB serial with no processor. What goes in and out, and what is proven.", "data": ["tours", "die", "routed", "deadline", "site", "board", "schematic"], "scripts": ["die", "layout", "labs", "board", "schematic"]} -->
 <section class="reveal bleed" id=reveal aria-labelledby=hero-h>
  <div class=reveal-stage>
   <div class=reveal-copy>
@@ -80,6 +80,13 @@ TQDie.mount(document.getElementById("zoom"), DATA("die"), {
 <script>
 TQLabs.deadline(document.getElementById("deadline"), DATA("deadline"), { clockNs: DATA("site").clock_ns, recordedHref: "tours.html#seq=deadline" });
 </script>
+
+<section aria-labelledby=sc-h>
+ <h2 id=sc-h>How the pin knows: the logic, lit by the recording</h2>
+ <p>This is the whole of one deadline channel. The host leaves one number behind, the deadline minus one. Every clock, a subtractor takes it away from the timebase; the moment the answer stops being negative, an AND gate with the <em>armed</em> flip-flop lets <em>fire</em> through, and a small counter holds the pin high for the pulse width: eight clocks, unless the host sets another. Firing one clock early is deliberate: the pin comes out of a register, so it changes on the next edge, which is exactly the deadline.</p>
+ {{static:schematic}}
+</section>
+<script>TQSchem.mount(document.getElementById("schem"), DATA("schematic"));</script>
 
 <section aria-labelledby=board-h>
  <h2 id=board-h>On a Basys 3, simulated</h2>

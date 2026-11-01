@@ -59,7 +59,7 @@ proto:
 # tour_trace.txt for docs/tools/traces.py.
 tour:
 	@iverilog -g2012 -o tb_tour.vvp -s tb_tour $(RTL) tb_tour.sv > tb_tour.log 2>&1 || { cat tb_tour.log; exit 1; }
-	vvp -n tb_tour.vvp +TRACE=tour_trace.txt > tour_out.txt; s=$$?; cat tour_out.txt; [ $$s -eq 0 ] && grep -q "TOUR TRACE PASSED" tour_out.txt
+	vvp -n tb_tour.vvp +TRACE=tour_trace.txt +PROBE=schematic_probe.txt > tour_out.txt; s=$$?; cat tour_out.txt; [ $$s -eq 0 ] && grep -q "TOUR TRACE PASSED" tour_out.txt
 
 # Verilator -Wall with no command-line waivers. tp_pkg carries the full
 # chip's RV32I and Xpulse constants, which this build never uses; the
@@ -98,12 +98,15 @@ docs:
 	cd .. && python3 docs/tools/motion.py --check
 	cd .. && python3 docs/tools/routed_map.py --check
 	cd .. && python3 docs/tools/routed_map.py --mutants
+	cd .. && python3 docs/tools/schematic.py --check
+	cd .. && python3 docs/tools/schematic.py --mutants
 
 # the explorer site: atlas against the RTL (needs Yosys), tours against a fresh
 # simulation, then the site itself
 explorer:
 	@if command -v yosys > /dev/null; then cd .. && python3 docs/tools/atlas.py --check; else echo "explorer: yosys not found, atlas check skipped"; fi
 	cd .. && python3 docs/tools/traces.py --check
+	cd .. && python3 docs/tools/schematic.py --check-sim
 	cd .. && python3 docs/tools/check_site.py
 
 # Formal proofs (Yosys SAT, k-induction) that the timing unit's speed rewrites change
