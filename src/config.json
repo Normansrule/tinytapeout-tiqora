@@ -21,6 +21,9 @@
   "//": "Tiqora-Serial: with this list the flow's synthesis measures 20,437 um^2 and global placement uses 68.7% of the free core; with the default list placement fails with DPL-0036 (LibreLane 3.0.14, measured locally 2026-10-25). Without it the layout does not fit the tile.",
   "SYNTH_EXCLUDED_CELL_FILE": "dir::synth_exclude.cells",
 
+  "//": "PNR_EXCLUDED_CELL_FILE - cells placement, CTS and the resizer may not use: the PDK's drc_exclude.cells plus the clkdlybuf4s* delay cells, which the resizer otherwise uses as ordinary buffers (see the file).",
+  "PNR_EXCLUDED_CELL_FILE": "dir::pnr_exclude.cells",
+
   "//": "CLOCK_PERIOD - Increase this in case you are getting setup time violations.",
   "//": "The value is in nanoseconds, so 20ns == 50MHz.",
   "CLOCK_PERIOD": 20,
