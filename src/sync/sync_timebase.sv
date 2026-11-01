@@ -101,7 +101,7 @@ module sync_timebase #(
     end
 
     // rate_in[30:FRACW] is reserved: the sign is bit 31, the magnitude is
-    // the low FRACW bits.
-    wire _unused = &{1'b0, rate_in[30:FRACW], 1'b0};
+    // the low FRACW bits. Only the top two bits of frac_sum2 are needed.
+    wire _unused = &{1'b0, rate_in[30:FRACW], frac_sum2[FRACW-1:0], 1'b0};
 
 endmodule : sync_timebase
