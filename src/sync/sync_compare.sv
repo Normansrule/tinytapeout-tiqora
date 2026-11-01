@@ -33,7 +33,9 @@ module sync_compare #(
 );
 
     logic [PWW-1:0] pw;
-    (* mem2reg *) logic [31:0]    deadline [NCMP-1:0];
+    logic [31:0]    arm_time_m1;
+    assign arm_time_m1 = arm_time - 32'd1;
+    (* mem2reg *) logic [31:0]    deadline_m1 [NCMP-1:0];
     (* mem2reg *) logic [PWW-1:0] pulse_cnt [NCMP-1:0];
 
     genvar i;
@@ -46,24 +48,26 @@ module sync_compare #(
         // that makes the pin edge land on exactly the tick that was
         // programmed instead of one after it.
         //
-        // This looks like it costs a second 32-bit adder per channel, and
-        // an earlier version rewrote it as `now - deadline >= -1` to avoid
-        // that. Measured, the rewrite was WORSE: synthesis already shares
-        // the single `now + 1` incrementer across every channel, while the
-        // rewrite needs a 32-input AND tree in each one. It cost about
-        // 1,000 um^2 across three channels. Left as written.
-        assign reached = ($signed((now + 32'd1) - deadline[i]) >= 0);
+        // The test is signed(now + 1 - deadline) >= 0. For speed the channel
+        // stores deadline - 1 (deadline_m1) instead, decremented once when it
+        // is armed, so every clock's compare is a single subtraction of two
+        // registers: the timebase increment used to sit in series with it, on
+        // one of the slowest paths in the chip. Same result for every value,
+        // wrap included: (now + 1) - d == now - (d - 1) modulo 2^32. An
+        // earlier rewrite as `now - deadline >= -1` was measured worse (a
+        // 32-input AND tree per channel), so the subtraction stays.
+        assign reached = ($signed(now - deadline_m1[i]) >= 0);
         assign fire    = (armed[i] && reached) ||
                          (pulse_we && pulse_mask[i]);
 
         always_ff @(posedge clk) begin
             if (rst) begin
                 armed[i]     <= 1'b0;
-                deadline[i]  <= 32'd0;
+                deadline_m1[i] <= 32'hFFFF_FFFF;
                 pulse_cnt[i] <= '0;
             end else begin
                 if (arm_we && (arm_sel == i[1:0])) begin
-                    deadline[i] <= arm_time;
+                    deadline_m1[i] <= arm_time_m1;
                     armed[i]    <= 1'b1;
                 end else if (armed[i] && reached) begin
                     armed[i]    <= 1'b0;

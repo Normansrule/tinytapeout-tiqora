@@ -1,0 +1,8 @@
+# timebase_equiv.ys — prove sync_timebase's carry look-ahead is exact (k-induction).
+# yosys -s syn/timebase_equiv.ys   ; exits non-zero if any property can fail
+read_verilog -sv src/sync/sync_timebase.sv
+read_verilog -sv syn/timebase_equiv.sv
+hierarchy -top timebase_equiv
+proc; flatten; opt_clean
+# reset in the first clock, then any input sequence; prove `now` matches and the internal state matches (the induction hypothesis)
+sat -tempinduct -prove ok_now 1 -prove dut.frac ref_frac -prove dut.rate_mag ref_rate_mag -prove dut.rate_neg ref_rate_neg -prove dut.frac_co ref_carry -set-at 1 rst 1 -seq 1 -maxsteps 8 -verify -show-ports

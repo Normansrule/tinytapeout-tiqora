@@ -50,7 +50,7 @@ module tb_tour;
                 dut.u_soc.u_host.rx_valid, dut.u_soc.u_host.rx_data, dut.u_soc.u_host.tx_busy,
                 dut.u_soc.u_host.reg_req, dut.u_soc.u_host.reg_addr, dut.u_soc.u_sync.u_fifo.count,
                 dut.u_soc.u_sync.u_cmp.armed, dut.u_soc.u_sync.fifo_ovf, dut.u_soc.u_sync.now,
-                dut.u_soc.u_sync.u_cmp.deadline[0]);
+                (dut.u_soc.u_sync.u_cmp.deadline_m1[0] + 32'd1));
         last = cur;
     end
     always @(posedge clk) if (rst_n) cycle <= cycle + 1;
@@ -103,7 +103,7 @@ module tb_tour;
     always @(negedge clk) if (rst_n) begin
         if (uo_out[0] && trig_rise < 0) begin
             trig_rise = cycle;
-            at_rise_now = dut.u_soc.u_sync.now; at_rise_deadline = dut.u_soc.u_sync.u_cmp.deadline[0];
+            at_rise_now = dut.u_soc.u_sync.now; at_rise_deadline = (dut.u_soc.u_sync.u_cmp.deadline_m1[0] + 32'd1);
         end
         if (uo_out[0]) trig_width = trig_width + 1;
         if (uo_out[7]) evtp = evtp + 1;

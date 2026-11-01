@@ -35,12 +35,40 @@ module sync_timebase #(
 
     logic [FRACW-1:0] frac, rate_mag;
     logic             rate_neg;
-    logic [FRACW:0]   frac_sum;
+    logic [FRACW-1:0] frac_sum;
+    logic [FRACW+1:0] frac_sum2;
     logic             frac_co;
     logic [31:0]      step;
 
-    assign frac_sum = {1'b0, frac} + {1'b0, rate_mag};
-    assign frac_co  = frac_sum[FRACW];
+    // Carry look-ahead, for speed. frac_co is the carry out of frac + rate_mag,
+    // the one that adds or drops a tick, and computing it in the same clock as
+    // `now + step` put a 24-bit carry chain in series with the 32-bit timebase
+    // increment: the slowest path in the chip (sky130 slow corner). Instead the
+    // carry is computed a clock early into a flip-flop, so `now` sees a register.
+    //   frac + rate_mag     = frac_co * 2^FRACW + frac_next
+    //   frac_next + rate_mag >= 2^FRACW  <=>  frac + 2*rate_mag >= (1 + frac_co) * 2^FRACW
+    // frac + 2*rate_mag < 3 * 2^FRACW, so its top two bits (0, 1 or 2) decide:
+    // the next carry is set exactly when they exceed today's carry. After reset
+    // or a rate write frac is 0, and 0 + rate_mag never carries, so the
+    // register starts at 0. Same ticks on the same clocks as computing it
+    // directly (syn/timebase_equiv.ys proves it); costs one adder and one flop.
+    assign frac_sum  = frac + rate_mag;
+    assign frac_sum2 = {2'b00, frac} + {1'b0, rate_mag, 1'b0};
+
+    // Both candidates are computed from registers and the write strobe only
+    // picks one at the end: a late adj_we (it is decoded from the instruction)
+    // then selects a finished sum instead of steering an adder's input.
+    // The adjust sum is a carry-select adder: both possible upper halves are
+    // formed alongside the lower half and its carry picks one, so the longest
+    // carry chain is 16 bits instead of 32 (one more 16-bit adder of area).
+    logic [31:0] now_adj, now_step;
+    logic [16:0] adj_lo;
+    logic [15:0] adj_hi0, adj_hi1;
+    assign adj_lo   = {1'b0, now[15:0]} + {1'b0, adj_in[15:0]} + 17'd1;
+    assign adj_hi0  = now[31:16] + adj_in[31:16];
+    assign adj_hi1  = now[31:16] + adj_in[31:16] + 16'd1;
+    assign now_adj  = {adj_lo[16] ? adj_hi1 : adj_hi0, adj_lo[15:0]};
+    assign now_step = now + step;
 
     // +2 speeds the clock up by one tick, 0 slows it by one tick
     always_comb begin
@@ -54,24 +82,26 @@ module sync_timebase #(
             frac     <= '0;
             rate_mag <= '0;
             rate_neg <= 1'b0;
+            frac_co  <= 1'b0;
         end else begin
             if (rate_we) begin
                 rate_mag <= rate_in[FRACW-1:0];
                 rate_neg <= rate_in[31];
                 frac     <= '0;
+                frac_co  <= 1'b0;
             end else begin
-                frac <= frac_sum[FRACW-1:0];
+                frac     <= frac_sum;
+                frac_co  <= (frac_sum2[FRACW+1:FRACW] > {1'b0, frac_co});
             end
 
             // A step and a tick in the same clock both apply, so a TADJ can
             // never swallow a tick.
-            if (adj_we) now <= now + adj_in + 32'd1;
-            else        now <= now + step;
+            now <= adj_we ? now_adj : now_step;
         end
     end
 
     // rate_in[30:FRACW] is reserved: the sign is bit 31, the magnitude is
-    // the low FRACW bits.
-    wire _unused = &{1'b0, rate_in[30:FRACW], 1'b0};
+    // the low FRACW bits. Only the top two bits of frac_sum2 are needed.
+    wire _unused = &{1'b0, rate_in[30:FRACW], frac_sum2[FRACW-1:0], 1'b0};
 
 endmodule : sync_timebase
