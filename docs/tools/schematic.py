@@ -436,7 +436,9 @@ def strip(d, x0=150, y0=0, w=None):
     o.append(f"<text class=gapt x={gx + gapw / 2:.1f} y={y0 + 22 + 2 * rh - 4} text-anchor=middle>{d['gap']:,}</text>")
     o.append(f"<text class=gapt x={gx + gapw / 2:.1f} y={y0 + 22 + 3 * rh - 8} text-anchor=middle>clocks</text>")
     for i, s in enumerate(steps):
-        o.append(f"<text class=gapt x={xs[i] + cw / 2:.1f} y={y0 + 22 + 5 * rh + 2} text-anchor=middle>{f"{s['cycle']:,}" if (i % 3 == 0 or i == d['edge']) and not (i % 3 and abs(i - d['edge']) < 2 and i != d['edge']) else ''}</text>")
+        shown = (i % 3 == 0 or i == d["edge"]) and not (i % 3 and abs(i - d["edge"]) < 2 and i != d["edge"])
+        label = format(s["cycle"], ",") if shown else ""
+        o.append(f"<text class=gapt x={xs[i] + cw / 2:.1f} y={y0 + 22 + 5 * rh + 2} text-anchor=middle>{label}</text>")
     return o, xs, cw, y0 + 22 + 5 * rh + 8
 
 
