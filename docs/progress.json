@@ -34,7 +34,7 @@
       "name": "sky130 timing",
       "steps": [
         {"step": "signoff timing after routing", "state": "done",
-         "evidence": {"label": "measured", "version": "src/ as on main 168fc84, 2026-10-28, LibreLane 3.0.14, open_pdks 8afc8346", "command": "GitHub run 40624495043: gds, signoff timing per corner", "result": "setup met at all nine corners at 50 MHz: +8.76 ns at the typical corner (nom_tt_025C_1v80), +1.43 ns at the slowest (max_ss_100C_1v60); hold met everywhere (+0.112 ns worst). The run still reports max-slew warnings on 745 pins at max_ss_100C_1v60 and 21 at nom_tt_025C_1v80"}}
+         "evidence": {"label": "measured", "version": "branch timing-speed 275685e, 2026-11-01, LibreLane 3.0.14, open_pdks 8afc8346", "command": "GitHub run 41346623526: gds, signoff timing per corner", "result": "setup met at all nine corners at 50 MHz: +10.33 ns at the typical corner (nom_tt_025C_1v80), +4.56 ns at the slowest (max_ss_100C_1v60), so about 65 MHz at the slowest corner and 103 MHz typical (estimates from the slack); hold met everywhere (+0.113 ns worst). The run still reports max-slew warnings on 908 pins at max_ss_100C_1v60 and 109 at nom_tt_025C_1v80. Main 168fc84 had +1.43 ns at the slowest corner (GitHub run 40624495043)"}}
       ]
     },
     {
