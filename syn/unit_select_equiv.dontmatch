@@ -1,0 +1,16 @@
+adj_in
+arm_time
+cfg_in
+pulse_mask
+pw_in
+rate_in
+u_cmp.arm_time
+u_cmp.arm_time_m1
+u_cmp.pulse_mask
+u_cmp.pw_in
+u_time.adj_hi0
+u_time.adj_hi1
+u_time.adj_in
+u_time.adj_lo
+u_time.now_adj
+u_time.rate_in

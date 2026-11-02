@@ -113,6 +113,7 @@ explorer:
 equiv:
 	cd .. && yosys -q -s syn/timebase_equiv.ys > /dev/null && echo "timebase look-ahead: proven equivalent"
 	cd .. && yosys -q -s syn/compare_equiv.ys > /dev/null && echo "comparator deadline - 1: proven equivalent"
+	cd .. && yosys -q -s syn/unit_select_equiv.ys > /dev/null && echo "late operand select: proven equivalent"
 
 # The timing unit (src/sync/*.sv) and its reference model are shared, byte for byte, between Tiqora and
 # Tiqora-Serial. docs/shared_timing.sha256 is identical in both repositories;
