@@ -1,4 +1,6 @@
-/* schematic.js — steps deadline channel 0's logic through the recording.
+/* schematic.js — steps a drawing of the RTL's logic through the recording:
+   deadline channel 0 (docs/tools/schematic.py, both repos) and, in Tiqora,
+   the core's 4-bit adder (docs/tools/adder_schematic.py).
    Shared unchanged by tiqora-skywater130 and tinytapeout-tiqora.
 
    The drawing arrives complete from docs/tools/schematic.py, written in at the
@@ -6,7 +8,8 @@
    it to another recorded clock: it lights the wires whose signal is 1, writes
    the recorded values into the registers, and moves the cursor on the timing
    strip. Nothing is computed here; every value comes from
-   docs/site/data/schematic.json.
+   the figure's data file (docs/site/data/schematic.json, adder.json). A step
+   may carry a label for the scrubber and hold: 1 to linger in play.
 
    Motion: a wire that turns on draws itself from source to sink, and a register
    whose value changes flashes as the clock edge reaches it. Play starts by
@@ -30,6 +33,7 @@
     const wires = [...svg.querySelectorAll(".w[data-s]")];
     const glows = new Map([...svg.querySelectorAll(".glow[data-g]")].map(g => [g.dataset.g, g]));
     const dots = [...svg.querySelectorAll(".dot[data-s]")];
+    const ons = [...svg.querySelectorAll("[data-on]")];
     const pad = svg.querySelector(".pad");
     const vals = [...svg.querySelectorAll("[data-v]")];
     const steps = d.steps, n = steps.length;
@@ -42,7 +46,7 @@
         case "arm_time": return s.arm_we ? fmt(s.arm_time) : "";
         case "arm_m1": return s.arm_we ? fmt(s.arm_m1) : "";
         case "now": case "dm1": case "diff": return fmt(s[k]);
-        default: return String(s[k]);
+        default: return s[k] == null ? "" : String(s[k]);
       }
     };
 
@@ -57,7 +61,8 @@
         const g = glows.get(w.dataset.w); if (g) g.style.opacity = on ? ".18" : "0";
       }
       for (const c of dots) c.classList.toggle("on", !!bit(s, c.dataset.s));
-      pad.classList.toggle("on", !!s.pin);
+      for (const c of ons) c.classList.toggle("on", !!s[c.dataset.on]);
+      if (pad) pad.classList.toggle("on", !!s.pin);
       for (const v of vals) {
         const t = text(s, v.dataset.v);
         if (v.textContent !== t) {
@@ -69,8 +74,9 @@
       }
       i = k;
       range.value = k;
-      range.setAttribute("aria-valuetext", `cycle ${fmt(s.cycle)}, now ${fmt(s.now)}`);
-      out.textContent = `cycle ${fmt(s.cycle)} · now ${fmt(s.now)}`;
+      const label = s.label || `cycle ${fmt(s.cycle)} · now ${fmt(s.now)}`;
+      range.setAttribute("aria-valuetext", label.replace(/ · /g, ", "));
+      out.textContent = label;
       cap.textContent = s.text;
       if (desc) desc.textContent = s.text;
       cur.setAttribute("x", xs[k]);
@@ -79,7 +85,7 @@
     // a step lingers longer where something happens: the arm, the jump, the edge
     const dwell = k => {
       const s = steps[k], p = steps[k - 1];
-      if (!p || s.part !== p.part || s.fire || s.arm_we || (s.pin !== p.pin)) return 3200;
+      if (!p || s.part !== p.part || s.hold || s.fire || s.arm_we || (s.pin !== p.pin)) return 3200;
       return 1300;
     };
     function stop() {
