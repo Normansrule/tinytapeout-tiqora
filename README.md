@@ -30,7 +30,7 @@ microcontroller when the chip should run your code on its own.
 
 It exists as tested RTL and a clean layout, not yet as a chip. At 1 × 2, the size it submits, the
 Tiny Tapeout GDS, pre-flight and gate-level workflows pass, and the routed layout meets setup and
-hold timing at 50 MHz at all nine corners, +4.56 ns at the slowest (GitHub run 41346623526, branch timing-speed).
+hold timing at 50 MHz at all nine corners, +4.68 ns at the slowest (GitHub run 41474835620, branch timing-speed-2).
 
 **Key features**
 
@@ -84,7 +84,7 @@ Where the Tiny Tapeout tile stands on the way to silicon. Each rung needs the on
 | Formally checked | ⬜ not done | no formal proofs exist for this design |
 | Synthesized | ✅ done | 21,322 µm², 458 flip-flops, 59% of the 1 × 2 die (`make -C test area`, Yosys 0.33, main 168fc84, 2026-10-27, with the cells this design's flow excludes (src/synth_exclude.cells) removed) |
 | Placed and routed | ✅ done | 1 × 2: `gds` and `gl_test` pass (GitHub run 40427835877); GitHub run 40624495043: DRC 0, LVS 0, antenna 0, 82% utilisation |
-| Timing checked | ✅ met at every corner | GitHub run 41346623526 (branch timing-speed 275685e, 2026-11-01, LibreLane 3.0.14, open_pdks 8afc8346; tt-gds-action ttsky26d), 1 × 2: setup met at all nine corners at 50 MHz: +10.33 ns at the typical corner (nom_tt_025C_1v80), +4.56 ns at the slowest (max_ss_100C_1v60), so about 65 MHz at the slowest corner and 103 MHz typical (estimates from the slack); hold met everywhere (+0.113 ns worst). The run still reports max-slew warnings on 908 pins at max_ss_100C_1v60 and 109 at nom_tt_025C_1v80. Main 168fc84 had +1.43 ns at the slowest corner (GitHub run 40624495043) |
+| Timing checked | ✅ met at every corner | GitHub run 41474835620 (branch timing-speed-2 3c58720, 2026-11-02, LibreLane 3.0.14, open_pdks 8afc8346; tt-gds-action ttsky26d), 1 × 2: setup met at all nine corners at 50 MHz: +10.37 ns at the typical corner (nom_tt_025C_1v80), +4.68 ns at the slowest (max_ss_100C_1v60), so about 65 MHz at the slowest corner and 104 MHz typical (estimates from the slack); hold met everywhere (+0.113 ns worst). The run still reports max-slew warnings on 950 pins at max_ss_100C_1v60 and 45 at nom_tt_025C_1v80. Main 168fc84 had +1.43 ns at the slowest corner (GitHub run 40624495043) |
 | Submitted, fabricated, measured | ⬜ not yet | the Tiny Tapeout pre-flight passes at 1 × 2 (GitHub run 40427835877); submitting is the owner's step |
 | FPGA board | ⬜ not yet | the Basys 3 design passes in simulation, 7 checks; nothing has run on a board |
 
@@ -103,7 +103,7 @@ Where Tiqora-Serial stands on the way to silicon. Every ✅ and 🔄 below names
 | **Tiny Tapeout GDS and pre-flight** | `██████████` 3/3 | cell area after synthesis, before placement | ✅ | 21,322 µm², 458 flip-flops: 59% of 1x2, with the cells this design's flow excludes (src/synth_exclude.cells) removed; measured (main 168fc84, Yosys 0.33, 2026-10-27, `make -C test area`) |
 |  |  | place and route at 1x2 | ✅ | clean GDS: DRC 0, LVS 0, antenna 0, 82% utilisation; measured (src/ as on main 168fc84, LibreLane 3.0.14, open_pdks 8afc8346, `GitHub run 40624495043: gds and gl_test`) |
 |  |  | Tiny Tapeout pre-flight | ✅ | pass; measured (main 168fc84, `GitHub run 40427835877: precheck`) |
-| **sky130 timing** | `██████████` 1/1 | signoff timing after routing | ✅ | setup met at all nine corners at 50 MHz: +10.33 ns at the typical corner (nom_tt_025C_1v80), +4.56 ns at the slowest (max_ss_100C_1v60), so about 65 MHz at the slowest corner and 103 MHz typical (estimates from the slack); hold met everywhere (+0.113 ns worst). The run still reports max-slew warnings on 908 pins at max_ss_100C_1v60 and 109 at nom_tt_025C_1v80. Main 168fc84 had +1.43 ns at the slowest corner (GitHub run 40624495043); measured (branch timing-speed 275685e, 2026-11-01, LibreLane 3.0.14, open_pdks 8afc8346, `GitHub run 41346623526: gds, signoff timing per corner`) |
+| **sky130 timing** | `██████████` 1/1 | signoff timing after routing | ✅ | setup met at all nine corners at 50 MHz: +10.37 ns at the typical corner (nom_tt_025C_1v80), +4.68 ns at the slowest (max_ss_100C_1v60), so about 65 MHz at the slowest corner and 104 MHz typical (estimates from the slack); hold met everywhere (+0.113 ns worst). The run still reports max-slew warnings on 950 pins at max_ss_100C_1v60 and 45 at nom_tt_025C_1v80. Main 168fc84 had +1.43 ns at the slowest corner (GitHub run 40624495043); measured (branch timing-speed-2 3c58720, 2026-11-02, LibreLane 3.0.14, open_pdks 8afc8346, `GitHub run 41474835620: gds, signoff timing per corner`) |
 | **Silicon** | `░░░░░░░░░░` 0/2 | shuttle submission | ⬜ | next: after a clean GDS and pre-flight |
 |  |  | first chip tested | ⬜ | next: after the shuttle returns |
 
@@ -423,7 +423,7 @@ at an internal flip-flop.
 | Verilator `-Wall` | **clean** (two documented waivers) |
 | Yosys elaboration | **passes, no latches** |
 | Shared sync blocks and their reference model | **byte-identical** to the main Tiqora chip, checked by `make shared` against a SHA-256 manifest kept in both repositories |
-| Timing-unit speed rewrites | **proven equivalent** by `make equiv` (Yosys SAT, k-induction): the timebase carry look-ahead and the comparator's stored deadline − 1 behave exactly like the plain versions they replaced; 3 mutants each caught (needs a native Yosys, so not in `make sim`) |
+| Timing-unit speed rewrites | **proven equivalent** by `make equiv` (Yosys SAT, k-induction, and equiv_induct for the operand select): the timebase carry look-ahead, the comparator's stored deadline − 1 and the late operand select in `sync_unit` behave exactly like the plain versions they replaced; 3 mutants each caught (needs a native Yosys, so not in `make sim`) |
 
 The serial test does everything a host would: ping, reject garbage, read the
 running timebase, configure capture, capture an edge and read the event back,

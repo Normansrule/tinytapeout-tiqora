@@ -8,11 +8,11 @@
    "sync_compare": 8156.6,
    "sync_event_fifo": 2615.0,
    "sync_timebase": 4908.5,
-   "sync_unit": 4553.1,
-   "tp_host_uart": 2047.0,
+   "sync_unit": 4588.2,
+   "tp_host_uart": 2037.0,
    "tp_sync_soc": 32.5,
-   "tp_uart_rx": 1201.2,
-   "tp_uart_tx": 1069.8,
+   "tp_uart_rx": 1198.6,
+   "tp_uart_tx": 1063.5,
    "tt_um_normansrule_tiqora_serial": 3.8
   },
   "sources": {
@@ -20,7 +20,7 @@
    "src/sync/sync_compare.sv": "0910608252174b2b17e2909903257ec0e2a1c7cd8b2cdeb8785888bdad3308c3",
    "src/sync/sync_event_fifo.sv": "8fbd9d34936c2624b9292253f31aa6ad31866a2c1c32879ca7a76ef24724c03a",
    "src/sync/sync_timebase.sv": "87d599d0c74435307ca6f45290b608ac9e6fee0e42ccab91e2e8dd5ba3bb32f6",
-   "src/sync/sync_unit.sv": "7063a3b59bd7715cb3dbf95ccca771b2dd78e81fba995bd1c54eae5441270e50",
+   "src/sync/sync_unit.sv": "2a4f9c3df3e71c382c9d11803a12b3c293fab6094ead429536c0edfc38972130",
    "src/tp_pkg.sv": "49c69ecf3f032b2b59c8796765d878d7c40c7742d6deb421dd6dd7efd326ca78",
    "src/tp_sync_soc.sv": "462a14536fd2450134754e5f7c87a1fb90d28c6c95822d8596fed7975f1905aa",
    "src/tt_um_normansrule_tiqora_serial.sv": "09a201defac0fb179034a01edc9dbbc2f4828b927dc53658c01290469dc57efb",
@@ -29,7 +29,7 @@
    "src/uart/tp_uart_tx.sv": "32458039699f7e41740457c80a820cc7132a2366a3f64bc58ee1675d674cb49a"
   },
   "tool": "Yosys 0.33",
-  "total_hierarchical_um2": 25478.1856,
+  "total_hierarchical_um2": 25494.4512,
   "what": "sky130_fd_sc_hd cell area per module, hierarchical synthesis before placement (the flattened netlist the flow builds is smaller: synthesis optimizes across boundaries)"
  },
  "blocks": [
@@ -2346,7 +2346,7 @@
    "src/sync/sync_compare.sv": "0910608252174b2b17e2909903257ec0e2a1c7cd8b2cdeb8785888bdad3308c3",
    "src/sync/sync_event_fifo.sv": "8fbd9d34936c2624b9292253f31aa6ad31866a2c1c32879ca7a76ef24724c03a",
    "src/sync/sync_timebase.sv": "87d599d0c74435307ca6f45290b608ac9e6fee0e42ccab91e2e8dd5ba3bb32f6",
-   "src/sync/sync_unit.sv": "7063a3b59bd7715cb3dbf95ccca771b2dd78e81fba995bd1c54eae5441270e50",
+   "src/sync/sync_unit.sv": "2a4f9c3df3e71c382c9d11803a12b3c293fab6094ead429536c0edfc38972130",
    "src/tp_pkg.sv": "49c69ecf3f032b2b59c8796765d878d7c40c7742d6deb421dd6dd7efd326ca78",
    "src/tp_sync_soc.sv": "462a14536fd2450134754e5f7c87a1fb90d28c6c95822d8596fed7975f1905aa",
    "src/tt_um_normansrule_tiqora_serial.sv": "09a201defac0fb179034a01edc9dbbc2f4828b927dc53658c01290469dc57efb",

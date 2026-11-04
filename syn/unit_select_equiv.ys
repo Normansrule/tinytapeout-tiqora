@@ -1,0 +1,15 @@
+# unit_select_equiv.ys — prove sync_unit's late operand select changes nothing observable.
+# syn/unit_select_ref.sv is sync_unit before the change (module renamed sync_unit_ref).
+# equiv_make pairs every flip-flop, output and internal wire by name; equiv_simple and
+# equiv_induct prove each pair equal. The wires in unit_select_equiv.dontmatch are the six
+# operand buses that changed on purpose and the sums computed from them: they may differ
+# only while their write enable is 0, and every register they feed is still proven equal. yosys -s syn/unit_select_equiv.ys exits non-zero if any pair is unproven.
+read_verilog -sv src/tp_pkg.sv src/sync/sync_timebase.sv src/sync/sync_compare.sv src/sync/sync_capture.sv src/sync/sync_event_fifo.sv src/sync/sync_unit.sv
+read_verilog -sv syn/unit_select_ref.sv
+hierarchy -check
+proc; flatten; memory; opt_clean
+equiv_make -blacklist syn/unit_select_equiv.dontmatch sync_unit_ref sync_unit equiv
+hierarchy -top equiv
+equiv_simple -seq 2
+equiv_induct -seq 2
+equiv_status -assert

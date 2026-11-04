@@ -275,28 +275,34 @@ module sync_unit
         endcase
     end
 
-    // Both access paths drive the same strobes.
+    // Both access paths drive the same strobes. Each data input takes the
+    // instruction operand unless the bus is writing and the instruction is
+    // not: the two forms agree whenever the matching write enable is 1, and
+    // the value is unused when it is 0. With the bus port tied off
+    // (SYNC_MMIO = 0, the Tiqora tile) mm_we is constant 0, so the operand
+    // goes straight from the core's mar register into the timebase adder
+    // instead of waiting for the Xpulse decode (proved by make equiv).
     always_comb begin
         fifo_pop   = t_pop   || (mm_re && (reg_addr == tp_pkg::SR_EVENT));
         arm_we     = t_arm   || (mm_we && ((reg_addr == tp_pkg::SR_CMP0) ||
                                            (reg_addr == tp_pkg::SR_CMP1)));
-        arm_time   = t_arm   ? t_rs1 : reg_wdata;
+        arm_time   = (mm_we && !t_arm)   ? reg_wdata : t_rs1;
         arm_sel    = t_arm   ? t_rs2[1:0]
                              : ((reg_addr == tp_pkg::SR_CMP1) ? 2'd1 : 2'd0);
         pulse_we   = t_pulse || (mm_we && (reg_addr == tp_pkg::SR_PULSE));
-        pulse_mask = t_pulse ? t_rs1[NCMP-1:0] : reg_wdata[NCMP-1:0];
+        pulse_mask = (mm_we && !t_pulse) ? reg_wdata[NCMP-1:0] : t_rs1[NCMP-1:0];
         pw_we      = (t_ctl && (t_sub == tp_pkg::TCTL_PW))   ||
                      (mm_we && (reg_addr == tp_pkg::SR_PW));
-        pw_in      = t_ctl   ? t_rs1 : reg_wdata;
+        pw_in      = (mm_we && !t_ctl)   ? reg_wdata : t_rs1;
         cfg_we     = (t_ctl && (t_sub == tp_pkg::TCTL_CFG))  ||
                      (mm_we && (reg_addr == tp_pkg::SR_CFG));
-        cfg_in     = t_ctl   ? t_rs1 : reg_wdata;
+        cfg_in     = (mm_we && !t_ctl)   ? reg_wdata : t_rs1;
         adj_we     = (t_ctl && (t_sub == tp_pkg::TCTL_ADJ))  ||
                      (mm_we && (reg_addr == tp_pkg::SR_ADJ));
-        adj_in     = t_ctl   ? t_rs1 : reg_wdata;
+        adj_in     = (mm_we && !t_ctl)   ? reg_wdata : t_rs1;
         rate_we    = (t_ctl && (t_sub == tp_pkg::TCTL_RATE)) ||
                      (mm_we && (reg_addr == tp_pkg::SR_RATE));
-        rate_in    = t_ctl   ? t_rs1 : reg_wdata;
+        rate_in    = (mm_we && !t_ctl)   ? reg_wdata : t_rs1;
     end
 
     wire _unused = &{1'b0, fifo_full, t_rs2[31:2], cfg_in[31:17], 1'b0};
