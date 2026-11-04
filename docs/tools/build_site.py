@@ -20,7 +20,7 @@ import base64, html, json, math, os, re, sys
 SITE = "docs/site"
 LIB = SITE + "/lib"
 MEDIA = "docs/images/explorer"
-SCRIPTS = ["model", "wave", "player", "atlas", "die", "layout", "labs", "board"]
+SCRIPTS = ["model", "wave", "player", "atlas", "die", "layout", "labs", "board", "schematic", "pace"]
 esc = lambda s: html.escape(str(s), quote=True)
 
 
@@ -93,22 +93,115 @@ def static_treemap(ctx):
     return treemap_svg(ctx, inline=True)
 
 
-def static_motion(ctx):
+def static_motion_feature(ctx):
+    """Only the first reel (the whole run), for the overview; the rest live with their tours."""
+    return static_motion(ctx, feature=True)
+
+
+def static_motion(ctx, feature=False):
     """Every reel docs/tools/motion.py drew, inlined so the pause button can stop it.
     Each reel names its classes after its tour, so they do not collide here."""
     m = ctx["site"]["motion"]
     out = []
-    for r in m["reels"]:
+    for r in m["reels"][:1] if feature else m["reels"]:
         fx = next(t for t in ctx["data"]["traces"] if t["id"] == r["fixture"])
         svg = open(f"{m['out']}/{fx['id']}.svg", encoding="utf-8").read().strip()
         out.append(f"<figure class=reel>{svg}<figcaption><a href='tours.html#seq={esc(fx['id'])}'>Step through “{esc(fx['title'])}”</a> "
                    f"<span class='ev measured'>recorded</span> <span class=small>{esc(fx['kind_text'])}; drawn by <code>docs/tools/motion.py</code></span></figcaption></figure>")
     return ("<p class=reel-bar><button class='btn ghost' type=button id=reel-pause aria-pressed=false>Pause the animations</button> "
             "<span class=small>With reduced motion turned on in your system, each one is a still of the whole recording.</span></p>"
-            f"<div class=reels id=reels>{''.join(out)}</div>")
+            f"<div class='reels{' feature' if feature else ''}' id=reels>{''.join(out)}</div>")
 
 
-STATIC = {"atlas_table": static_atlas_table, "pins": static_pins, "progress": static_progress,
+def wire_runs(r):
+    """Per metal layer: how many wire segments, how much wire, and the share running across the die,
+    counted from the routed geometry itself (routed.json: x0, y0, x1, y1 per segment)."""
+    out = {}
+    for L, w, n, um in zip(r["layers"], r["wires"], r["segments"], r["wire_um"]):
+        if not n:
+            continue
+        b = base64.b64decode(w)
+        v = [int.from_bytes(b[i:i + 2], "little") for i in range(0, len(b), 2)]
+        across = sum(1 for i in range(0, len(v), 4) if abs(v[i + 2] - v[i]) > abs(v[i + 3] - v[i + 1]))
+        out[L] = {"segments": n, "mm": um / 1000, "across": round(100 * across / (len(v) // 4))}
+    return out
+
+
+def static_stack(ctx):
+    """The routed die taken apart: the cells, then each metal layer the router used, as planes that
+    layout.js tilts and separates while you scroll. The legend is the facts, written here from
+    routed.json, so it reads the same without JavaScript."""
+    r = ctx["data"]["routed"]
+    u = r["unit_nm"] / 1000
+    runs = wire_runs(r)
+    cls = dict(zip(r["classes"], r["counts"]))
+    cells = sum(n for c, n in cls.items() if c != "physical only")
+    items = [("cells", "Cells", f"{cells:,} placed cells in rows {r['row'] * u:.2f} µm tall: {cls.get('logic', 0):,} logic, "
+                                f"{cls.get('flip-flop', 0):,} flip-flops (green), {cls.get('buffer', 0):,} buffers and "
+                                f"{cls.get('clock tree', 0):,} clock-tree cells (amber). The transistors are here, in the silicon.")]
+    width = dict(zip(r["layers"], r["width_nm"]))
+    for L, f in runs.items():
+        dirn = "across" if f["across"] >= 50 else "up and down"
+        share = f["across"] if f["across"] >= 50 else 100 - f["across"]
+        items.append((L, L, f"{f['segments']:,} wire segments, {f['mm']:.1f} mm of wire, {width[L] / 1000:.2f} µm wide; "
+                            f"{share}% of them run {dirn}, so each layer crosses the one below."))
+    planes = "".join(f"<div class='plane{' metal' if k != 'cells' else ''}' data-layer={k} style='--i:{i}'></div>" for i, (k, _, _) in enumerate(items))
+    legend = "".join(f"<li><b>{esc(t)}</b><span>{esc(x)}</span></li>" for _, t, x in items)
+    src = r["source"]
+    return (f"<div class=stack-stage><div class=stack aria-hidden=true>{planes}</div>"
+            f"<ol class=stack-legend aria-label='The layers, from the silicon up'>{legend}</ol></div>"
+            f"<p class=stack-cap><span class='ev measured'>measured</span> Counted from the routed layout of a local "
+            f"{esc(src['flow'])} run ({esc(src['pdk'])}): the shapes are the real ones; the colours and the spacing between "
+            f"the layers are chosen. On the chip the layers are less than a micrometre apart.</p>")
+
+
+def schem_figure(ctx, d, sc, fid, aria, note):
+    """A logic drawing that schematic.js steps through its recording: complete, at its still, without JavaScript."""
+    e, s, site = d["edge"], d["steps"][d["edge"]], ctx["site"]
+    src = f"{site['repo']}/blob/{site['ref']}/{d['rtl']}"
+    parts = "".join(f"<li><a href='{src}#L{d['lines'][k]}'>{esc(v)}</a> <span class=small>line {d['lines'][k]}</span></li>"
+                    for k, v in sorted(d["parts"].items(), key=lambda kv: d["lines"][kv[0]]))
+    label = s.get("label") or f"cycle {s['cycle']:,} · now {s['now']:,}"
+    return (f"<figure class=schem id={fid}>"
+            f"<div class=schem-stage tabindex=0 role=group aria-label='{esc(aria)} Left and right arrows step one clock; space plays.'>"
+            f"{sc.site_svg(d, e)}</div>"
+            f"<div class=schem-bar hidden><button class=btn type=button data-play aria-pressed=false>Play</button>"
+            f"<button class='btn ghost' type=button data-step=-1 aria-label='Previous clock'>&#8249;</button>"
+            f"<button class='btn ghost' type=button data-step=1 aria-label='Next clock'>&#8250;</button>"
+            f"<input type=range min=0 max={len(d['steps']) - 1} value={e} aria-label='Recorded clock'>"
+            f"<output class=mono>{esc(label)}</output></div>"
+            f"<div class=schem-strip>{sc.strip_svg(d, e)}</div>"
+            f"<p class=schem-cap aria-live=polite>{esc(s['text'])}</p>"
+            f"<figcaption><span class='ev recorded'>recorded</span> {note}"
+            f"<details><summary>Each part, in <code>{esc(d['rtl'])}</code></summary><ul class=schem-parts>{parts}</ul></details></figcaption></figure>")
+
+
+def static_schematic(ctx):
+    """Deadline channel 0 as logic (docs/tools/schematic.py), at the clock the pin rises; docs/site/lib/schematic.js
+    steps it through the rest of the recording."""
+    import schematic as sc
+    d = ctx["data"]["schematic"]
+    return schem_figure(ctx, d, sc, "schem", "The deadline logic.",
+        f"Every 0 and 1 on a wire, and every value in a register, was read inside "
+        f"<code>sync_compare</code> by <code>test/tb_tour.sv</code> during <code>make -C test tour</code>; "
+        f"<code>docs/tools/schematic.py</code> checks each of the {len(d['steps'])} clocks against the RTL's equations, "
+        f"rewritten in Python, before drawing them. Two values are arithmetic on recorded ones: the subtractor's output and "
+        f"<code>cnt−1</code>. The gates are drawn from the RTL, not from the synthesized netlist, which builds the same logic out of sky130 cells.")
+
+
+def static_adder(ctx):
+    """Tiqora only: the core's 4-bit adder as logic (docs/tools/adder_schematic.py), at the add's last nibble."""
+    import adder_schematic as sc
+    d = ctx["data"]["adder"]
+    return schem_figure(ctx, d, sc, "adder", "The core's 4-bit adder.",
+        f"Every nibble, carry and 0 or 1 on a wire was read inside <code>tp_ncore</code> by <code>test/tb_tour.sv</code> "
+        f"during <code>make -C test tour</code>; <code>docs/tools/adder_schematic.py</code> checks each of the {len(d['steps'])} "
+        f"clocks against the RTL's equations, rewritten in Python, checks both results against Python's own 32-bit arithmetic "
+        f"and against the datapath tour, then draws them. The sum beside the adder is arithmetic on recorded values. "
+        f"The {d['gap']:,} clocks between the two instructions are not drawn.")
+
+
+STATIC = {"schematic": static_schematic, "adder": static_adder, "stack": static_stack, "motion_feature": static_motion_feature, "atlas_table": static_atlas_table, "pins": static_pins, "progress": static_progress,
           "ladder": static_ladder, "flow": static_flow, "treemap": static_treemap, "motion": static_motion}
 
 

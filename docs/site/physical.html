@@ -128,7 +128,7 @@ kbd { border: 1px solid var(--line-2); border-bottom-width: 2px; border-radius: 
 h1, h2, h3 { line-height: 1.15; text-wrap: balance; }
 h1, h2 { font-family: var(--display); font-weight: 600; }
 h1 { font-size: clamp(2.4rem, 6vw, 4rem); line-height: 1.02; letter-spacing: -.008em; margin: 2.6rem 0 .9rem; max-width: 24ch; }
-h2 { font-size: clamp(1.6rem, 3vw, 2.15rem); letter-spacing: -.005em; margin: 3.4rem 0 .7rem; }
+h2 { font-size: clamp(1.7rem, 3.4vw, 2.5rem); letter-spacing: -.012em; line-height: 1.08; margin: 4rem 0 .8rem; }
 /* a page section opens with the same mark the cycle ruler gives it */
 main > h2::before, section > h2::before { content: ""; display: block; width: 28px; height: 2px; margin-bottom: .7rem; background: var(--trace); }
 h3 { font-size: 1.1rem; font-weight: 700; margin: 1.8rem 0 .4rem; }
@@ -147,6 +147,16 @@ html { scrollbar-color: var(--line-2) var(--bg); }
 .ruler .sec { stroke: var(--trace); stroke-width: 1.5; }
 .ruler .now { position: absolute; top: 0; bottom: 0; width: 2px; left: 0; background: var(--cursor); transform: translateX(var(--x, 0px)); }
 .top { position: sticky; top: 0; z-index: 5; background: var(--bg); border-bottom: 1px solid var(--line); }
+/* the header is nearly opaque, with no blur behind it: a backdrop blur over these canvases and
+   drawings made every scrolled frame repaint the strip under the header, and in profiling it was
+   the largest single cost of scrolling. Solid for readers who asked for less transparency. */
+.top { background: color-mix(in srgb, var(--bg) 93%, transparent); }
+@media (prefers-reduced-transparency: reduce) { .top { background: var(--bg); -webkit-backdrop-filter: none; backdrop-filter: none; } }
+@media (prefers-contrast: more) {
+  :root { --line: var(--line-2); --muted: var(--ink-2); }
+  .top { background: var(--bg); -webkit-backdrop-filter: none; backdrop-filter: none; border-bottom-color: var(--ink); }
+  .btn.ghost, .src, .theme { border-color: var(--ink); }
+}
 .top .in { display: flex; gap: 1rem; align-items: center; max-width: 1200px; margin: 0 auto; padding: .5rem 16px; flex-wrap: wrap; }
 .brand { font-family: var(--display); font-weight: 600; letter-spacing: .04em; font-size: 1.15rem; color: var(--ink); text-decoration: none; display: flex; align-items: center; gap: .45rem; }
 .brand svg { width: 22px; height: 22px; }
@@ -534,9 +544,10 @@ html { overflow-x: clip; }
 .chip3d { position: relative; transform-origin: 50% 40%; border-radius: 6px; overflow: hidden; box-shadow: 0 0 0 1px #2a302d, 0 40px 80px -20px rgba(0, 0, 0, .9);
   transform: rotateX(calc((1 - var(--p)) * 56deg)) rotateZ(calc((1 - var(--p)) * -20deg)) scale(calc(.82 + .18 * var(--p))); will-change: transform; }
 .chip3d canvas { display: block; width: 100%; height: auto; }
-.chip3d .sheen { position: absolute; inset: 0; pointer-events: none; mix-blend-mode: screen;
-  background: linear-gradient(105deg, transparent 30%, rgba(255, 255, 255, .16) 45%, rgba(154, 216, 247, .1) 52%, transparent 66%);
-  background-size: 260% 100%; background-position: calc(120% - var(--p) * 140%) 0; }
+.chip3d .sheen { position: absolute; top: 0; bottom: 0; left: 0; width: 260%; pointer-events: none;
+  background: linear-gradient(105deg, transparent 30%, rgba(255, 255, 255, .07) 45%, transparent 60%);
+  /* moved by transform, not background-position, so scrolling recomposites it instead of repainting it */
+  transform: translateX(calc(-46% + var(--p) * 54%)); will-change: transform; }
 .reveal-chip .shadow { position: absolute; left: 10%; right: 10%; bottom: -6%; height: 18%; border-radius: 50%; background: radial-gradient(closest-side, rgba(0, 0, 0, .75), transparent); filter: blur(6px); z-index: -1; }
 .reveal-cap { margin: 1.4rem auto 0; max-width: 46ch; text-align: center; font-size: .95rem; color: var(--screen-dim); }
 .reveal-cap .ev.illustrative { color: var(--screen-dim); }
@@ -557,8 +568,8 @@ html { overflow-x: clip; }
 
 /* ------------------------------------------------------------ the routed layout (layout.js) */
 .chip3d canvas.glint { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; mix-blend-mode: screen; }
-.routed-hero .chip3d { box-shadow: 0 0 0 1px #2c3550, 0 0 60px -10px rgba(110, 120, 255, calc(.15 + .35 * var(--p))), 0 40px 90px -20px rgba(0, 0, 0, .95); }
-.routed-hero .chip3d .sheen { background: linear-gradient(105deg, transparent 30%, rgba(255, 255, 255, .10) 45%, rgba(160, 120, 255, .08) 52%, transparent 66%); background-size: 260% 100%; background-position: calc(120% - var(--p) * 140%) 0; }
+.routed-hero .chip3d { box-shadow: 0 0 0 1px #2c3550, 0 0 36px -12px rgba(110, 120, 255, .3); }
+.routed-hero .chip3d .sheen { background: linear-gradient(105deg, transparent 30%, rgba(255, 255, 255, .08) 45%, rgba(160, 120, 255, .06) 52%, transparent 62%); }
 .routed-x { --rx-ink: #dfe4f2; --rx-dim: #8d95ab; --rx-line: #283048; position: relative; margin: 1.2rem 0; background: #05070a; color: var(--rx-ink); border-radius: var(--radius); overflow: hidden;
   box-shadow: 0 0 0 1px var(--rx-line), 0 30px 70px -30px rgba(80, 90, 255, .35); }
 .routed-bar { display: flex; flex-wrap: wrap; gap: .5rem .9rem; align-items: center; padding: .7rem .8rem; border-bottom: 1px solid var(--rx-line); }
@@ -631,7 +642,17 @@ canvas.routed:active { cursor: grabbing; }
     .stat { animation: stat-in linear both; animation-timeline: view(); animation-range: entry 0% cover 30%; }
     .stat:nth-child(2) { animation-range: entry 6% cover 34%; } .stat:nth-child(3) { animation-range: entry 12% cover 38%; } .stat:nth-child(4) { animation-range: entry 18% cover 42%; }
     @keyframes stat-in { from { opacity: 0; transform: translateY(28px); } }
+    /* each section's heading and the schematic arrive as they scroll in; driven by your scrolling, never on a timer */
+    main section > h2, .schem-stage { animation: rise-in linear both; animation-timeline: view(); animation-range: entry 0% cover 22%; }
+    @keyframes rise-in { from { opacity: 0; transform: translateY(18px); } }
   }
+  /* the schematic: a wire that turns on draws itself from source to sink; a register flashes as its clock edge lands */
+  .sc .w.on.flow { stroke-dasharray: 1; animation: sc-flow 420ms var(--ease-out) both; }
+  @keyframes sc-flow { from { stroke-dashoffset: 1; } to { stroke-dashoffset: 0; } }
+  .sc .part.tick .ff, .sc .part.tick .box { animation: sc-tick 620ms var(--ease-out); }
+  @keyframes sc-tick { from { stroke: var(--sch-hi); stroke-width: 3; } }
+  .sc .glow { transition: opacity 260ms ease; }
+  .schem-strip .cur { transition: x 300ms var(--ease-out); }
 }
 @media print {
   .routed-bar, .routed-hint { display: none; }
@@ -646,6 +667,123 @@ canvas.routed:active { cursor: grabbing; }
 .reel figcaption { margin-top: .45rem; display: flex; flex-wrap: wrap; gap: .3rem .7rem; align-items: baseline; }
 .reel-bar { display: flex; flex-wrap: wrap; gap: .4rem .9rem; align-items: center; }
 .reels[data-paused] svg, .reels[data-paused] svg * { animation-play-state: paused !important; }
+
+/* the deadline schematic (docs/tools/schematic.py, docs/site/lib/schematic.js). Paper in light mode, the
+   instrument's screen in dark; a 1 on a wire is the recorded trace's amber. */
+:root { --sch-bg: #fdfdfb; --sch-box: #f2f2ee; --sch-edge: #bcbfb8; --sch-ink: #121416; --sch-muted: #575d63;
+  --sch-off: #c4c7c0; --sch-hi: #d27300; --sch-bus: #0b7a5f; --sch-lane: #f1f1ec; --sch-cur: #0b5f86; }
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) { --sch-bg: #0f1214; --sch-box: #161a1d; --sch-edge: #3a4247; --sch-ink: #e8ebe9; --sch-muted: #9aa3a7;
+    --sch-off: #3a4247; --sch-hi: #ffb000; --sch-bus: #3fc49b; --sch-lane: #12161a; --sch-cur: #7cc6ea; }
+}
+:root[data-theme="dark"] { --sch-bg: #0f1214; --sch-box: #161a1d; --sch-edge: #3a4247; --sch-ink: #e8ebe9; --sch-muted: #9aa3a7;
+  --sch-off: #3a4247; --sch-hi: #ffb000; --sch-bus: #3fc49b; --sch-lane: #12161a; --sch-cur: #7cc6ea; }
+.schem { margin: 1.4rem 0 0; background: var(--sch-bg); border: 1px solid var(--line); border-radius: 16px; padding: 10px 10px 1.1rem;
+  box-shadow: 0 1px 2px color-mix(in srgb, var(--ink) 6%, transparent), 0 18px 48px -24px color-mix(in srgb, var(--ink) 22%, transparent); }
+.schem-stage { border-radius: 12px; outline-offset: 3px; }
+.schem-stage svg, .schem-strip svg { display: block; width: 100%; height: auto; }
+.schem-bar { display: flex; flex-wrap: wrap; gap: .5rem; align-items: center; padding: .7rem .5rem .2rem; }
+.schem-bar[hidden] { display: none; }
+.schem-bar .btn { min-width: 44px; justify-content: center; }
+.schem-bar input[type=range] { flex: 1 1 220px; accent-color: var(--sch-hi); min-height: 44px; }
+.schem-bar output { font-size: .9rem; color: var(--ink-2); font-variant-numeric: tabular-nums; min-width: 22ch; }
+.schem-strip { padding: 0 .5rem; }
+.schem-cap { font-size: 1.05rem; line-height: 1.5; color: var(--ink); max-width: 72ch; min-height: 4.6em; margin: .6rem .5rem .4rem; }
+.schem figcaption { font-size: .92rem; color: var(--ink-2); margin: .2rem .5rem 0; max-width: 80ch; }
+.schem details { margin-top: .5rem; }
+.schem summary { cursor: pointer; font-weight: 700; }
+.schem-parts { columns: 2 18rem; margin: .4rem 0 0; padding-left: 1.1rem; }
+@media (max-width: 700px) {
+  .schem-stage { overflow-x: auto; overscroll-behavior-x: contain; } .schem-stage svg { width: 780px; max-width: none; }
+  .schem-cap { min-height: 7.5em; }
+}
+@media (prefers-contrast: more) { .schem { border-color: var(--ink); } }
+
+/* ------------------------------------------------------------ pace.js: drawings far off screen stop animating */
+[data-idle], [data-idle] * { animation-play-state: paused !important; }
+/* sections after the opening scenes are only laid out and painted when they come near the screen */
+main > section.cv { content-visibility: auto; contain-intrinsic-size: auto 1200px; }
+/* the scroll scenes too: off screen, their big composited layers (the tilted die and the planes) are dropped */
+main > section.reveal, main > section.layers { content-visibility: auto; contain-intrinsic-size: auto 2400px; }
+
+/* ------------------------------------------------------------ the overview as chapters: a centred head, then the piece */
+.chapter { text-align: center; margin: 8rem auto 2.4rem; max-width: 62rem; }
+.chapter .eyebrow { font: 600 .88rem var(--sans); letter-spacing: .12em; text-transform: uppercase; color: var(--trace); margin: 0 0 .8rem; max-width: none; }
+.chapter h2 { font-size: clamp(2.3rem, 5.8vw, 4.6rem); line-height: 1; letter-spacing: -.022em; margin: 0 auto 1rem; max-width: 21ch; }
+.chapter .lede { margin: 0 auto; max-width: 44ch; font-size: clamp(1.1rem, 1.7vw, 1.32rem); }
+.chapter + * { margin-top: 0; }
+section.sub { margin-top: 4.5rem; }
+section.sub > h2 { font-size: clamp(1.5rem, 2.6vw, 2rem); margin: 0 0 .6rem; }
+section.sub > h2::before { display: none; }
+.dark-band { background: var(--screen); color: var(--screen-ink); padding: 1px 16px 6rem; }
+.dark-band .chapter .lede { color: #b9c0b8; }
+.dark-band .chapter .eyebrow { color: #ffb000; }
+
+/* ------------------------------------------------------------ the routed die, taken apart (layout.js stack) */
+.layers { --e: 0; --ar: 2.25; }
+.stack-stage { position: relative; display: grid; grid-template-columns: minmax(0, 1.6fr) minmax(16rem, 1fr); gap: 2rem; align-items: center;
+  max-width: 1200px; margin: 0 auto; }
+.stack { position: relative; width: min(100%, 64vh * var(--ar)); justify-self: center; aspect-ratio: var(--ar); transform-style: preserve-3d;
+  transform: perspective(1800px) rotateX(calc(var(--e) * 56deg)) rotateZ(calc(var(--e) * -28deg)) scale(calc(1 - var(--e) * .14)); }
+.plane { position: absolute; inset: 0; transform: translateZ(calc(var(--e) * (var(--i) - var(--mid, 2)) * min(8vh, 66px))); transition: opacity 360ms var(--ease-out), filter 360ms var(--ease-out); }
+.plane canvas { display: block; width: 100%; height: 100%; border-radius: 3px; }
+.plane.metal { background: rgba(8, 12, 20, calc(var(--e) * .35)); box-shadow: 0 0 0 1px rgba(170, 190, 255, calc(var(--e) * .22)); border-radius: 3px; }
+.plane:not(.metal) { box-shadow: 0 0 0 1px #2c3550, 0 40px 80px -24px rgba(0, 0, 0, .9); border-radius: 3px; }
+.plane.dim { opacity: .14; }
+.stack-legend { list-style: none; margin: 0; padding: 0; display: grid; gap: .2rem; counter-reset: L; }
+.stack-legend li { padding: .7rem .9rem; border-radius: 10px; border: 1px solid transparent; color: var(--screen-dim); transition: color 300ms ease, background-color 300ms ease, border-color 300ms ease; cursor: default; }
+.stack-legend li b { display: block; font: 600 1.15rem var(--display); letter-spacing: .02em; color: var(--screen-ink); }
+.stack-legend li span { display: block; font-size: .92rem; line-height: 1.45; }
+.stack-legend li[data-on] { color: var(--screen-ink); background: rgba(255, 255, 255, .05); border-color: #2c3550; }
+.layers.live .stack-legend li { cursor: pointer; }
+.stack-cap { max-width: 70ch; margin: 2rem auto 0; text-align: center; font-size: .92rem; color: var(--screen-dim); }
+.stack-cap .ev.measured { color: #5bd28a; }
+/* without JavaScript there are no pictures: the legend is the section */
+.layers:not(.on) .stack { display: none; }
+.layers:not(.on) .stack-stage { grid-template-columns: minmax(0, 1fr); max-width: 44rem; }
+.layers:not(.on) .stack-legend li { color: var(--screen-ink); }
+/* live: the stage holds while you scroll through three screens of the section */
+.layers.live { height: 330vh; padding-bottom: 0; }
+.layers.live .layers-stick { position: sticky; top: var(--top-h, 67px); height: calc(100svh - var(--top-h, 67px)); display: grid; align-content: center; padding: 0 16px; overflow: hidden; }
+.layers.live .chapter { margin: 0 auto 1.4rem; }
+.layers.live .chapter h2 { font-size: clamp(2rem, 4.4vw, 3.4rem); }
+.layers.live .chapter .lede { font-size: 1.05rem; }
+.layers.live .stack-cap { margin-top: 1rem; }
+/* a tall tile (Tiqora-Serial's 1x2) is sized by the screen's height, so the opened stack still fits */
+.layers.live .stack { width: min(100%, calc((100svh - 22rem) * var(--ar))); }
+@media (max-width: 900px) {
+  .stack-stage { grid-template-columns: 1fr; gap: 1rem; }
+  .layers.live .stack-legend li:not([data-on]) { display: none; }
+  .layers.live .chapter .lede { display: none; }
+}
+@media (max-width: 700px) { .layers { --top-h: 0px; } }
+
+/* ------------------------------------------------------------ the tours, as cards */
+.tourgrid { list-style: none; padding: 0; margin: 2rem 0 0; display: grid; gap: 1rem; grid-template-columns: repeat(auto-fill, minmax(17rem, 1fr)); }
+.tourgrid li { position: relative; display: grid; gap: .35rem; align-content: start; padding: 1.2rem 1.2rem 1.1rem; border-radius: 16px; background: var(--surface); border: 1px solid var(--line);
+  transition: transform 220ms var(--ease-out), border-color 200ms ease, box-shadow 220ms var(--ease-out); }
+.tourgrid a { font: 600 1.2rem/1.2 var(--display); letter-spacing: .01em; color: var(--ink); text-decoration: none; }
+.tourgrid a::after { content: ""; position: absolute; inset: 0; border-radius: inherit; }
+.tourgrid p { margin: 0; color: var(--ink-2); font-size: .97rem; }
+.tourgrid .small { font-family: var(--mono); font-size: .8rem; }
+@media (hover: hover) and (pointer: fine) { .tourgrid li:hover { transform: translateY(-3px); border-color: var(--line-2); box-shadow: 0 18px 40px -26px color-mix(in srgb, var(--ink) 40%, transparent); } }
+.tourgrid li:focus-within { outline: 2px solid var(--focus); outline-offset: 2px; }
+.tourgrid a:focus-visible { outline: none; }
+.reels.feature { margin: 0 auto; max-width: 980px; }
+.reels.feature .reel { max-width: none; }
+.figure-pair { display: grid; gap: 1.2rem; grid-template-columns: repeat(auto-fit, minmax(min(100%, 30rem), 1fr)); margin-top: 1.6rem; }
+.figure-pair img { display: block; width: 100%; height: auto; border-radius: 12px; }
+.figure-pair figure { margin: 0; }
+.figure-pair figcaption { font-size: .9rem; color: var(--ink-2); margin-top: .4rem; }
+
+@media (prefers-reduced-motion: no-preference) {
+  @supports (animation-timeline: view()) {
+    .chapter { animation: rise-in linear both; animation-timeline: view(); animation-range: entry 0% cover 25%; }
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .stack-legend li, .plane { transition: none; }
+}
 </style>
 <script>try { const t = localStorage.getItem("tq-theme"); if (t) document.documentElement.dataset.theme = t; } catch (e) {}</script>
 </head>
@@ -765,10 +903,13 @@ canvas.routed:active { cursor: grabbing; }
     const core = die.regions.reduce((b, r) => [Math.min(b[0], r.um[0]), Math.min(b[1], r.um[1]), Math.max(b[2], r.um[0] + r.um[2]), Math.max(b[3], r.um[1] + r.um[3])], [1e9, 1e9, -1e9, -1e9]);
     return { paths, inst, core, RH, die };
   }
-  function drawCellsOf(G, g, list, s) {
+  // the cells layer by layer, in slices: a caller can draw it all at once, or a few
+  // thousand cells per idle moment so that no single task stalls scrolling
+  function* cellSteps(G, g, list, s) {
     const { paths, core, RH, die } = G;
     g.fillStyle = LAYER_STYLE.met1;
     for (let y = core[1]; y <= core[3] + 1e-6; y += RH) g.fillRect(core[0], y - 0.24, core[2] - core[0], 0.48);
+    let n = 0;
     for (const L of die.layers) {
       const key = L.key; if (s < 3 && (key === "licon" || key === "mcon")) continue;
       g.fillStyle = LAYER_STYLE[key];
@@ -778,9 +919,11 @@ canvas.routed:active { cursor: grabbing; }
         if (i.f) { g.translate(i.x, i.y + RH); g.scale(1, -1); } else g.translate(i.x, i.y);
         g.fill(p);
         g.restore();
+        if (++n % 1500 === 0) { yield; g.fillStyle = LAYER_STYLE[key]; }
       }
     }
   }
+  function drawCellsOf(G, g, list, s) { for (const _ of cellSteps(G, g, list, s)); }
   // the whole tile as one bitmap at ppu pixels per µm, with its outline and block colours
   function tileCanvas(die, ppu, outline) {
     const G = geometry(die), [TW, TH] = die.tile_um;
@@ -826,14 +969,27 @@ canvas.routed:active { cursor: grabbing; }
     ];
 
     // a bitmap of the whole tile for the zoomed-out views
-    let bitmap = null;
-    function prerender() {
-      const c = document.createElement("canvas");
-      c.width = Math.ceil(TW * BITMAP_PX_PER_UM); c.height = Math.ceil(TH * BITMAP_PX_PER_UM);
-      const g = c.getContext("2d");
-      g.setTransform(BITMAP_PX_PER_UM, 0, 0, -BITMAP_PX_PER_UM, 0, c.height);
-      drawCells(g, inst, BITMAP_PX_PER_UM);
-      bitmap = c;
+    let bitmap = null, job = null;
+    function prerender(now) {
+      if (bitmap) return;
+      if (!job) {
+        const c = document.createElement("canvas");
+        c.width = Math.ceil(TW * BITMAP_PX_PER_UM); c.height = Math.ceil(TH * BITMAP_PX_PER_UM);
+        const g = c.getContext("2d");
+        g.setTransform(BITMAP_PX_PER_UM, 0, 0, -BITMAP_PX_PER_UM, 0, c.height);
+        job = { c, it: cellSteps(G, g, inst, BITMAP_PX_PER_UM), queued: false };
+      }
+      if (now) { for (const _ of job.it); bitmap = job.c; return; }
+      if (job.queued) return;
+      job.queued = true;
+      const idle = root.requestIdleCallback ? f => root.requestIdleCallback(f, { timeout: 500 }) : f => setTimeout(() => f({ timeRemaining: () => 8 }), 16);
+      const step = d => {
+        if (bitmap) return;
+        let r;
+        do r = job.it.next(); while (!r.done && d.timeRemaining() > 3);
+        if (r.done) bitmap = job.c; else idle(step);
+      };
+      idle(step);
     }
     const drawCells = (g, list, s) => drawCellsOf(G, g, list, s);
 
@@ -851,9 +1007,10 @@ canvas.routed:active { cursor: grabbing; }
       dpr = Math.min(2, root.devicePixelRatio || 1);
       W = canvas.clientWidth; H = canvas.clientHeight;
       canvas.width = Math.round(W * dpr); canvas.height = Math.round(H * dpr);
-      draw();
+      vcache = null; draw(true);
     }
-    function draw() {
+    let vcache = null;
+    function draw(rest) {
       if (!W) return;
       // the view sits beside the caption: right of it on a wide screen, above it on a narrow one
       // (only while scrolling: captions then pass over the screen)
@@ -882,8 +1039,24 @@ canvas.routed:active { cursor: grabbing; }
         ctx.drawImage(bitmap, ox - cx * s, oy - (TH - cy) * s, TW * s, TH * s);
         ctx.restore();
       } else {
-        const vis = inst.filter(i => i.x + i.w >= vx0 && i.x <= vx1 && i.y + RH >= vy0 && i.y <= vy1);
-        drawCells(ctx, vis, s);
+        // zoomed in: the visible cells go into a cached picture a little larger than the view, at
+        // the current scale. While the camera stays inside it and the scale within a quarter of it,
+        // a frame is one drawImage; at rest it is drawn again at the exact scale.
+        const sd = s * dpr, v = vcache;
+        if (!v || sd > v.sd * 1.25 || sd < v.sd / 1.6 || vx0 < v.x0 || vx1 > v.x1 || vy0 < v.y0 || vy1 > v.y1 || (rest && v.sd !== sd)) {
+          const mx = (vx1 - vx0) * .15, my = (vy1 - vy0) * .15;
+          const x0 = vx0 - mx, x1 = vx1 + mx, y0 = vy0 - my, y1 = vy1 + my;
+          const c = (v && v.c) || document.createElement("canvas");
+          c.width = Math.ceil((x1 - x0) * sd); c.height = Math.ceil((y1 - y0) * sd);
+          const g = c.getContext("2d");
+          g.setTransform(sd, 0, 0, -sd, -x0 * sd, y1 * sd);
+          drawCells(g, inst.filter(i => i.x + i.w >= x0 && i.x <= x1 && i.y + RH >= y0 && i.y <= y1), s);
+          vcache = { c, sd, x0, x1, y0, y1 };
+        }
+        const w = vcache;
+        ctx.save(); ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+        ctx.drawImage(w.c, ox + (w.x0 - cx) * s, oy - (w.y1 - cy) * s, (w.x1 - w.x0) * s, (w.y1 - w.y0) * s);
+        ctx.restore();
       }
       // the tile outline and the tile boundaries
       ctx.lineWidth = 1.5 / s; ctx.strokeStyle = AMBER; ctx.strokeRect(0, 0, TW, TH);
@@ -943,28 +1116,35 @@ canvas.routed:active { cursor: grabbing; }
       const k = 120, c = 2 * Math.sqrt(k);            // stiffness; damping = critical
       const a = k * (target - t) - c * vel;
       vel += a * dt; t += vel * dt;
-      if (Math.abs(target - t) < 1e-4 && Math.abs(vel) < 1e-4) { t = target; vel = 0; draw(); raf = 0; return; }
+      if (Math.abs(target - t) < 1e-4 && Math.abs(vel) < 1e-4) { t = target; vel = 0; draw(true); raf = 0; return; }
       draw(); raf = requestAnimationFrame(tick);
     }
     function onScroll() {
-      target = progress();
+      const p = progress();
+      if (p === target && !raf) return;     // scrolling elsewhere on the page: the view is already there
+      target = p;
       if (!raf) { last = performance.now(); raf = requestAnimationFrame(tick); }
     }
 
-    function go(i) { t = target = i; steps.forEach((b, j) => b.toggleAttribute("data-on", j === i)); buttons.forEach((b, j) => b.setAttribute("aria-pressed", String(j === i))); draw(); }
+    function go(i) { t = target = i; steps.forEach((b, j) => b.toggleAttribute("data-on", j === i)); buttons.forEach((b, j) => b.setAttribute("aria-pressed", String(j === i))); draw(true); }
     const buttons = [...host.querySelectorAll(".zoom-go button")];
     buttons.forEach((b, i) => b.addEventListener("click", () => go(i)));
 
+    let started = false;
     const start = () => {
-      if (!bitmap) prerender();
+      started = true;
+      prerender(true);
       resize();
       if (reduce) { host.classList.add("stepped"); go(0); }
       else { host.classList.add("scrolly"); t = target = progress(); draw(); addEventListener("scroll", onScroll, { passive: true }); }
     };
-    addEventListener("resize", () => { if (bitmap) resize(); });
+    addEventListener("resize", () => { if (started) resize(); });
     if ("IntersectionObserver" in root) {
       const io = new IntersectionObserver(es => { if (es.some(e => e.isIntersecting)) { io.disconnect(); start(); } }, { rootMargin: "200px" });
       io.observe(host);
+      // a few screens ahead, the bitmap is drawn in idle moments, so start() finds it ready
+      const early = new IntersectionObserver(es => { if (es.some(e => e.isIntersecting)) { early.disconnect(); prerender(false); } }, { rootMargin: "300% 0px" });
+      early.observe(host);
     } else start();
     host.classList.add(reduce ? "stepped" : "scrolly");
     // until the screen is drawn, the first caption is the one shown
@@ -1001,7 +1181,12 @@ canvas.routed:active { cursor: grabbing; }
       set(); raf = requestAnimationFrame(tick);
     };
     p = target = progress(); set();
-    addEventListener("scroll", () => { target = progress(); if (!raf) { last = performance.now(); raf = requestAnimationFrame(tick); } }, { passive: true });
+    addEventListener("scroll", () => {
+      const q = progress();
+      if (q === target && !raf) return;
+      target = q;
+      if (!raf) { last = performance.now(); raf = requestAnimationFrame(tick); }
+    }, { passive: true });
   }
 
   root.TQDie = { mount, reveal, tileCanvas };
@@ -1137,11 +1322,11 @@ canvas.routed:active { cursor: grabbing; }
 
   // a light band over the metal at angle a and position t (0..1), with the vias near it glinting
   function drawLight(g, base, d, sparks, t, glint) {
-    const W = base.width, H = base.height;
+    const W = g.canvas.width, H = g.canvas.height;
     g.clearRect(0, 0, W, H);
     const cx = -0.2 * W + t * 1.4 * W, band = W * .16;
     g.save();
-    g.drawImage(base._metal, 0, 0);
+    g.drawImage(base._metal, 0, 0, W, H);
     g.globalCompositeOperation = "source-in";
     const gr = g.createLinearGradient(cx - band, 0, cx + band * .6, H * .35);
     gr.addColorStop(0, "rgba(255,255,255,0)"); gr.addColorStop(.5, "rgba(255,250,235,.85)"); gr.addColorStop(1, "rgba(255,255,255,0)");
@@ -1201,17 +1386,24 @@ canvas.routed:active { cursor: grabbing; }
     root.TQDie.reveal(host, null, { canvas: base, ar: d.W / d.H });
     host.classList.add("routed-hero");
     if (reduceMotion()) return;
-    const light = document.createElement("canvas"); light.width = base.width; light.height = base.height;
+    // the light is drawn at no more than 820 px wide and stretched over the die: it is a soft
+    // band, so the detail is not missed, and each frame then costs a quarter of the pixels.
+    // It is only drawn while the hero is on screen and only when the light has moved.
+    const q = Math.min(1, 820 / base.width);
+    const light = document.createElement("canvas"); light.width = Math.round(base.width * q); light.height = Math.round(base.height * q);
     light.className = "glint"; light.setAttribute("aria-hidden", "true");
     base.after(light);
-    const g = light.getContext("2d"), sparks = sparkPoints(d, 1400);
-    let raf = 0, pointer = 0;
+    const g = light.getContext("2d"), sparks = sparkPoints(d, 900);
+    let raf = 0, pointer = 0, seen = true, key = "";
     const draw = () => {
       raf = 0;
-      const p = parseFloat(host.style.getPropertyValue("--p")) || 0;
+      const p = parseFloat(host.style.getPropertyValue("--p")) || 0, k = p.toFixed(3) + "," + pointer.toFixed(3);
+      if (k === key) return;
+      key = k;
       drawLight(g, base, d, sparks, Math.min(1.05, .12 + p * .95 + pointer * .14), p * 6 + pointer * 3);
     };
-    const ask = () => { if (!raf) raf = requestAnimationFrame(draw); };
+    const ask = () => { if (!raf && seen) raf = requestAnimationFrame(draw); };
+    if ("IntersectionObserver" in root) new IntersectionObserver(es => { seen = es[es.length - 1].isIntersecting; ask(); }).observe(slot);
     host.addEventListener("pointermove", e => { const r = host.getBoundingClientRect(); pointer = (e.clientX - r.left) / Math.max(1, r.width) - .5; ask(); });
     new MutationObserver(ask).observe(host, { attributes: true, attributeFilter: ["style"] });
     ask();
@@ -1341,7 +1533,106 @@ canvas.routed:active { cursor: grabbing; }
     rebuild();
   }
 
-  root.TQLayout = { hero, explore, render, decode, drawClock };
+  // the stack: the cells, then each metal layer the router used, each on its own plane.
+  // Scrolling tilts the die and pulls the planes apart, then brings each layer forward in turn,
+  // from the cells up to met4. The planes move by CSS transforms only, so the browser
+  // composites them on the GPU; their pictures are drawn once. With reduced motion the stack
+  // rests tilted and apart and nothing is tied to scrolling. Without JavaScript the legend
+  // (written by build_site.py from routed.json) is the whole section.
+  function stack(host, R) {
+    const box = host.querySelector(".stack"); if (!box) return;
+    const d = decode(R), reduce = reduceMotion();
+    const wpx = Math.min(1300, Math.max(700, (root.innerWidth || 1200) * .62) * Math.min(2, root.devicePixelRatio || 1));
+    const px = wpx / d.W, f = wholeFrame(d, px);
+    const planes = [...box.querySelectorAll(".plane")];
+    const items = [...host.querySelectorAll(".stack-legend li")];
+    host.style.setProperty("--ar", (d.W / d.H).toFixed(3));
+    host.style.setProperty("--mid", ((planes.length - 1) / 2).toString());   // the stack opens about its middle
+    // one plane per idle moment, so drawing them never holds up scrolling
+    let built = false;
+    const idle = root.requestIdleCallback ? fn => root.requestIdleCallback(fn, { timeout: 300 }) : fn => setTimeout(fn, 16);
+    function build() {
+      if (built) return; built = true;
+      host.classList.add("on");
+      let i = 0;
+      const next = () => {
+        const pl = planes[i++]; if (!pl) return;
+        const L = pl.dataset.layer;
+        const c = L === "cells" ? render(R, px, { layers: {}, bloom: false }) : layerCanvas(d, d.layers.indexOf(L), f, .9);
+        if (c) { c.setAttribute("aria-hidden", "true"); pl.prepend(c); } else pl.hidden = true;
+        idle(next);
+      };
+      idle(next);
+    }
+    const n = planes.length;
+    let shown = -1;
+    function set(p) {
+      // 0 to .3: tilt and pull apart; .3 to 1: each plane in turn comes to the front
+      const e = Math.min(1, p / .3), sm = e * e * (3 - 2 * e);
+      host.style.setProperty("--e", sm.toFixed(4));
+      const k = p < .3 ? -1 : Math.min(n - 1, Math.floor((p - .3) / .7 * n));
+      if (k !== shown) {
+        shown = k;
+        planes.forEach((pl, i) => pl.classList.toggle("dim", k >= 0 && i !== k));
+        items.forEach((li, i) => li.toggleAttribute("data-on", i === k));
+      }
+    }
+    // the legend's items act as buttons
+    const press = (li, fn) => {
+      li.tabIndex = 0; li.setAttribute("role", "button");
+      li.addEventListener("click", fn);
+      li.addEventListener("keydown", e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); fn(); } });
+    };
+    // the items take focus from the start; what choosing one does is set once the stack runs
+    let act = null, went = false;
+    items.forEach((li, i) => press(li, () => { go(); act(li, i); }));
+    const go = () => {
+      if (went) return; went = true;
+      build();
+      if (reduce) {
+        // at rest, tilted and apart; choosing a layer in the legend brings it forward
+        host.classList.add("still"); host.style.setProperty("--e", "1");
+        act = (li, i) => {
+          const on = !li.hasAttribute("data-on");
+          items.forEach((x, j) => x.toggleAttribute("data-on", on && j === i));
+          planes.forEach((pl, j) => pl.classList.toggle("dim", on && j !== i));
+        };
+        return;
+      }
+      let p = 0, target = 0, vel = 0, raf = 0, last = 0;
+      const progress = () => {
+        const r = host.getBoundingClientRect(), span = host.offsetHeight - innerHeight;
+        return Math.max(0, Math.min(1, -r.top / Math.max(1, span)));
+      };
+      const tick = now => {
+        const dt = Math.min(0.05, (now - last) / 1000 || 0.016); last = now;
+        const kk = 110, cc = 2 * Math.sqrt(kk);
+        vel += (kk * (target - p) - cc * vel) * dt; p += vel * dt;
+        if (Math.abs(target - p) < 1e-4 && Math.abs(vel) < 1e-4) { p = target; set(p); raf = 0; return; }
+        set(p); raf = requestAnimationFrame(tick);
+      };
+      p = target = progress(); set(p);
+      addEventListener("scroll", () => {
+        const t = progress();
+        if (t === target && !raf) return;     // off the section: nothing moves, nothing is drawn
+        target = t;
+        if (!raf) { last = performance.now(); raf = requestAnimationFrame(tick); }
+      }, { passive: true });
+      // the legend's items jump to their layer
+      act = (li, i) => {
+        const span = host.offsetHeight - innerHeight, top = host.getBoundingClientRect().top + scrollY;
+        scrollTo({ top: top + span * (.3 + (i + .5) / n * .7), behavior: "smooth" });
+      };
+    };
+    // the section takes its scrolling height at once, so nothing below it moves later
+    if (!reduce) host.classList.add("live");
+    if ("IntersectionObserver" in root) {
+      const io = new IntersectionObserver(es => { if (es.some(e => e.isIntersecting)) { io.disconnect(); go(); } }, { rootMargin: "100% 0px" });
+      io.observe(host);
+    } else go();
+  }
+
+  root.TQLayout = { hero, explore, stack, render, decode, drawClock };
 })(window);
 </script>
 <script>

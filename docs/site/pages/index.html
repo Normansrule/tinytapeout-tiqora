@@ -1,4 +1,4 @@
-<!-- {"title": "Overview", "description": "Tiqora-Serial: hardware timestamping and cycle-exact triggers for a Tiny Tapeout 1x2 tile, controlled over USB serial with no processor. What goes in and out, and what is proven.", "data": ["tours", "die", "routed", "deadline", "site", "board"], "scripts": ["die", "layout", "labs", "board"]} -->
+<!-- {"title": "Overview", "description": "Tiqora-Serial: hardware timestamping and cycle-exact triggers for a Tiny Tapeout 1x2 tile, controlled over USB serial with no processor. What goes in and out, and what is proven.", "data": ["tours", "die", "routed", "deadline", "site", "board", "schematic"], "scripts": ["die", "layout", "labs", "board", "schematic", "pace"]} -->
 <section class="reveal bleed" id=reveal aria-labelledby=hero-h>
  <div class=reveal-stage>
   <div class=reveal-copy>
@@ -19,6 +19,28 @@
 </section>
 <script>TQLayout.hero(document.getElementById("reveal"), DATA("routed"));</script>
 
+
+<section aria-labelledby=num-h>
+ <h2 id=num-h class=sr>In numbers</h2>
+ <div class=stats>
+  <div class=stat><b>{{die:tile_r}}<small>µm</small></b><span>all of it: one Tiny Tapeout 1x2 tile, the size the shuttle sets.</span></div>
+  <div class=stat><b>{{die:cells}}</b><span>standard cells, synthesized with each block kept whole. <span class="ev measured">measured</span></span></div>
+  <div class=stat><b>0<small>ticks late</small></b><span>TRIG0 rises on exactly the tick the host armed. <span class="ev recorded">recorded</span> <a href="tours.html#seq=deadline">the deadline tour</a></span></div>
+  <div class=stat><b>20<small>ns</small></b><span>per tick: the timebase counts every clock of the 50 MHz clock, by design. <a href="tours.html">See it count</a></span></div>
+ </div>
+</section>
+
+<section class="layers bleed dark-band" id=layers aria-labelledby=layers-h>
+ <div class=layers-stick>
+  <div class=chapter>
+   <p class=eyebrow>Inside the tile</p>
+   <h2 id=layers-h>Built up in layers</h2>
+   <p class=lede>Cells in the silicon, and four layers of metal above them, each running across the one below. Here is the routed chip, taken apart layer by layer.</p>
+  </div>
+  {{static:stack}}
+ </div>
+</section>
+<script>TQLayout.stack(document.getElementById("layers"), DATA("routed"));</script>
 
 <section class="zoom bleed" id=zoom aria-labelledby=zoom-h>
  <div class=zoom-stage>
@@ -62,28 +84,40 @@ TQDie.mount(document.getElementById("zoom"), DATA("die"), {
 });
 </script>
 
-<section aria-labelledby=num-h>
- <h2 id=num-h class=sr>In numbers</h2>
- <div class=stats>
-  <div class=stat><b>{{die:tile_r}}<small>µm</small></b><span>all of it: one Tiny Tapeout 1x2 tile, the size the shuttle sets.</span></div>
-  <div class=stat><b>{{die:cells}}</b><span>standard cells, synthesized with each block kept whole. <span class="ev measured">measured</span></span></div>
-  <div class=stat><b>0<small>ticks late</small></b><span>TRIG0 rises on exactly the tick the host armed. <span class="ev recorded">recorded</span> <a href="tours.html#seq=deadline">the deadline tour</a></span></div>
-  <div class=stat><b>20<small>ns</small></b><span>per tick: the timebase counts every clock of the 50 MHz clock, by design. <a href="tours.html">See it count</a></span></div>
+<section class=cv aria-labelledby=io-h>
+ <div class=chapter>
+  <p class=eyebrow>The system</p>
+  <h2 id=io-h>What goes in, and what comes out</h2>
+  <p class=lede>Commands come in from a host computer over a serial port. Pin edges come in to be timestamped. Pulses on the exact tick, flags and replies go out.</p>
  </div>
+ <figure class=hero-art aria-label="Data flow through Tiqora-Serial">{{static:flow}}</figure>
 </section>
 
-<section aria-labelledby=dl-h>
- <h2 id=dl-h>Fire a deadline</h2>
- <p>The host writes a tick number into a deadline register and goes back to whatever it was doing. When the timebase reaches that tick, the pin rises on exactly that clock, with no help from the host. Pick how far ahead to arm it.</p>
+<section class=cv aria-labelledby=dl-h>
+ <div class=chapter>
+  <p class=eyebrow>Time, to the tick</p>
+  <h2 id=dl-h>Fire a pin on the exact tick</h2>
+  <p class=lede>The host writes a tick number into a deadline register and goes back to whatever it was doing. When the timebase reaches that tick, the pin rises on exactly that clock, with no help from the host. Pick how far ahead to arm it.</p>
+ </div>
  <div class=deadline id=deadline><p class=small>The lab needs JavaScript. <a href="tours.html#seq=deadline">The recorded deadline tour</a> shows the same moment, cycle by cycle.</p></div>
 </section>
 <script>
 TQLabs.deadline(document.getElementById("deadline"), DATA("deadline"), { clockNs: DATA("site").clock_ns, recordedHref: "tours.html#seq=deadline" });
 </script>
 
-<section aria-labelledby=board-h>
- <h2 id=board-h>On a Basys 3, simulated</h2>
- <p>The same RTL on a Digilent Basys 3, with the board's USB port as the host link. Press play, or drag through the session: a ping, two TIME reads, a CFG write, a BTNL press read back as an event, and a PULSE on TRIG0, with every byte in hex.</p>
+<section class="cv sub" aria-labelledby=sc-h>
+ <h2 id=sc-h>How the pin knows: the logic, lit by the recording</h2>
+ <p>This is the whole of one deadline channel. The host leaves one number behind, the deadline minus one. Every clock, a subtractor takes it away from the timebase; the moment the answer stops being negative, an AND gate with the <em>armed</em> flip-flop lets <em>fire</em> through, and a small counter holds the pin high for the pulse width: eight clocks, unless the host sets another. Firing one clock early is deliberate: the pin comes out of a register, so it changes on the next edge, which is exactly the deadline.</p>
+ {{static:schematic}}
+</section>
+<script>TQSchem.mount(document.getElementById("schem"), DATA("schematic"));</script>
+
+<section class=cv aria-labelledby=board-h>
+ <div class=chapter>
+  <p class=eyebrow>Run it</p>
+  <h2 id=board-h>On a Basys 3, simulated</h2>
+  <p class=lede>The same RTL on a Digilent Basys 3, with the board's USB port as the host link. Press play, or drag through the session: a ping, two TIME reads, a CFG write, a BTNL press read back as an event, and a PULSE on TRIG0, with every byte in hex.</p>
+ </div>
  <div class=board-live><div class=scroll id=board tabindex=0 role=region aria-label="The simulated board; scrolls sideways on narrow screens">
   <img src="{{img:docs/images/explorer/fpga.png}}" width=880 height=560 alt="The simulated Basys 3 at the end of the PC session: the terminal lists the bytes each way" style="display:block;max-width:100%;height:auto">
  </div></div>
@@ -91,13 +125,49 @@ TQLabs.deadline(document.getElementById("deadline"), DATA("deadline"), { clockNs
 </section>
 <script>TQBoard.mount(document.getElementById("board"), DATA("board"));</script>
 
-<section aria-labelledby=io-h>
- <h2 id=io-h>What goes in and what comes out</h2>
- <figure class=hero-art aria-label="Data flow through Tiqora-Serial">{{static:flow}}</figure>
+<section class=cv aria-labelledby=reels-h>
+ <div class=chapter>
+  <p class=eyebrow>Recorded, not drawn</p>
+  <h2 id=reels-h>Watch it run</h2>
+  <p class=lede>The whole session, replayed from the simulation: a cursor sweeps the recording from caption to caption. Each tour below steps through one moment of it, clock by clock.</p>
+ </div>
+ {{static:motion_feature}}
+ <h3 id=tours>Five recorded tours, and the whole session</h3>
+ <p>Each is a window of one simulation of the real top module, <code>tt_um_normansrule_tiqora_serial</code>, driven only through its pins the way the demo board drives it.</p>
+ <ol class=tourgrid id=tourcards></ol>
 </section>
+<script>
+(function () {
+  const b = document.getElementById("reel-pause"), box = document.getElementById("reels");
+  b.addEventListener("click", () => {
+    const on = b.getAttribute("aria-pressed") !== "true";
+    b.setAttribute("aria-pressed", on);
+    b.textContent = on ? "Play the animations" : "Pause the animations";
+    box.toggleAttribute("data-paused", on);
+  });
+})();
+</script>
+<script>
+(function () {
+  const box = document.getElementById("tourcards");
+  DATA("tours").forEach(f => {
+    const li = document.createElement("li");
+    li.innerHTML = "<a></a><p></p><span class=small></span>";
+    li.querySelector("a").href = "tours.html#seq=" + f.id;
+    li.querySelector("a").textContent = f.title;
+    li.querySelector("p").textContent = f.summary;
+    li.querySelector(".small").textContent = (f.cycles[1] - f.cycles[0] + 1).toLocaleString("en-US") + " cycles, " + f.captions + " captions";
+    box.append(li);
+  });
+})();
+</script>
+<noscript><p>The tour list needs JavaScript; the tours are also in <code>docs/site/data/traces/</code> as JSON.</p></noscript>
 
-<section aria-labelledby=q>
- <h2 id=q>Seven questions</h2>
+<section class=cv aria-labelledby=q>
+ <div class=chapter>
+  <p class=eyebrow>The details</p>
+  <h2 id=q>Seven questions</h2>
+ </div>
  <div class=qa><h3>What is Tiqora-Serial?</h3><div>
   <p>A Tiny Tapeout design of 1 × 2 tiles that timestamps edges on eight inputs and drives three trigger outputs on exact clock ticks, all controlled by a host computer over a serial port. The timing RTL in <code>src/sync/</code> is the same file, byte for byte, as in the <a href="https://github.com/Normansrule/tiqora-skywater130">Tiqora microcontroller</a>, which <code>make -C test shared</code> checks. Use it when the thinking happens on a PC or a Raspberry Pi and only the timing has to be exact.</p>
  </div></div>
@@ -126,41 +196,3 @@ make -C test sim                 <span class=c># every suite</span></pre>
   <p>Or build any command in the <a href="tours.html#lab-h">protocol lab</a>, including wrong ones, and see what the chip answers.</p>
  </div></div>
 </section>
-
-<section aria-labelledby=reels-h>
- <h2 id=reels-h>Watch it run</h2>
- <p>Every recorded tour, playing on its own: a cursor sweeps each window from caption to caption and uncovers the waveform the simulation wrote. Nothing here is computed in the browser.</p>
- {{static:motion}}
-</section>
-<script>
-(function () {
-  const b = document.getElementById("reel-pause"), box = document.getElementById("reels");
-  b.addEventListener("click", () => {
-    const on = b.getAttribute("aria-pressed") !== "true";
-    b.setAttribute("aria-pressed", on);
-    b.textContent = on ? "Play the animations" : "Pause the animations";
-    box.toggleAttribute("data-paused", on);
-  });
-})();
-</script>
-
-<section aria-labelledby=tours>
- <h2 id=tours>Five recorded tours, and the whole session</h2>
- <p>Each is a window of one simulation of the real top module, <code>tt_um_normansrule_tiqora_serial</code>, driven only through its pins the way the demo board drives it.</p>
- <ol class=tourlist id=tourcards></ol>
-</section>
-<script>
-(function () {
-  const box = document.getElementById("tourcards");
-  DATA("tours").forEach(f => {
-    const li = document.createElement("li");
-    li.innerHTML = "<a></a><p></p><span class=small></span>";
-    li.querySelector("a").href = "tours.html#seq=" + f.id;
-    li.querySelector("a").textContent = f.title;
-    li.querySelector("p").textContent = f.summary;
-    li.querySelector(".small").textContent = (f.cycles[1] - f.cycles[0] + 1).toLocaleString("en-US") + " cycles, " + f.captions + " captions";
-    box.append(li);
-  });
-})();
-</script>
-<noscript><p>The tour list needs JavaScript; the tours are also in <code>docs/site/data/traces/</code> as JSON.</p></noscript>
