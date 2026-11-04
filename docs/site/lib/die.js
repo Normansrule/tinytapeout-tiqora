@@ -47,10 +47,13 @@
     const core = die.regions.reduce((b, r) => [Math.min(b[0], r.um[0]), Math.min(b[1], r.um[1]), Math.max(b[2], r.um[0] + r.um[2]), Math.max(b[3], r.um[1] + r.um[3])], [1e9, 1e9, -1e9, -1e9]);
     return { paths, inst, core, RH, die };
   }
-  function drawCellsOf(G, g, list, s) {
+  // the cells layer by layer, in slices: a caller can draw it all at once, or a few
+  // thousand cells per idle moment so that no single task stalls scrolling
+  function* cellSteps(G, g, list, s) {
     const { paths, core, RH, die } = G;
     g.fillStyle = LAYER_STYLE.met1;
     for (let y = core[1]; y <= core[3] + 1e-6; y += RH) g.fillRect(core[0], y - 0.24, core[2] - core[0], 0.48);
+    let n = 0;
     for (const L of die.layers) {
       const key = L.key; if (s < 3 && (key === "licon" || key === "mcon")) continue;
       g.fillStyle = LAYER_STYLE[key];
@@ -60,9 +63,11 @@
         if (i.f) { g.translate(i.x, i.y + RH); g.scale(1, -1); } else g.translate(i.x, i.y);
         g.fill(p);
         g.restore();
+        if (++n % 1500 === 0) { yield; g.fillStyle = LAYER_STYLE[key]; }
       }
     }
   }
+  function drawCellsOf(G, g, list, s) { for (const _ of cellSteps(G, g, list, s)); }
   // the whole tile as one bitmap at ppu pixels per µm, with its outline and block colours
   function tileCanvas(die, ppu, outline) {
     const G = geometry(die), [TW, TH] = die.tile_um;
@@ -108,14 +113,27 @@
     ];
 
     // a bitmap of the whole tile for the zoomed-out views
-    let bitmap = null;
-    function prerender() {
-      const c = document.createElement("canvas");
-      c.width = Math.ceil(TW * BITMAP_PX_PER_UM); c.height = Math.ceil(TH * BITMAP_PX_PER_UM);
-      const g = c.getContext("2d");
-      g.setTransform(BITMAP_PX_PER_UM, 0, 0, -BITMAP_PX_PER_UM, 0, c.height);
-      drawCells(g, inst, BITMAP_PX_PER_UM);
-      bitmap = c;
+    let bitmap = null, job = null;
+    function prerender(now) {
+      if (bitmap) return;
+      if (!job) {
+        const c = document.createElement("canvas");
+        c.width = Math.ceil(TW * BITMAP_PX_PER_UM); c.height = Math.ceil(TH * BITMAP_PX_PER_UM);
+        const g = c.getContext("2d");
+        g.setTransform(BITMAP_PX_PER_UM, 0, 0, -BITMAP_PX_PER_UM, 0, c.height);
+        job = { c, it: cellSteps(G, g, inst, BITMAP_PX_PER_UM), queued: false };
+      }
+      if (now) { for (const _ of job.it); bitmap = job.c; return; }
+      if (job.queued) return;
+      job.queued = true;
+      const idle = root.requestIdleCallback ? f => root.requestIdleCallback(f, { timeout: 500 }) : f => setTimeout(() => f({ timeRemaining: () => 8 }), 16);
+      const step = d => {
+        if (bitmap) return;
+        let r;
+        do r = job.it.next(); while (!r.done && d.timeRemaining() > 3);
+        if (r.done) bitmap = job.c; else idle(step);
+      };
+      idle(step);
     }
     const drawCells = (g, list, s) => drawCellsOf(G, g, list, s);
 
@@ -133,9 +151,10 @@
       dpr = Math.min(2, root.devicePixelRatio || 1);
       W = canvas.clientWidth; H = canvas.clientHeight;
       canvas.width = Math.round(W * dpr); canvas.height = Math.round(H * dpr);
-      draw();
+      vcache = null; draw(true);
     }
-    function draw() {
+    let vcache = null;
+    function draw(rest) {
       if (!W) return;
       // the view sits beside the caption: right of it on a wide screen, above it on a narrow one
       // (only while scrolling: captions then pass over the screen)
@@ -164,8 +183,24 @@
         ctx.drawImage(bitmap, ox - cx * s, oy - (TH - cy) * s, TW * s, TH * s);
         ctx.restore();
       } else {
-        const vis = inst.filter(i => i.x + i.w >= vx0 && i.x <= vx1 && i.y + RH >= vy0 && i.y <= vy1);
-        drawCells(ctx, vis, s);
+        // zoomed in: the visible cells go into a cached picture a little larger than the view, at
+        // the current scale. While the camera stays inside it and the scale within a quarter of it,
+        // a frame is one drawImage; at rest it is drawn again at the exact scale.
+        const sd = s * dpr, v = vcache;
+        if (!v || sd > v.sd * 1.25 || sd < v.sd / 1.6 || vx0 < v.x0 || vx1 > v.x1 || vy0 < v.y0 || vy1 > v.y1 || (rest && v.sd !== sd)) {
+          const mx = (vx1 - vx0) * .15, my = (vy1 - vy0) * .15;
+          const x0 = vx0 - mx, x1 = vx1 + mx, y0 = vy0 - my, y1 = vy1 + my;
+          const c = (v && v.c) || document.createElement("canvas");
+          c.width = Math.ceil((x1 - x0) * sd); c.height = Math.ceil((y1 - y0) * sd);
+          const g = c.getContext("2d");
+          g.setTransform(sd, 0, 0, -sd, -x0 * sd, y1 * sd);
+          drawCells(g, inst.filter(i => i.x + i.w >= x0 && i.x <= x1 && i.y + RH >= y0 && i.y <= y1), s);
+          vcache = { c, sd, x0, x1, y0, y1 };
+        }
+        const w = vcache;
+        ctx.save(); ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+        ctx.drawImage(w.c, ox + (w.x0 - cx) * s, oy - (w.y1 - cy) * s, (w.x1 - w.x0) * s, (w.y1 - w.y0) * s);
+        ctx.restore();
       }
       // the tile outline and the tile boundaries
       ctx.lineWidth = 1.5 / s; ctx.strokeStyle = AMBER; ctx.strokeRect(0, 0, TW, TH);
@@ -225,28 +260,35 @@
       const k = 120, c = 2 * Math.sqrt(k);            // stiffness; damping = critical
       const a = k * (target - t) - c * vel;
       vel += a * dt; t += vel * dt;
-      if (Math.abs(target - t) < 1e-4 && Math.abs(vel) < 1e-4) { t = target; vel = 0; draw(); raf = 0; return; }
+      if (Math.abs(target - t) < 1e-4 && Math.abs(vel) < 1e-4) { t = target; vel = 0; draw(true); raf = 0; return; }
       draw(); raf = requestAnimationFrame(tick);
     }
     function onScroll() {
-      target = progress();
+      const p = progress();
+      if (p === target && !raf) return;     // scrolling elsewhere on the page: the view is already there
+      target = p;
       if (!raf) { last = performance.now(); raf = requestAnimationFrame(tick); }
     }
 
-    function go(i) { t = target = i; steps.forEach((b, j) => b.toggleAttribute("data-on", j === i)); buttons.forEach((b, j) => b.setAttribute("aria-pressed", String(j === i))); draw(); }
+    function go(i) { t = target = i; steps.forEach((b, j) => b.toggleAttribute("data-on", j === i)); buttons.forEach((b, j) => b.setAttribute("aria-pressed", String(j === i))); draw(true); }
     const buttons = [...host.querySelectorAll(".zoom-go button")];
     buttons.forEach((b, i) => b.addEventListener("click", () => go(i)));
 
+    let started = false;
     const start = () => {
-      if (!bitmap) prerender();
+      started = true;
+      prerender(true);
       resize();
       if (reduce) { host.classList.add("stepped"); go(0); }
       else { host.classList.add("scrolly"); t = target = progress(); draw(); addEventListener("scroll", onScroll, { passive: true }); }
     };
-    addEventListener("resize", () => { if (bitmap) resize(); });
+    addEventListener("resize", () => { if (started) resize(); });
     if ("IntersectionObserver" in root) {
       const io = new IntersectionObserver(es => { if (es.some(e => e.isIntersecting)) { io.disconnect(); start(); } }, { rootMargin: "200px" });
       io.observe(host);
+      // a few screens ahead, the bitmap is drawn in idle moments, so start() finds it ready
+      const early = new IntersectionObserver(es => { if (es.some(e => e.isIntersecting)) { early.disconnect(); prerender(false); } }, { rootMargin: "300% 0px" });
+      early.observe(host);
     } else start();
     host.classList.add(reduce ? "stepped" : "scrolly");
     // until the screen is drawn, the first caption is the one shown
@@ -283,7 +325,12 @@
       set(); raf = requestAnimationFrame(tick);
     };
     p = target = progress(); set();
-    addEventListener("scroll", () => { target = progress(); if (!raf) { last = performance.now(); raf = requestAnimationFrame(tick); } }, { passive: true });
+    addEventListener("scroll", () => {
+      const q = progress();
+      if (q === target && !raf) return;
+      target = q;
+      if (!raf) { last = performance.now(); raf = requestAnimationFrame(tick); }
+    }, { passive: true });
   }
 
   root.TQDie = { mount, reveal, tileCanvas };

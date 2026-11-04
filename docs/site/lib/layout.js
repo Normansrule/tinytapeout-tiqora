@@ -127,11 +127,11 @@
 
   // a light band over the metal at angle a and position t (0..1), with the vias near it glinting
   function drawLight(g, base, d, sparks, t, glint) {
-    const W = base.width, H = base.height;
+    const W = g.canvas.width, H = g.canvas.height;
     g.clearRect(0, 0, W, H);
     const cx = -0.2 * W + t * 1.4 * W, band = W * .16;
     g.save();
-    g.drawImage(base._metal, 0, 0);
+    g.drawImage(base._metal, 0, 0, W, H);
     g.globalCompositeOperation = "source-in";
     const gr = g.createLinearGradient(cx - band, 0, cx + band * .6, H * .35);
     gr.addColorStop(0, "rgba(255,255,255,0)"); gr.addColorStop(.5, "rgba(255,250,235,.85)"); gr.addColorStop(1, "rgba(255,255,255,0)");
@@ -191,17 +191,24 @@
     root.TQDie.reveal(host, null, { canvas: base, ar: d.W / d.H });
     host.classList.add("routed-hero");
     if (reduceMotion()) return;
-    const light = document.createElement("canvas"); light.width = base.width; light.height = base.height;
+    // the light is drawn at no more than 820 px wide and stretched over the die: it is a soft
+    // band, so the detail is not missed, and each frame then costs a quarter of the pixels.
+    // It is only drawn while the hero is on screen and only when the light has moved.
+    const q = Math.min(1, 820 / base.width);
+    const light = document.createElement("canvas"); light.width = Math.round(base.width * q); light.height = Math.round(base.height * q);
     light.className = "glint"; light.setAttribute("aria-hidden", "true");
     base.after(light);
-    const g = light.getContext("2d"), sparks = sparkPoints(d, 1400);
-    let raf = 0, pointer = 0;
+    const g = light.getContext("2d"), sparks = sparkPoints(d, 900);
+    let raf = 0, pointer = 0, seen = true, key = "";
     const draw = () => {
       raf = 0;
-      const p = parseFloat(host.style.getPropertyValue("--p")) || 0;
+      const p = parseFloat(host.style.getPropertyValue("--p")) || 0, k = p.toFixed(3) + "," + pointer.toFixed(3);
+      if (k === key) return;
+      key = k;
       drawLight(g, base, d, sparks, Math.min(1.05, .12 + p * .95 + pointer * .14), p * 6 + pointer * 3);
     };
-    const ask = () => { if (!raf) raf = requestAnimationFrame(draw); };
+    const ask = () => { if (!raf && seen) raf = requestAnimationFrame(draw); };
+    if ("IntersectionObserver" in root) new IntersectionObserver(es => { seen = es[es.length - 1].isIntersecting; ask(); }).observe(slot);
     host.addEventListener("pointermove", e => { const r = host.getBoundingClientRect(); pointer = (e.clientX - r.left) / Math.max(1, r.width) - .5; ask(); });
     new MutationObserver(ask).observe(host, { attributes: true, attributeFilter: ["style"] });
     ask();
@@ -331,5 +338,104 @@
     rebuild();
   }
 
-  root.TQLayout = { hero, explore, render, decode, drawClock };
+  // the stack: the cells, then each metal layer the router used, each on its own plane.
+  // Scrolling tilts the die and pulls the planes apart, then brings each layer forward in turn,
+  // from the cells up to met4. The planes move by CSS transforms only, so the browser
+  // composites them on the GPU; their pictures are drawn once. With reduced motion the stack
+  // rests tilted and apart and nothing is tied to scrolling. Without JavaScript the legend
+  // (written by build_site.py from routed.json) is the whole section.
+  function stack(host, R) {
+    const box = host.querySelector(".stack"); if (!box) return;
+    const d = decode(R), reduce = reduceMotion();
+    const wpx = Math.min(1300, Math.max(700, (root.innerWidth || 1200) * .62) * Math.min(2, root.devicePixelRatio || 1));
+    const px = wpx / d.W, f = wholeFrame(d, px);
+    const planes = [...box.querySelectorAll(".plane")];
+    const items = [...host.querySelectorAll(".stack-legend li")];
+    host.style.setProperty("--ar", (d.W / d.H).toFixed(3));
+    host.style.setProperty("--mid", ((planes.length - 1) / 2).toString());   // the stack opens about its middle
+    // one plane per idle moment, so drawing them never holds up scrolling
+    let built = false;
+    const idle = root.requestIdleCallback ? fn => root.requestIdleCallback(fn, { timeout: 300 }) : fn => setTimeout(fn, 16);
+    function build() {
+      if (built) return; built = true;
+      host.classList.add("on");
+      let i = 0;
+      const next = () => {
+        const pl = planes[i++]; if (!pl) return;
+        const L = pl.dataset.layer;
+        const c = L === "cells" ? render(R, px, { layers: {}, bloom: false }) : layerCanvas(d, d.layers.indexOf(L), f, .9);
+        if (c) { c.setAttribute("aria-hidden", "true"); pl.prepend(c); } else pl.hidden = true;
+        idle(next);
+      };
+      idle(next);
+    }
+    const n = planes.length;
+    let shown = -1;
+    function set(p) {
+      // 0 to .3: tilt and pull apart; .3 to 1: each plane in turn comes to the front
+      const e = Math.min(1, p / .3), sm = e * e * (3 - 2 * e);
+      host.style.setProperty("--e", sm.toFixed(4));
+      const k = p < .3 ? -1 : Math.min(n - 1, Math.floor((p - .3) / .7 * n));
+      if (k !== shown) {
+        shown = k;
+        planes.forEach((pl, i) => pl.classList.toggle("dim", k >= 0 && i !== k));
+        items.forEach((li, i) => li.toggleAttribute("data-on", i === k));
+      }
+    }
+    // the legend's items act as buttons
+    const press = (li, fn) => {
+      li.tabIndex = 0; li.setAttribute("role", "button");
+      li.addEventListener("click", fn);
+      li.addEventListener("keydown", e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); fn(); } });
+    };
+    // the items take focus from the start; what choosing one does is set once the stack runs
+    let act = null, went = false;
+    items.forEach((li, i) => press(li, () => { go(); act(li, i); }));
+    const go = () => {
+      if (went) return; went = true;
+      build();
+      if (reduce) {
+        // at rest, tilted and apart; choosing a layer in the legend brings it forward
+        host.classList.add("still"); host.style.setProperty("--e", "1");
+        act = (li, i) => {
+          const on = !li.hasAttribute("data-on");
+          items.forEach((x, j) => x.toggleAttribute("data-on", on && j === i));
+          planes.forEach((pl, j) => pl.classList.toggle("dim", on && j !== i));
+        };
+        return;
+      }
+      let p = 0, target = 0, vel = 0, raf = 0, last = 0;
+      const progress = () => {
+        const r = host.getBoundingClientRect(), span = host.offsetHeight - innerHeight;
+        return Math.max(0, Math.min(1, -r.top / Math.max(1, span)));
+      };
+      const tick = now => {
+        const dt = Math.min(0.05, (now - last) / 1000 || 0.016); last = now;
+        const kk = 110, cc = 2 * Math.sqrt(kk);
+        vel += (kk * (target - p) - cc * vel) * dt; p += vel * dt;
+        if (Math.abs(target - p) < 1e-4 && Math.abs(vel) < 1e-4) { p = target; set(p); raf = 0; return; }
+        set(p); raf = requestAnimationFrame(tick);
+      };
+      p = target = progress(); set(p);
+      addEventListener("scroll", () => {
+        const t = progress();
+        if (t === target && !raf) return;     // off the section: nothing moves, nothing is drawn
+        target = t;
+        if (!raf) { last = performance.now(); raf = requestAnimationFrame(tick); }
+      }, { passive: true });
+      // the legend's items jump to their layer
+      act = (li, i) => {
+        const span = host.offsetHeight - innerHeight, top = host.getBoundingClientRect().top + scrollY;
+        scrollTo({ top: top + span * (.3 + (i + .5) / n * .7), behavior: "smooth" });
+      };
+    };
+    // the section takes its scrolling height at once, so nothing below it moves later
+    if (!reduce) host.classList.add("live");
+    if ("IntersectionObserver" in root) {
+      const io = new IntersectionObserver(es => { if (es.some(e => e.isIntersecting)) { io.disconnect(); go(); } }, { rootMargin: "100% 0px" });
+      io.observe(host);
+    } else go();
+  }
+
+  root.TQLayout = { hero, explore, stack, render, decode, drawClock };
 })(window);

@@ -147,10 +147,10 @@ html { scrollbar-color: var(--line-2) var(--bg); }
 .ruler .sec { stroke: var(--trace); stroke-width: 1.5; }
 .ruler .now { position: absolute; top: 0; bottom: 0; width: 2px; left: 0; background: var(--cursor); transform: translateX(var(--x, 0px)); }
 .top { position: sticky; top: 0; z-index: 5; background: var(--bg); border-bottom: 1px solid var(--line); }
-/* the header is a material over the page, where the browser can blur behind it; solid for readers who asked for less transparency */
-@supports ((-webkit-backdrop-filter: blur(1px)) or (backdrop-filter: blur(1px))) {
-  .top { background: color-mix(in srgb, var(--bg) 80%, transparent); -webkit-backdrop-filter: saturate(170%) blur(18px); backdrop-filter: saturate(170%) blur(18px); }
-}
+/* the header is nearly opaque, with no blur behind it: a backdrop blur over these canvases and
+   drawings made every scrolled frame repaint the strip under the header, and in profiling it was
+   the largest single cost of scrolling. Solid for readers who asked for less transparency. */
+.top { background: color-mix(in srgb, var(--bg) 93%, transparent); }
 @media (prefers-reduced-transparency: reduce) { .top { background: var(--bg); -webkit-backdrop-filter: none; backdrop-filter: none; } }
 @media (prefers-contrast: more) {
   :root { --line: var(--line-2); --muted: var(--ink-2); }
@@ -544,9 +544,10 @@ html { overflow-x: clip; }
 .chip3d { position: relative; transform-origin: 50% 40%; border-radius: 6px; overflow: hidden; box-shadow: 0 0 0 1px #2a302d, 0 40px 80px -20px rgba(0, 0, 0, .9);
   transform: rotateX(calc((1 - var(--p)) * 56deg)) rotateZ(calc((1 - var(--p)) * -20deg)) scale(calc(.82 + .18 * var(--p))); will-change: transform; }
 .chip3d canvas { display: block; width: 100%; height: auto; }
-.chip3d .sheen { position: absolute; inset: 0; pointer-events: none; mix-blend-mode: screen;
-  background: linear-gradient(105deg, transparent 30%, rgba(255, 255, 255, .16) 45%, rgba(154, 216, 247, .1) 52%, transparent 66%);
-  background-size: 260% 100%; background-position: calc(120% - var(--p) * 140%) 0; }
+.chip3d .sheen { position: absolute; top: 0; bottom: 0; left: 0; width: 260%; pointer-events: none;
+  background: linear-gradient(105deg, transparent 30%, rgba(255, 255, 255, .07) 45%, transparent 60%);
+  /* moved by transform, not background-position, so scrolling recomposites it instead of repainting it */
+  transform: translateX(calc(-46% + var(--p) * 54%)); will-change: transform; }
 .reveal-chip .shadow { position: absolute; left: 10%; right: 10%; bottom: -6%; height: 18%; border-radius: 50%; background: radial-gradient(closest-side, rgba(0, 0, 0, .75), transparent); filter: blur(6px); z-index: -1; }
 .reveal-cap { margin: 1.4rem auto 0; max-width: 46ch; text-align: center; font-size: .95rem; color: var(--screen-dim); }
 .reveal-cap .ev.illustrative { color: var(--screen-dim); }
@@ -567,8 +568,8 @@ html { overflow-x: clip; }
 
 /* ------------------------------------------------------------ the routed layout (layout.js) */
 .chip3d canvas.glint { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; mix-blend-mode: screen; }
-.routed-hero .chip3d { box-shadow: 0 0 0 1px #2c3550, 0 0 60px -10px rgba(110, 120, 255, calc(.15 + .35 * var(--p))), 0 40px 90px -20px rgba(0, 0, 0, .95); }
-.routed-hero .chip3d .sheen { background: linear-gradient(105deg, transparent 30%, rgba(255, 255, 255, .10) 45%, rgba(160, 120, 255, .08) 52%, transparent 66%); background-size: 260% 100%; background-position: calc(120% - var(--p) * 140%) 0; }
+.routed-hero .chip3d { box-shadow: 0 0 0 1px #2c3550, 0 0 36px -12px rgba(110, 120, 255, .3); }
+.routed-hero .chip3d .sheen { background: linear-gradient(105deg, transparent 30%, rgba(255, 255, 255, .08) 45%, rgba(160, 120, 255, .06) 52%, transparent 62%); }
 .routed-x { --rx-ink: #dfe4f2; --rx-dim: #8d95ab; --rx-line: #283048; position: relative; margin: 1.2rem 0; background: #05070a; color: var(--rx-ink); border-radius: var(--radius); overflow: hidden;
   box-shadow: 0 0 0 1px var(--rx-line), 0 30px 70px -30px rgba(80, 90, 255, .35); }
 .routed-bar { display: flex; flex-wrap: wrap; gap: .5rem .9rem; align-items: center; padding: .7rem .8rem; border-bottom: 1px solid var(--rx-line); }
@@ -697,6 +698,92 @@ canvas.routed:active { cursor: grabbing; }
   .schem-cap { min-height: 7.5em; }
 }
 @media (prefers-contrast: more) { .schem { border-color: var(--ink); } }
+
+/* ------------------------------------------------------------ pace.js: drawings far off screen stop animating */
+[data-idle], [data-idle] * { animation-play-state: paused !important; }
+/* sections after the opening scenes are only laid out and painted when they come near the screen */
+main > section.cv { content-visibility: auto; contain-intrinsic-size: auto 1200px; }
+/* the scroll scenes too: off screen, their big composited layers (the tilted die and the planes) are dropped */
+main > section.reveal, main > section.layers { content-visibility: auto; contain-intrinsic-size: auto 2400px; }
+
+/* ------------------------------------------------------------ the overview as chapters: a centred head, then the piece */
+.chapter { text-align: center; margin: 8rem auto 2.4rem; max-width: 62rem; }
+.chapter .eyebrow { font: 600 .88rem var(--sans); letter-spacing: .12em; text-transform: uppercase; color: var(--trace); margin: 0 0 .8rem; max-width: none; }
+.chapter h2 { font-size: clamp(2.3rem, 5.8vw, 4.6rem); line-height: 1; letter-spacing: -.022em; margin: 0 auto 1rem; max-width: 21ch; }
+.chapter .lede { margin: 0 auto; max-width: 44ch; font-size: clamp(1.1rem, 1.7vw, 1.32rem); }
+.chapter + * { margin-top: 0; }
+section.sub { margin-top: 4.5rem; }
+section.sub > h2 { font-size: clamp(1.5rem, 2.6vw, 2rem); margin: 0 0 .6rem; }
+section.sub > h2::before { display: none; }
+.dark-band { background: var(--screen); color: var(--screen-ink); padding: 1px 16px 6rem; }
+.dark-band .chapter .lede { color: #b9c0b8; }
+.dark-band .chapter .eyebrow { color: #ffb000; }
+
+/* ------------------------------------------------------------ the routed die, taken apart (layout.js stack) */
+.layers { --e: 0; --ar: 2.25; }
+.stack-stage { position: relative; display: grid; grid-template-columns: minmax(0, 1.6fr) minmax(16rem, 1fr); gap: 2rem; align-items: center;
+  max-width: 1200px; margin: 0 auto; }
+.stack { position: relative; width: min(100%, 64vh * var(--ar)); justify-self: center; aspect-ratio: var(--ar); transform-style: preserve-3d;
+  transform: perspective(1800px) rotateX(calc(var(--e) * 56deg)) rotateZ(calc(var(--e) * -28deg)) scale(calc(1 - var(--e) * .14)); }
+.plane { position: absolute; inset: 0; transform: translateZ(calc(var(--e) * (var(--i) - var(--mid, 2)) * min(8vh, 66px))); transition: opacity 360ms var(--ease-out), filter 360ms var(--ease-out); }
+.plane canvas { display: block; width: 100%; height: 100%; border-radius: 3px; }
+.plane.metal { background: rgba(8, 12, 20, calc(var(--e) * .35)); box-shadow: 0 0 0 1px rgba(170, 190, 255, calc(var(--e) * .22)); border-radius: 3px; }
+.plane:not(.metal) { box-shadow: 0 0 0 1px #2c3550, 0 40px 80px -24px rgba(0, 0, 0, .9); border-radius: 3px; }
+.plane.dim { opacity: .14; }
+.stack-legend { list-style: none; margin: 0; padding: 0; display: grid; gap: .2rem; counter-reset: L; }
+.stack-legend li { padding: .7rem .9rem; border-radius: 10px; border: 1px solid transparent; color: var(--screen-dim); transition: color 300ms ease, background-color 300ms ease, border-color 300ms ease; cursor: default; }
+.stack-legend li b { display: block; font: 600 1.15rem var(--display); letter-spacing: .02em; color: var(--screen-ink); }
+.stack-legend li span { display: block; font-size: .92rem; line-height: 1.45; }
+.stack-legend li[data-on] { color: var(--screen-ink); background: rgba(255, 255, 255, .05); border-color: #2c3550; }
+.layers.live .stack-legend li { cursor: pointer; }
+.stack-cap { max-width: 70ch; margin: 2rem auto 0; text-align: center; font-size: .92rem; color: var(--screen-dim); }
+.stack-cap .ev.measured { color: #5bd28a; }
+/* without JavaScript there are no pictures: the legend is the section */
+.layers:not(.on) .stack { display: none; }
+.layers:not(.on) .stack-stage { grid-template-columns: minmax(0, 1fr); max-width: 44rem; }
+.layers:not(.on) .stack-legend li { color: var(--screen-ink); }
+/* live: the stage holds while you scroll through three screens of the section */
+.layers.live { height: 330vh; padding-bottom: 0; }
+.layers.live .layers-stick { position: sticky; top: var(--top-h, 67px); height: calc(100svh - var(--top-h, 67px)); display: grid; align-content: center; padding: 0 16px; overflow: hidden; }
+.layers.live .chapter { margin: 0 auto 1.4rem; }
+.layers.live .chapter h2 { font-size: clamp(2rem, 4.4vw, 3.4rem); }
+.layers.live .chapter .lede { font-size: 1.05rem; }
+.layers.live .stack-cap { margin-top: 1rem; }
+/* a tall tile (Tiqora-Serial's 1x2) is sized by the screen's height, so the opened stack still fits */
+.layers.live .stack { width: min(100%, calc((100svh - 22rem) * var(--ar))); }
+@media (max-width: 900px) {
+  .stack-stage { grid-template-columns: 1fr; gap: 1rem; }
+  .layers.live .stack-legend li:not([data-on]) { display: none; }
+  .layers.live .chapter .lede { display: none; }
+}
+@media (max-width: 700px) { .layers { --top-h: 0px; } }
+
+/* ------------------------------------------------------------ the tours, as cards */
+.tourgrid { list-style: none; padding: 0; margin: 2rem 0 0; display: grid; gap: 1rem; grid-template-columns: repeat(auto-fill, minmax(17rem, 1fr)); }
+.tourgrid li { position: relative; display: grid; gap: .35rem; align-content: start; padding: 1.2rem 1.2rem 1.1rem; border-radius: 16px; background: var(--surface); border: 1px solid var(--line);
+  transition: transform 220ms var(--ease-out), border-color 200ms ease, box-shadow 220ms var(--ease-out); }
+.tourgrid a { font: 600 1.2rem/1.2 var(--display); letter-spacing: .01em; color: var(--ink); text-decoration: none; }
+.tourgrid a::after { content: ""; position: absolute; inset: 0; border-radius: inherit; }
+.tourgrid p { margin: 0; color: var(--ink-2); font-size: .97rem; }
+.tourgrid .small { font-family: var(--mono); font-size: .8rem; }
+@media (hover: hover) and (pointer: fine) { .tourgrid li:hover { transform: translateY(-3px); border-color: var(--line-2); box-shadow: 0 18px 40px -26px color-mix(in srgb, var(--ink) 40%, transparent); } }
+.tourgrid li:focus-within { outline: 2px solid var(--focus); outline-offset: 2px; }
+.tourgrid a:focus-visible { outline: none; }
+.reels.feature { margin: 0 auto; max-width: 980px; }
+.reels.feature .reel { max-width: none; }
+.figure-pair { display: grid; gap: 1.2rem; grid-template-columns: repeat(auto-fit, minmax(min(100%, 30rem), 1fr)); margin-top: 1.6rem; }
+.figure-pair img { display: block; width: 100%; height: auto; border-radius: 12px; }
+.figure-pair figure { margin: 0; }
+.figure-pair figcaption { font-size: .9rem; color: var(--ink-2); margin-top: .4rem; }
+
+@media (prefers-reduced-motion: no-preference) {
+  @supports (animation-timeline: view()) {
+    .chapter { animation: rise-in linear both; animation-timeline: view(); animation-range: entry 0% cover 25%; }
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .stack-legend li, .plane { transition: none; }
+}
 </style>
 <script>try { const t = localStorage.getItem("tq-theme"); if (t) document.documentElement.dataset.theme = t; } catch (e) {}</script>
 </head>
