@@ -206,14 +206,14 @@ def flow_svg(ctx, inline=False):
 def squarify(items, x, y, w, h):
     """Squarified treemap: [(value, key)] -> {key: (x, y, w, h)}."""
     items = sorted([i for i in items if i[0] > 0], reverse=True)
-    out, total = {}, sum(v for v, _ in items)
+    out, total = {}, math.fsum(v for v, _ in items)
     if not items or total <= 0:
         return out
     scale = w * h / total
     rest = [(v * scale, k) for v, k in items]
 
     def worst(row, side):
-        s = sum(v for v, _ in row)
+        s = math.fsum(v for v, _ in row)
         return max(max(side * side * v / (s * s), (s * s) / (side * side * v)) for v, _ in row)
 
     while rest:
@@ -221,7 +221,7 @@ def squarify(items, x, y, w, h):
         row = [rest.pop(0)]
         while rest and worst(row + [rest[0]], side) <= worst(row, side):
             row.append(rest.pop(0))
-        s = sum(v for v, _ in row)
+        s = math.fsum(v for v, _ in row)
         if w >= h:
             cw, cy = s / h, y
             for v, k in row:
@@ -243,7 +243,7 @@ def treemap_svg(ctx, inline=False):
     die_w, die_h = ctx["site"]["die_um"]
     die = die_w * die_h
     blocks = [b for b in a["blocks"] if "tile" in b["builds"] and b["module"] in area]
-    total = sum(area[b["module"]] for b in blocks)
+    total = math.fsum(area[b["module"]] for b in blocks)
     W = 760
     S = W / die_w
     H = die_h * S
