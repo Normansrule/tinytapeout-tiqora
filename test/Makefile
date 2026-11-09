@@ -40,7 +40,7 @@ COMPILE_ARGS += -g2012
 TOPLEVEL = tb
 COCOTB_TEST_MODULES = test
 
-.PHONY: warnings sim lint synth area uart tour clean-sim explorer proto shared syncref
+.PHONY: formal formal-mutants warnings sim lint synth area uart tour clean-sim explorer proto shared syncref
 
 sim: uart proto tour shared syncref docs
 	@echo ""
@@ -110,6 +110,16 @@ explorer:
 	@if command -v yosys > /dev/null; then cd .. && python3 docs/tools/atlas.py --check; else echo "explorer: yosys not found, atlas check skipped"; fi
 	cd .. && python3 docs/tools/traces.py --check
 	cd .. && python3 docs/tools/check_site.py
+
+# Formal proofs of the shared timing unit (syn/formal/, identical to Tiqora's):
+# the timebase counts exactly, an armed deadline fires on its tick, pulses last pw.
+# Needs yosys and z3.
+formal:
+	cd .. && sh syn/formal/run.sh
+
+# Break the timing unit eight ways; every break must make `make formal` fail.
+formal-mutants:
+	cd .. && python3 syn/formal/mutants.py
 
 # The timing unit (src/sync/*.sv) and its reference model are shared, byte for byte, between Tiqora and
 # Tiqora-Serial. docs/shared_timing.sha256 is identical in both repositories;
