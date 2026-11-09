@@ -1,0 +1,16 @@
+name: formal
+on: [push, workflow_dispatch]
+jobs:
+  formal:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Install Yosys and z3
+        shell: bash
+        run: sudo apt-get update && sudo apt-get install -y yosys z3
+
+      # Proofs of the shared timing unit, then the eight mutants that each must break them.
+      - name: Formal proofs and their mutants
+        shell: bash
+        run: make -C test formal formal-mutants

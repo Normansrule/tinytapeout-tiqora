@@ -420,6 +420,7 @@ at an internal flip-flop.
 | `sync_model.py`, the timing unit against a Python reference model, every output on every clock, three builds, and no pin event lost without overflow | **4 / 4** |
 | `test.py` cocotb, through the Tiny Tapeout pin interface | **5 / 5** |
 | `tpctl.py selftest`, host protocol with no hardware | **18 / 18** |
+| `make formal`, the timing unit proven for every input sequence (bounded 8 clocks, then 4-induction): exact counting, fire on the armed tick, pulse width; `make formal-mutants` breaks it 8 ways | **3 / 3 proven, 8 / 8 mutants caught** |
 | Verilator `-Wall` | **clean** (two documented waivers) |
 | Yosys elaboration | **passes, no latches** |
 | Shared sync blocks and their reference model | **byte-identical** to the main Tiqora chip, checked by `make shared` against a SHA-256 manifest kept in both repositories |
