@@ -10,7 +10,7 @@ jobs:
         shell: bash
         run: sudo apt-get update && sudo apt-get install -y yosys z3
 
-      # Proofs of the shared timing unit, then the eight mutants that each must break them.
+      # Proofs of the timing unit, event queue and register file, then the mutants that each must break them.
       - name: Formal proofs and their mutants
         shell: bash
         run: make -C test formal formal-mutants
