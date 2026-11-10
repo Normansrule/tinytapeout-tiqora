@@ -1,4 +1,4 @@
-"""mutants.py — break the shared timing unit eight ways and check that
+"""mutants.py — break the shared timing unit (and Tiqora's register file) on purpose and check that
 syn/formal/run.sh fails on every one (the proofs are not vacuous).
 Usage, from the repository root: python3 syn/formal/mutants.py"""
 import subprocess, shutil, os, sys, tempfile
@@ -12,12 +12,20 @@ muts = [
  ("fires while disarmed", "sync_compare.sv", "assign fire    = (armed[i] && reached) ||", "assign fire    = (reached) ||"),
  ("TADJ swallows the tick", "sync_timebase.sv", "now <= now + adj_in + 32'd1;", "now <= now + adj_in;"),
  ("free run counts by 2", "sync_timebase.sv", "else          step = frac_co ? 32'd2 : 32'd1;", "else          step = frac_co ? 32'd2 : 32'd2;"),
+ ("queue drops `lost` silently", "sync_event_fifo.sv", "if ((push && full) || lost) overflow <= 1'b1;", "if (push && full) overflow <= 1'b1;"),
+ ("push into a full queue overwrites", "sync_event_fifo.sv", "assign do_push = push && !full;", "assign do_push = push;"),
+ ("queue shows the newest, not the oldest", "sync_event_fifo.sv", "assign rdata = mem[rptr];", "assign rdata = mem[wptr];"),
+ ("register write ignores the address", "../core/tp_nregfile.sv", "(we && wa == i[3:0]) ? wd : r[i][3:0]", "(we) ? wd : r[i][3:0]"),
+ ("register write lands one nibble off", "../core/tp_nregfile.sv", "r[i] <= {(we && wa == i[3:0]) ? wd : r[i][3:0], r[i][31:4]};", "r[i] <= {r[i][3:0], (we && wa == i[3:0]) ? wd : r[i][31:28], r[i][27:4]};"),
+ ("x0 reads non-zero", "../core/tp_nregfile.sv", "qa = 4'd0;", "qa = r[1][3:0];"),
 ]
+muts = [m for m in muts if os.path.exists(f"{repo}/src/sync/{m[1]}")]   # Serial has no register file
 caught = 0
 for name, f, a, b in muts:
     d = tempfile.mkdtemp(prefix="fmut_")
     os.makedirs(d + "/src/sync"); shutil.copy(repo + "/src/tp_pkg.sv", d + "/src/")
     for g in os.listdir(repo + "/src/sync"): shutil.copy(f"{repo}/src/sync/{g}", d + "/src/sync/")
+    if os.path.isdir(repo + "/src/core"): shutil.copytree(repo + "/src/core", d + "/src/core")
     p = f"{d}/src/sync/{f}"; s = open(p).read()
     if s.count(a) != 1: print("PATTERN NOT FOUND", name); continue
     open(p, "w").write(s.replace(a, b))

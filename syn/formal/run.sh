@@ -1,5 +1,6 @@
 #!/bin/sh
-# run.sh — prove the formal properties of the shared timing unit. Each *_props.svh
+# run.sh — prove the formal properties of the shared timing unit (and, in
+# Tiqora, the rotating register file). Each *_props.svh
 # is spliced into a scratch copy of its src/sync/*.sv just before `endmodule`
 # (the RTL itself is untouched), then checked with Yosys + yosys-smtbmc + z3:
 # a bounded check of 8 clocks from reset, then 4-induction, which
@@ -14,7 +15,8 @@ mkdir -p "$OUT"
 n=0
 prove() {   # prove <module> <props file> [defines]
     m=$1; p=$2; shift 2; tag="$m${1:+ $*}"
-    awk -v inc="$(cat "$p")" -v end="endmodule : $m" '$0 ~ "^"end { print inc } { print }' "$SRC/$m.sv" > "$OUT/$m.sv"
+    f=$SRC/$m.sv; [ -f "$f" ] || f=$SRC/../core/$m.sv
+    awk -v inc="$(cat "$p")" -v end="endmodule : $m" '$0 ~ "^"end { print inc } { print }' "$f" > "$OUT/$m.sv"
     grep -q 'f_past_ok' "$OUT/$m.sv" || { echo "FAIL  could not splice $p into $m"; exit 1; }
     yosys -q -l "$OUT/$m.yosys.log" -p "read_verilog -formal -sv $* $SRC/../tp_pkg.sv $OUT/$m.sv; prep -top $m; async2sync; dffunmap; write_smt2 -wires $OUT/$m.smt2" >/dev/null 2>&1 \
       || { tail -5 "$OUT/$m.yosys.log"; echo "FAIL  $tag: Yosys"; exit 1; }
@@ -30,5 +32,7 @@ DM1=""; grep -q 'deadline_m1' "$SRC/sync_compare.sv" && DM1="-DF_STORES_DM1"
 prove sync_timebase syn/formal/timebase_props.svh
 prove sync_compare  syn/formal/compare_props.svh $DM1
 prove sync_compare  syn/formal/compare_props.svh -DFREE_RUN $DM1
+prove sync_event_fifo syn/formal/fifo_props.svh
+[ -f "$SRC/../core/tp_nregfile.sv" ] && prove tp_nregfile syn/formal/regfile_props.svh
 echo "$n checks, 0 failures"
 echo "FORMAL PROOFS PASSED"
