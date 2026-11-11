@@ -47,7 +47,7 @@ STYLE = (
     "@media (prefers-color-scheme:dark){svg{--bg:#0d1117;--edge:#3d444d;--ink:#e6edf3;--ink2:#9198a1;"
     "--dim:#30363d;--box:#151b23;--hi:#ffb000;--ok:#3fb950;--acc:#4493f8}}"
     f".bg{{fill:var(--bg);stroke:var(--edge)}}.t{{font:700 22px {FONT};fill:var(--ink);letter-spacing:-.3px}}"
-    f".e{{font:600 11px {FONT};fill:var(--hi);letter-spacing:1.4px}}.l{{font:400 13.5px {FONT};fill:var(--ink2)}}"
+    f".e{{font:600 13px {FONT};fill:var(--hi)}}.l{{font:400 13.5px {FONT};fill:var(--ink2)}}"
     f".m{{font:500 12px {MONO};fill:var(--ink2)}}.mb{{font:700 17px {MONO};fill:var(--ink)}}"
     ".box{fill:var(--box);stroke:var(--edge)}.dim{stroke:var(--dim);fill:none}.hi{stroke:var(--hi);fill:none}"
     ".hif{fill:var(--hi)}.okf{fill:var(--ok)}.dimf{fill:var(--dim)}.acc{stroke:var(--acc);fill:none}"
@@ -225,9 +225,9 @@ def render(card):
     svg = (f"<svg xmlns='http://www.w3.org/2000/svg' width='{W}' height='{H}' viewBox='0 0 {W} {H}' role='img'"
            f" aria-label='{escape(alt, quote=True)}'><title>{escape(alt)}</title><style>{STYLE}</style>"
            f"<rect class=bg x=.5 y=.5 width={W - 1} height={H - 1} rx=16/>"
-           f"<text class=e x=40 y=42>{escape(card['eyebrow'].upper())}</text>"
+           f"<text class=e x=40 y=42>{escape(card['eyebrow'])}</text>"
            f"<rect class=pill x={W - 40 - 8 * len(ev) - 18} y=27 width={8 * len(ev) + 18} height=22 rx=11/>"
-           f"<text class=e x={W - 40 - 9} y=42 text-anchor=end style='letter-spacing:.4px'>{escape(ev)}</text>"
+           f"<text class=e x={W - 40 - 9} y=42 text-anchor=end style='font-size:11.5px'>{escape(ev)}</text>"
            f"<text class=t x=40 y=72>{escape(card['title'])}</text>{body}{lines}</svg>\n")
     return xml(svg), errs
 
