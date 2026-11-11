@@ -14,9 +14,13 @@
 //   late      bytes that arrive while the chip is still replying are ignored
 //   loss      a third edge into the 2-deep queue is dropped and raises the
 //             sticky overflow flag; the two queued events read back in order
-//   reconnect a host that vanishes mid-command leaves the port waiting for
-//             the rest (the next command is eaten as data); reset recovers
-//             it with nothing committed and the queue and flag cleared
+//   timeout   a frame cut short is thrown away once the line has been quiet
+//             for 2^TOW clocks, so the next command is parsed as a command
+//             and nothing half-received is ever written; a slow host whose
+//             gaps stay under the timeout still gets through
+//   reconnect bytes sent before the timeout still count as the rest of the
+//             cut frame, but it never commits; reset also recovers the port,
+//             with the queue and overflow flag cleared
 //   burst     an edge that arrives while a multi-pin burst is still being
 //             queued replaces the waiting event, and overflow says so
 //
@@ -31,6 +35,8 @@ module tb_proto;
     localparam int DIVW    = 6;
     localparam int CLK_NS  = 20;
     localparam int BIT_NS  = DIV * CLK_NS;
+    localparam int TOW     = 10;               // frame timeout: 2^10 clocks, 6.4 byte times here
+    localparam int TO_NS   = (1 << TOW) * CLK_NS;
 
     reg        clk = 1'b0, rst = 1'b1;
     reg        rx  = 1'b1;
@@ -60,7 +66,7 @@ module tb_proto;
 
     tp_sync_soc #(
         .NCH(8), .NCMP(3), .DEPTH(2), .PTRW(1),
-        .FRACW(24), .FILTW(0), .DIV(DIV), .DIVW(DIVW)
+        .FRACW(24), .FILTW(0), .DIV(DIV), .DIVW(DIVW), .TOW(TOW)
     ) dut (
         .clk(clk), .rst(rst),
         .cap_pin(cap), .trig_pin(trig),
@@ -337,20 +343,46 @@ module tb_proto;
             "the queue is empty and overflow stays set until reset");
 
         // -------------------------------------------------------------
+        $display("\n[timeout]");
+        req0 = req_count;
+        send_byte(8'h01); send_byte(8'h07); send_byte(8'hAA);   // a write cut after 3 bytes
+        #(2 * TO_NS);                                          // the host goes quiet
+        do_write(8'h07, 32'h1234_5678, ok);
+        chk(ok && req_count == req0 + 1 && last_addr == 4'h7 && last_we && last_wdata == 32'h1234_5678,
+            "a write cut after 3 bytes is dropped: the next full write is ACKed and lands whole, once");
+        send_byte(8'h02);                                      // a read cut after its command byte
+        #(2 * TO_NS);
+        do_ping(ok);
+        chk(ok && req_count == req0 + 1, "a read cut after its command byte is dropped: the next ping answers 5A 01");
+        req0 = req_count;
+        send_byte(8'h01); #(TO_NS * 3 / 4); send_byte(8'h07);  // a slow host: every gap 3/4 of the timeout
+        for (i = 0; i < 4; i = i + 1) begin
+            #(TO_NS * 3 / 4);
+            send_byte(8'h11 * (i + 1));
+        end
+        settle(4, n);
+        ok = (n == 1) && (rxq[rxq_rd % 1024] === 8'h06); drop_rx();
+        chk(ok && req_count == req0 + 1 && last_wdata == 32'h4433_2211,
+            "a slow host with gaps under the timeout still gets its write through");
+
+        // -------------------------------------------------------------
         $display("\n[reconnection]");
         req0 = req_count;
         send_byte(8'h01); send_byte(8'h07); send_byte(8'hAA); send_byte(8'hBB);
         settle(30, n);                              // the host goes away here
-        send_byte(8'h03);                           // and comes back with a ping
+        send_byte(8'h03);                           // and comes back with a ping, too soon
         settle(30, n);
         chk(n == 0 && req_count == req0,
-            "a ping after a cut write is taken as its fifth byte: no reply, nothing written");
+            "a ping sent before the timeout is taken as the cut write's fifth byte: no reply, nothing written");
+        #(2 * TO_NS);
+        do_ping(ok);
+        chk(ok && req_count == req0, "after the timeout the next ping answers 5A 01 and the cut write never lands");
         @(negedge clk) rst = 1'b1;
         repeat (4) @(negedge clk);
         rst = 1'b0;
         #(BIT_NS * 2);
         do_ping(ok);
-        chk(ok && req_count == req0, "after reset the next ping answers 5A 01 and the cut write never lands");
+        chk(ok && req_count == req0, "reset recovers the port too: the next ping answers 5A 01");
         do_read(8'h02, v, ok);
         chk(ok && v[4] && !v[6] && ovf === 1'b0, "reset also empties the queue and clears overflow");
 

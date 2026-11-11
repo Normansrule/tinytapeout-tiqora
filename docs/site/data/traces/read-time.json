@@ -144,9 +144,9 @@
    "src/sync/sync_timebase.sv": "c7a8d227e898022290a6fd1fade22e451c9b5adf532139151d7c8872ceb1f1ef",
    "src/sync/sync_unit.sv": "7063a3b59bd7715cb3dbf95ccca771b2dd78e81fba995bd1c54eae5441270e50",
    "src/tp_pkg.sv": "8da187b5b062a40778534565ed50fbbe5c70afb2faa444fe44a47f324cdb42cd",
-   "src/tp_sync_soc.sv": "462a14536fd2450134754e5f7c87a1fb90d28c6c95822d8596fed7975f1905aa",
+   "src/tp_sync_soc.sv": "9e26c57ddcfb46968e57fc735fef35ec4c788cc0f3b55b03eac594ba0aac0873",
    "src/tt_um_normansrule_tiqora_serial.sv": "09a201defac0fb179034a01edc9dbbc2f4828b927dc53658c01290469dc57efb",
-   "src/uart/tp_host_uart.sv": "e131a7447cb016ede4b67bfcfdea0d5f9faca7cbfd2d0fc7de93b74e1656c449",
+   "src/uart/tp_host_uart.sv": "0e4e4d8331e76b55431110f4d4bc4916a189572c19eddf34d2ca8ca01e71b591",
    "src/uart/tp_uart_rx.sv": "74ac23194c71027eff9a5fa8fef0acd5eb32af71e996affae7d25d0c01bc2f1a",
    "src/uart/tp_uart_tx.sv": "32458039699f7e41740457c80a820cc7132a2366a3f64bc58ee1675d674cb49a",
    "test/tb_tour.sv": "11ffefe316205a5c26aee7b1a8ebb5643f61468a0a587c4c46202ad478030ae2"

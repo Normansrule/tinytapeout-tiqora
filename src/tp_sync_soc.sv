@@ -20,7 +20,8 @@ module tp_sync_soc #(
     parameter int FILTW = 0,
     parameter int PWW   = 16,      // trigger pulse-width counter bits
     parameter int DIV   = 434,     // baud = clk_hz / DIV; 115200 at 50 MHz
-    parameter int DIVW  = 9
+    parameter int DIVW  = 9,
+    parameter int TOW   = 20       // host frame timeout, 2^TOW clocks (21 ms at 50 MHz)
 ) (
     input  wire  logic            clk,
     input  wire  logic            rst,
@@ -49,7 +50,7 @@ module tp_sync_soc #(
     logic [31:0] t_now, status, head;
     logic [31:0] t_rdata_unused;     // no core to read it
 
-    tp_host_uart #(.DIV(DIV), .DIVW(DIVW)) u_host (
+    tp_host_uart #(.DIV(DIV), .DIVW(DIVW), .TOW(TOW)) u_host (
         .clk      (clk),
         .rst      (rst),
         .rx_pin   (uart_rx),

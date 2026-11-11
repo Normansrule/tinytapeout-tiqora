@@ -36,9 +36,9 @@ microcontroller when the chip should run your code on its own.
 
 | | |
 |---|---|
-| ✅ **RTL simulation** | 62 checks: 58 on the serial host port, 28 of them on framing errors, unknown commands, partial frames, late bytes, queue loss, reconnection and bursts, and 4 comparing the timing unit with a reference model (`cd test && make sim`), plus 5 cocotb tests from the pins only |
+| ✅ **RTL simulation** | 66 checks: 62 on the serial host port, 32 of them on framing errors, unknown commands, partial frames, late bytes, the frame timeout, queue loss, reconnection and bursts, and 4 comparing the timing unit with a reference model (`cd test && make sim`), plus 5 cocotb tests from the pins only |
 | ✅ **FPGA (simulated)** | the whole Digilent Basys 3 design, driven like a PC at 115,200 baud: 7 checks (`make -C fpga/basys3 sim`) |
-| ✅ **Area (verify-audits 2026-10-26)** | 21,322 µm², 458 flip-flops, 59% of the 1 × 2 die (`make area`) |
+| ✅ **Area (frame-timeout 2026-11-11)** | 21,391 µm², 478 flip-flops, 59% of the 1 × 2 die (`make area`) |
 | ✅ **Docs** | every link, image, `make` target and script mentioned exists (`make docs`, part of `make sim`) |
 | ✅ **Place and route at 1 × 2** | the Tiny Tapeout `gds`, pre-flight and gate-level workflows pass (GitHub run 40161260168); local LibreLane 3.0.14 run: DRC 0, LVS 0, antenna 0 |
 | ❌ **Setup timing, slow corner** | misses by 1.30 ns at 50 MHz at ss_100C_1v60 (29 paths), about 47 MHz there; met at the typical corner (+9.48 ns); hold met everywhere |
@@ -308,10 +308,11 @@ Two limits follow from the design and are now measured rather than assumed:
 
 * **Wait for each reply.** Bytes that arrive while the chip is still sending are ignored, so a
   host that sends its next command early loses it. `tpctl.py` always waits.
-* **There is no frame timeout.** If a host stops partway through a frame, the chip keeps waiting,
-  and the next bytes it receives finish that frame. A write cut short and followed by new commands
-  commits those bytes as its data. After a host-side timeout, reset the chip, or send the missing
-  bytes of a frame you know the state of, before trusting the link again.
+* **A cut frame is dropped after 21 ms of silence.** If a host stops partway through a frame, the
+  chip throws the partial frame away once the line has been quiet for 2^20 clocks (21 ms at
+  50 MHz), and nothing from it is written. Bytes sent before then still count as the rest of that
+  frame, so after an error wait at least 21 ms (or reset the chip) before the next command
+  (`make -C test proto`, [timeout] and [reconnection]).
 
 What has *not* been done yet: setup timing at the slow corner (it misses by 1.30 ns at 50 MHz),
 and a run on a real Basys 3. The area has been measured against the real
@@ -324,7 +325,7 @@ sky130 library; see the Area section.
 **Measured**, not estimated. Yosys maps the design onto the real sky130_fd_sc_hd standard cell
 library, minus the cells this design's flow excludes (`src/synth_exclude.cells`: the PDK's
 `no_synth.cells` without its drive-strength-1 entries): 2,529 cells, 458 of them flip-flops,
-**21,322 µm²** (measured, verify-audits 2026-10-26, Yosys 0.33, `make -C test area`).
+**21,391 µm²** (measured, frame-timeout 2026-11-11, Yosys 0.33, `make -C test area`).
 
 | Tile | At 60% utilisation | At 70% | Verdict |
 |---|---:|---:|---|
