@@ -18,7 +18,9 @@ prove() {   # prove <module> <props file> [defines]
     f=$SRC/$m.sv; [ -f "$f" ] || f=$SRC/../core/$m.sv
     awk -v inc="$(cat "$p")" -v end="endmodule : $m" '$0 ~ "^"end { print inc } { print }' "$f" > "$OUT/$m.sv"
     grep -q 'f_past_ok' "$OUT/$m.sv" || { echo "FAIL  could not splice $p into $m"; exit 1; }
-    yosys -q -l "$OUT/$m.yosys.log" -p "read_verilog -formal -sv $* $SRC/../tp_pkg.sv $OUT/$m.sv; prep -top $m; async2sync; dffunmap; write_smt2 -wires $OUT/$m.smt2" >/dev/null 2>&1 \
+    defs=""; chp=""   # +NAME=VALUE overrides a parameter, anything else is a define
+    for a in "$@"; do case $a in +*) a=${a#+}; chp="$chp chparam -set ${a%%=*} ${a#*=} $m;";; *) defs="$defs $a";; esac; done
+    yosys -q -l "$OUT/$m.yosys.log" -p "read_verilog -formal -sv $defs $SRC/../tp_pkg.sv $OUT/$m.sv;$chp prep -top $m; async2sync; dffunmap; write_smt2 -wires $OUT/$m.smt2" >/dev/null 2>&1 \
       || { tail -5 "$OUT/$m.yosys.log"; echo "FAIL  $tag: Yosys"; exit 1; }
     yosys-smtbmc -s z3 -t "$DEPTH" "$OUT/$m.smt2" > "$OUT/$m.bmc.log" 2>&1 \
       || { grep -E 'Assert failed|failed' "$OUT/$m.bmc.log" | head -5; echo "FAIL  $tag: counterexample within $DEPTH clocks"; exit 1; }
@@ -33,6 +35,8 @@ prove sync_timebase syn/formal/timebase_props.svh
 prove sync_compare  syn/formal/compare_props.svh $DM1
 prove sync_compare  syn/formal/compare_props.svh -DFREE_RUN $DM1
 prove sync_event_fifo syn/formal/fifo_props.svh
+prove sync_capture  syn/formal/capture_props.svh
+prove sync_capture  syn/formal/capture_props.svh +FILTW=2
 [ -f "$SRC/../core/tp_nregfile.sv" ] && prove tp_nregfile syn/formal/regfile_props.svh
 echo "$n checks, 0 failures"
 echo "FORMAL PROOFS PASSED"
