@@ -784,6 +784,28 @@ section.sub > h2::before { display: none; }
 @media (prefers-reduced-motion: reduce) {
   .stack-legend li, .plane { transition: none; }
 }
+
+/* the schematic as a viewer: each part is a button; choosing one lights the wires that touch it, dims the rest,
+   and shows its RTL line beside the drawing (docs/site/lib/schematic.js) */
+.sc .part[tabindex] { cursor: pointer; outline: none; }
+.sc .part.sel :is(.box, .ff, .gate, .pad), .sc .part:focus-visible :is(.box, .ff, .gate, .pad) { stroke: var(--sch-cur); stroke-width: 2.6; }
+.sc .part:focus-visible :is(.box, .ff, .gate, .pad) { stroke-dasharray: 5 3; }
+.sc.inspecting .w:not(.lit), .sc.inspecting .dot { opacity: .28; }
+.sc.inspecting .glow:not(.lit) { opacity: 0 !important; }
+.sc.inspecting .w.lit:not(.on) { stroke: var(--sch-cur); }
+.sc.inspecting .part:not(.sel) { opacity: .62; }
+.schem-inspect { margin: .2rem .5rem .6rem; padding: .7rem .9rem; border: 1px solid var(--sch-edge); border-left: 3px solid var(--sch-cur);
+  border-radius: 10px; background: var(--sch-box); max-width: 72ch; }
+.schem-inspect[hidden] { display: none; }
+.schem-inspect p { margin: 0; }
+.schem-inspect .si-h { font-size: 1rem; }
+.schem-inspect .si-v { font-size: .9rem; color: var(--ink-2); margin-top: .35rem; }
+.schem-code { display: block; font: .84rem/1.45 var(--mono); color: var(--sch-ink); white-space: pre-wrap; overflow-wrap: anywhere; margin-top: .3rem; }
+.schem-parts li { break-inside: avoid; margin-bottom: .45rem; }
+.schem-parts .schem-code { color: var(--ink-2); }
+@media (prefers-reduced-motion: no-preference) {
+  .sc .w, .sc .dot, .sc .part { transition: opacity 180ms ease, stroke 180ms ease; }
+}
 </style>
 <script>try { const t = localStorage.getItem("tq-theme"); if (t) document.documentElement.dataset.theme = t; } catch (e) {}</script>
 </head>
@@ -889,7 +911,7 @@ section.sub > h2::before { display: none; }
 <section class="cv sub" aria-labelledby=sc-h>
  <h2 id=sc-h>How the pin knows: the logic, lit by the recording</h2>
  <p>This is the whole of one deadline channel. The host leaves one number behind, the deadline minus one. Every clock, a subtractor takes it away from the timebase; the moment the answer stops being negative, an AND gate with the <em>armed</em> flip-flop lets <em>fire</em> through, and a small counter holds the pin high for the pulse width: eight clocks, unless the host sets another. Firing one clock early is deliberate: the pin comes out of a register, so it changes on the next edge, which is exactly the deadline.</p>
- <figure class=schem id=schem><div class=schem-stage tabindex=0 role=group aria-label='The deadline logic. Left and right arrows step one clock; space plays.'><svg class="sc" viewBox='0 0 1120 560' role="img" aria-labelledby="sc-title" sc-desc xmlns='http://www.w3.org/2000/svg'><title id="sc-title">Deadline channel 0 of sync_compare, drawn as logic</title><desc id="sc-desc">The clock edge. The counter loads pw = 8 and armed clears. The counter is not zero, so TRIG0 on uo_out[0] goes high on this clock, when now = 111,242: the deadline exactly, 0 ticks late.</desc><style>
+ <figure class=schem id=schem data-rtl='src/sync/sync_compare.sv'><div class=schem-stage tabindex=0 role=group aria-label='The deadline logic. Left and right arrows step one clock; space plays; Tab reaches each part.'><svg class="sc" viewBox='0 0 1120 560' role="img" aria-labelledby="sc-title" sc-desc xmlns='http://www.w3.org/2000/svg'><title id="sc-title">Deadline channel 0 of sync_compare, drawn as logic</title><desc id="sc-desc">The clock edge. The counter loads pw = 8 and armed clears. The counter is not zero, so TRIG0 on uo_out[0] goes high on this clock, when now = 111,242: the deadline exactly, 0 ticks late.</desc><style>
 .sc{font-family:var(--sans,system-ui,-apple-system,'Segoe UI',Helvetica,Arial,sans-serif)}
 .sc .bg{fill:var(--sch-bg,#0f1214)}
 .sc .box{fill:var(--sch-box,#161a1d);stroke:var(--sch-edge,#3a4247);stroke-width:1.5}
@@ -945,7 +967,7 @@ section.sub > h2::before { display: none; }
 .sc .curl{stroke:var(--sch-cur,#6ea8f0);stroke-width:2}
 .sc .cap{fill:var(--sch-ink,#e8ebe9);font-size:13.5px}
 .sc .gapt{fill:var(--sch-muted,#9aa3a7);font-size:11px}
-</style><rect class="lane" x="66" y="9" width="1028" height="16" rx="3"/><text class="rowl" x="58" y="22" text-anchor="end">arm_we</text><path class='w on' d='M70,12 L124.1,12 L124.1,22 L178.2,22'/><path class='w on' d='M224.2,22 L278.3,22 L278.3,22 L332.4,22 L332.4,22 L386.6,22 L386.6,22 L440.7,22 L440.7,22 L494.8,22 L494.8,22 L548.9,22 L548.9,22 L603.0,22 L603.0,22 L657.1,22 L657.1,22 L711.2,22 L711.2,22 L765.3,22 L765.3,22 L819.4,22 L819.4,22 L873.6,22 L873.6,22 L927.7,22 L927.7,22 L981.8,22 L981.8,22 L1035.9,22 L1035.9,22 L1090.0,22'/><rect class="lane" x="66" y="29" width="1028" height="16" rx="3"/><text class="rowl" x="58" y="42" text-anchor="end">armed</text><path class='w on' d='M70,42 L124.1,42 L124.1,32 L178.2,32'/><path class='w on' d='M224.2,32 L278.3,32 L278.3,32 L332.4,32 L332.4,32 L386.6,32 L386.6,32 L440.7,32 L440.7,32 L494.8,32 L494.8,42 L548.9,42 L548.9,42 L603.0,42 L603.0,42 L657.1,42 L657.1,42 L711.2,42 L711.2,42 L765.3,42 L765.3,42 L819.4,42 L819.4,42 L873.6,42 L873.6,42 L927.7,42 L927.7,42 L981.8,42 L981.8,42 L1035.9,42 L1035.9,42 L1090.0,42'/><rect class="lane" x="66" y="49" width="1028" height="16" rx="3"/><text class="rowl" x="58" y="62" text-anchor="end">reached</text><path class='w on' d='M70,52 L124.1,52 L124.1,62 L178.2,62'/><path class='w on' d='M224.2,62 L278.3,62 L278.3,62 L332.4,62 L332.4,62 L386.6,62 L386.6,62 L440.7,62 L440.7,52 L494.8,52 L494.8,52 L548.9,52 L548.9,52 L603.0,52 L603.0,52 L657.1,52 L657.1,52 L711.2,52 L711.2,52 L765.3,52 L765.3,52 L819.4,52 L819.4,52 L873.6,52 L873.6,52 L927.7,52 L927.7,52 L981.8,52 L981.8,52 L1035.9,52 L1035.9,52 L1090.0,52'/><rect class="lane" x="66" y="69" width="1028" height="16" rx="3"/><text class="rowl" x="58" y="82" text-anchor="end">fire</text><path class='w on' d='M70,82 L124.1,82 L124.1,82 L178.2,82'/><path class='w on' d='M224.2,82 L278.3,82 L278.3,82 L332.4,82 L332.4,82 L386.6,82 L386.6,82 L440.7,82 L440.7,72 L494.8,72 L494.8,82 L548.9,82 L548.9,82 L603.0,82 L603.0,82 L657.1,82 L657.1,82 L711.2,82 L711.2,82 L765.3,82 L765.3,82 L819.4,82 L819.4,82 L873.6,82 L873.6,82 L927.7,82 L927.7,82 L981.8,82 L981.8,82 L1035.9,82 L1035.9,82 L1090.0,82'/><rect class="lane" x="66" y="89" width="1028" height="16" rx="3"/><text class="rowl" x="58" y="102" text-anchor="end">TRIG0</text><path class='w on' d='M70,102 L124.1,102 L124.1,102 L178.2,102'/><path class='w on' d='M224.2,102 L278.3,102 L278.3,102 L332.4,102 L332.4,102 L386.6,102 L386.6,102 L440.7,102 L440.7,102 L494.8,102 L494.8,92 L548.9,92 L548.9,92 L603.0,92 L603.0,92 L657.1,92 L657.1,92 L711.2,92 L711.2,92 L765.3,92 L765.3,92 L819.4,92 L819.4,92 L873.6,92 L873.6,92 L927.7,92 L927.7,102 L981.8,102 L981.8,102 L1035.9,102 L1035.9,102 L1090.0,102'/><text class="gapt" x="201.2" y="58" text-anchor="middle">17,018</text><text class="gapt" x="201.2" y="74" text-anchor="middle">clocks</text><text class="gapt" x="97.1" y="124" text-anchor="middle">94,213</text><text class="gapt" x="151.2" y="124" text-anchor="middle"></text><text class="gapt" x="251.3" y="124" text-anchor="middle"></text><text class="gapt" x="305.4" y="124" text-anchor="middle">111,234</text><text class="gapt" x="359.5" y="124" text-anchor="middle"></text><text class="gapt" x="413.6" y="124" text-anchor="middle"></text><text class="gapt" x="467.7" y="124" text-anchor="middle">111,237</text><text class="gapt" x="521.8" y="124" text-anchor="middle">111,238</text><text class="gapt" x="575.9" y="124" text-anchor="middle"></text><text class="gapt" x="630.1" y="124" text-anchor="middle">111,240</text><text class="gapt" x="684.2" y="124" text-anchor="middle"></text><text class="gapt" x="738.3" y="124" text-anchor="middle"></text><text class="gapt" x="792.4" y="124" text-anchor="middle">111,243</text><text class="gapt" x="846.5" y="124" text-anchor="middle"></text><text class="gapt" x="900.6" y="124" text-anchor="middle"></text><text class="gapt" x="954.7" y="124" text-anchor="middle">111,246</text><text class="gapt" x="1008.8" y="124" text-anchor="middle"></text><text class="gapt" x="1062.9" y="124" text-anchor="middle"></text><g class="cursor" data-xs='[70, 124.1, 224.2, 278.3, 332.4, 386.6, 440.7, 494.8, 548.9, 603.0, 657.1, 711.2, 765.3, 819.4, 873.6, 927.7, 981.8, 1035.9]' data-cw='54.11'><rect class="cur" x="494.8" y="4" width="54.1" height="126"/></g></svg></div><p class=schem-cap aria-live=polite>The clock edge. The counter loads pw = 8 and armed clears. The counter is not zero, so TRIG0 on uo_out[0] goes high on this clock, when now = 111,242: the deadline exactly, 0 ticks late.</p><figcaption><span class='ev recorded'>recorded</span> Every 0 and 1 on a wire, and every value in a register, was read inside <code>sync_compare</code> by <code>test/tb_tour.sv</code> during <code>make -C test tour</code>; <code>docs/tools/schematic.py</code> checks each of the 18 clocks against the RTL's equations, rewritten in Python, before drawing them. Two values are arithmetic on recorded ones: the subtractor's output and <code>cnt−1</code>. The gates are drawn from the RTL, not from the synthesized netlist, which builds the same logic out of sky130 cells.<details><summary>Each part, in <code>src/sync/sync_compare.sv</code></summary><ul class=schem-parts><li><a href='https://github.com/Normansrule/tinytapeout-tiqora/blob/main/src/sync/sync_compare.sv#L37'>arm_time - 1</a> <span class=small>line 37</span></li><li><a href='https://github.com/Normansrule/tinytapeout-tiqora/blob/main/src/sync/sync_compare.sv#L38'>deadline - 1 register</a> <span class=small>line 38</span></li><li><a href='https://github.com/Normansrule/tinytapeout-tiqora/blob/main/src/sync/sync_compare.sv#L59'>the compare</a> <span class=small>line 59</span></li><li><a href='https://github.com/Normansrule/tinytapeout-tiqora/blob/main/src/sync/sync_compare.sv#L60'>armed and reached</a> <span class=small>line 60</span></li><li><a href='https://github.com/Normansrule/tinytapeout-tiqora/blob/main/src/sync/sync_compare.sv#L61'>or a direct pulse</a> <span class=small>line 61</span></li><li><a href='https://github.com/Normansrule/tinytapeout-tiqora/blob/main/src/sync/sync_compare.sv#L70'>load the deadline</a> <span class=small>line 70</span></li><li><a href='https://github.com/Normansrule/tinytapeout-tiqora/blob/main/src/sync/sync_compare.sv#L71'>armed flip-flop</a> <span class=small>line 71</span></li><li><a href='https://github.com/Normansrule/tinytapeout-tiqora/blob/main/src/sync/sync_compare.sv#L72'>disarm when reached</a> <span class=small>line 72</span></li><li><a href='https://github.com/Normansrule/tinytapeout-tiqora/blob/main/src/sync/sync_compare.sv#L76'>load the pulse width</a> <span class=small>line 76</span></li><li><a href='https://github.com/Normansrule/tinytapeout-tiqora/blob/main/src/sync/sync_compare.sv#L77'>pulse counter</a> <span class=small>line 77</span></li><li><a href='https://github.com/Normansrule/tinytapeout-tiqora/blob/main/src/sync/sync_compare.sv#L81'>trigger output</a> <span class=small>line 81</span></li><li><a href='https://github.com/Normansrule/tinytapeout-tiqora/blob/main/src/sync/sync_compare.sv#L86'>pulse width, 8 at reset</a> <span class=small>line 86</span></li></ul></details></figcaption></figure>
+</style><rect class="lane" x="66" y="9" width="1028" height="16" rx="3"/><text class="rowl" x="58" y="22" text-anchor="end">arm_we</text><path class='w on' d='M70,12 L124.1,12 L124.1,22 L178.2,22'/><path class='w on' d='M224.2,22 L278.3,22 L278.3,22 L332.4,22 L332.4,22 L386.6,22 L386.6,22 L440.7,22 L440.7,22 L494.8,22 L494.8,22 L548.9,22 L548.9,22 L603.0,22 L603.0,22 L657.1,22 L657.1,22 L711.2,22 L711.2,22 L765.3,22 L765.3,22 L819.4,22 L819.4,22 L873.6,22 L873.6,22 L927.7,22 L927.7,22 L981.8,22 L981.8,22 L1035.9,22 L1035.9,22 L1090.0,22'/><rect class="lane" x="66" y="29" width="1028" height="16" rx="3"/><text class="rowl" x="58" y="42" text-anchor="end">armed</text><path class='w on' d='M70,42 L124.1,42 L124.1,32 L178.2,32'/><path class='w on' d='M224.2,32 L278.3,32 L278.3,32 L332.4,32 L332.4,32 L386.6,32 L386.6,32 L440.7,32 L440.7,32 L494.8,32 L494.8,42 L548.9,42 L548.9,42 L603.0,42 L603.0,42 L657.1,42 L657.1,42 L711.2,42 L711.2,42 L765.3,42 L765.3,42 L819.4,42 L819.4,42 L873.6,42 L873.6,42 L927.7,42 L927.7,42 L981.8,42 L981.8,42 L1035.9,42 L1035.9,42 L1090.0,42'/><rect class="lane" x="66" y="49" width="1028" height="16" rx="3"/><text class="rowl" x="58" y="62" text-anchor="end">reached</text><path class='w on' d='M70,52 L124.1,52 L124.1,62 L178.2,62'/><path class='w on' d='M224.2,62 L278.3,62 L278.3,62 L332.4,62 L332.4,62 L386.6,62 L386.6,62 L440.7,62 L440.7,52 L494.8,52 L494.8,52 L548.9,52 L548.9,52 L603.0,52 L603.0,52 L657.1,52 L657.1,52 L711.2,52 L711.2,52 L765.3,52 L765.3,52 L819.4,52 L819.4,52 L873.6,52 L873.6,52 L927.7,52 L927.7,52 L981.8,52 L981.8,52 L1035.9,52 L1035.9,52 L1090.0,52'/><rect class="lane" x="66" y="69" width="1028" height="16" rx="3"/><text class="rowl" x="58" y="82" text-anchor="end">fire</text><path class='w on' d='M70,82 L124.1,82 L124.1,82 L178.2,82'/><path class='w on' d='M224.2,82 L278.3,82 L278.3,82 L332.4,82 L332.4,82 L386.6,82 L386.6,82 L440.7,82 L440.7,72 L494.8,72 L494.8,82 L548.9,82 L548.9,82 L603.0,82 L603.0,82 L657.1,82 L657.1,82 L711.2,82 L711.2,82 L765.3,82 L765.3,82 L819.4,82 L819.4,82 L873.6,82 L873.6,82 L927.7,82 L927.7,82 L981.8,82 L981.8,82 L1035.9,82 L1035.9,82 L1090.0,82'/><rect class="lane" x="66" y="89" width="1028" height="16" rx="3"/><text class="rowl" x="58" y="102" text-anchor="end">TRIG0</text><path class='w on' d='M70,102 L124.1,102 L124.1,102 L178.2,102'/><path class='w on' d='M224.2,102 L278.3,102 L278.3,102 L332.4,102 L332.4,102 L386.6,102 L386.6,102 L440.7,102 L440.7,102 L494.8,102 L494.8,92 L548.9,92 L548.9,92 L603.0,92 L603.0,92 L657.1,92 L657.1,92 L711.2,92 L711.2,92 L765.3,92 L765.3,92 L819.4,92 L819.4,92 L873.6,92 L873.6,92 L927.7,92 L927.7,102 L981.8,102 L981.8,102 L1035.9,102 L1035.9,102 L1090.0,102'/><text class="gapt" x="201.2" y="58" text-anchor="middle">17,018</text><text class="gapt" x="201.2" y="74" text-anchor="middle">clocks</text><text class="gapt" x="97.1" y="124" text-anchor="middle">94,213</text><text class="gapt" x="151.2" y="124" text-anchor="middle"></text><text class="gapt" x="251.3" y="124" text-anchor="middle"></text><text class="gapt" x="305.4" y="124" text-anchor="middle">111,234</text><text class="gapt" x="359.5" y="124" text-anchor="middle"></text><text class="gapt" x="413.6" y="124" text-anchor="middle"></text><text class="gapt" x="467.7" y="124" text-anchor="middle">111,237</text><text class="gapt" x="521.8" y="124" text-anchor="middle">111,238</text><text class="gapt" x="575.9" y="124" text-anchor="middle"></text><text class="gapt" x="630.1" y="124" text-anchor="middle">111,240</text><text class="gapt" x="684.2" y="124" text-anchor="middle"></text><text class="gapt" x="738.3" y="124" text-anchor="middle"></text><text class="gapt" x="792.4" y="124" text-anchor="middle">111,243</text><text class="gapt" x="846.5" y="124" text-anchor="middle"></text><text class="gapt" x="900.6" y="124" text-anchor="middle"></text><text class="gapt" x="954.7" y="124" text-anchor="middle">111,246</text><text class="gapt" x="1008.8" y="124" text-anchor="middle"></text><text class="gapt" x="1062.9" y="124" text-anchor="middle"></text><g class="cursor" data-xs='[70, 124.1, 224.2, 278.3, 332.4, 386.6, 440.7, 494.8, 548.9, 603.0, 657.1, 711.2, 765.3, 819.4, 873.6, 927.7, 981.8, 1035.9]' data-cw='54.11'><rect class="cur" x="494.8" y="4" width="54.1" height="126"/></g></svg></div><p class=schem-cap aria-live=polite>The clock edge. The counter loads pw = 8 and armed clears. The counter is not zero, so TRIG0 on uo_out[0] goes high on this clock, when now = 111,242: the deadline exactly, 0 ticks late.</p><div class=schem-inspect hidden aria-live=polite></div><figcaption><span class='ev recorded'>recorded</span> Every 0 and 1 on a wire, and every value in a register, was read inside <code>sync_compare</code> by <code>test/tb_tour.sv</code> during <code>make -C test tour</code>; <code>docs/tools/schematic.py</code> checks each of the 18 clocks against the RTL's equations, rewritten in Python, before drawing them. Two values are arithmetic on recorded ones: the subtractor's output and <code>cnt−1</code>. The gates are drawn from the RTL, not from the synthesized netlist, which builds the same logic out of sky130 cells.<details><summary>Each part, in <code>src/sync/sync_compare.sv</code></summary><ul class=schem-parts><li data-part=minus1><a href='https://github.com/Normansrule/tinytapeout-tiqora/blob/main/src/sync/sync_compare.sv#L37'>arm_time - 1</a> <span class=small>line 37</span><code class=schem-code>assign arm_time_m1 = arm_time - 32&#x27;d1;</code></li><li data-part=dm1><a href='https://github.com/Normansrule/tinytapeout-tiqora/blob/main/src/sync/sync_compare.sv#L38'>deadline - 1 register</a> <span class=small>line 38</span><code class=schem-code>(* mem2reg *) logic [31:0]    deadline_m1</code></li><li data-part=sub><a href='https://github.com/Normansrule/tinytapeout-tiqora/blob/main/src/sync/sync_compare.sv#L59'>the compare</a> <span class=small>line 59</span><code class=schem-code>assign reached = ($signed(now - deadline_m1[i]) &gt;= 0);</code></li><li data-part=and><a href='https://github.com/Normansrule/tinytapeout-tiqora/blob/main/src/sync/sync_compare.sv#L60'>armed and reached</a> <span class=small>line 60</span><code class=schem-code>assign fire    = (armed[i] &amp;&amp; reached) ||</code></li><li data-part=or><a href='https://github.com/Normansrule/tinytapeout-tiqora/blob/main/src/sync/sync_compare.sv#L61'>or a direct pulse</a> <span class=small>line 61</span><code class=schem-code>(pulse_we &amp;&amp; pulse_mask[i]);</code></li><li data-part=mux_dm1><a href='https://github.com/Normansrule/tinytapeout-tiqora/blob/main/src/sync/sync_compare.sv#L70'>load the deadline</a> <span class=small>line 70</span><code class=schem-code>deadline_m1[i] &lt;= arm_time_m1;</code></li><li data-part=armed><a href='https://github.com/Normansrule/tinytapeout-tiqora/blob/main/src/sync/sync_compare.sv#L71'>armed flip-flop</a> <span class=small>line 71</span><code class=schem-code>armed[i]    &lt;= 1&#x27;b1;</code></li><li data-part=clear><a href='https://github.com/Normansrule/tinytapeout-tiqora/blob/main/src/sync/sync_compare.sv#L72'>disarm when reached</a> <span class=small>line 72</span><code class=schem-code>end else if (armed[i] &amp;&amp; reached) begin</code></li><li data-part=mux_cnt><a href='https://github.com/Normansrule/tinytapeout-tiqora/blob/main/src/sync/sync_compare.sv#L76'>load the pulse width</a> <span class=small>line 76</span><code class=schem-code>if (fire)                        pulse_cnt[i] &lt;= pw;</code></li><li data-part=cnt><a href='https://github.com/Normansrule/tinytapeout-tiqora/blob/main/src/sync/sync_compare.sv#L77'>pulse counter</a> <span class=small>line 77</span><code class=schem-code>else if (pulse_cnt[i] != &#x27;0)     pulse_cnt[i] &lt;= pulse_cnt[i] - 1&#x27;b1;</code></li><li data-part=nz><a href='https://github.com/Normansrule/tinytapeout-tiqora/blob/main/src/sync/sync_compare.sv#L81'>trigger output</a> <span class=small>line 81</span><code class=schem-code>assign trig[i] = (pulse_cnt[i] != &#x27;0);</code></li><li data-part=pw><a href='https://github.com/Normansrule/tinytapeout-tiqora/blob/main/src/sync/sync_compare.sv#L86'>pulse width, 8 at reset</a> <span class=small>line 86</span><code class=schem-code>if (rst)        pw &lt;= &#123;&#123;(PWW-4)&#123;1&#x27;b0&#125;&#125;, 4&#x27;d8&#125;;</code></li></ul></details></figcaption></figure>
 </section>
 <section class=cv aria-labelledby=board-h>
  <div class=chapter>
@@ -2234,7 +2256,14 @@ make -C test sim                 <span class=c># every suite</span></pre>
    itself the first time the drawing is in view, and stops when it leaves.
    With prefers-reduced-motion it never starts by itself and nothing draws or
    flashes: each step simply replaces the last. Keyboard: left and right step
-   a clock, Home and End jump, space plays or pauses. */
+   a clock, Home and End jump, space plays or pauses.
+
+   Inspect: every part of the drawing is a button. Choosing one (a click, or Tab
+   to it and Enter) lights the wires that touch it, dims the rest, and shows its
+   RTL line and its value at the shown clock beside the drawing, as a schematic
+   viewer does. Which wires touch a part is read from the drawing itself: a wire
+   touches a part when one of its ends lies on the part's outline. Escape, or
+   choosing it again, lets go. */
 (function (root) {
   "use strict";
   const reduce = root.matchMedia && root.matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -2255,7 +2284,7 @@ make -C test sim                 <span class=c># every suite</span></pre>
     const pad = svg.querySelector(".pad");
     const vals = [...svg.querySelectorAll("[data-v]")];
     const steps = d.steps, n = steps.length;
-    let i = d.edge, timer = 0, playing = false, seen = false;
+    let i = d.edge, timer = 0, playing = false, seen = false, inspect = null;
     bar.hidden = false;
 
     const bit = (s, sig) => sig === "armed_reached" ? (s.armed & s.reached) : s[sig];
@@ -2291,6 +2320,7 @@ make -C test sim                 <span class=c># every suite</span></pre>
         }
       }
       i = k;
+      if (inspect) inspect.refresh();
       range.value = k;
       const label = s.label || `cycle ${fmt(s.cycle)} · now ${fmt(s.now)}`;
       range.setAttribute("aria-valuetext", label.replace(/ · /g, ", "));
@@ -2347,7 +2377,88 @@ make -C test sim                 <span class=c># every suite</span></pre>
         }
       }, { threshold: 0.55 }).observe(stage);
     }
+    inspect = inspector(fig, svg);
     show(i, false);
+  }
+
+  function inspector(fig, svg) {
+    const panel = fig.querySelector(".schem-inspect");
+    const groups = new Map();
+    for (const g of svg.querySelectorAll(".part[data-part]")) {
+      const id = g.dataset.part;
+      if (!groups.has(id)) groups.set(id, []);
+      groups.get(id).push(g);
+    }
+    if (!panel || !groups.size) return null;
+    const entries = new Map([...fig.querySelectorAll(".schem-parts li[data-part]")].map(li => [li.dataset.part, li]));
+    const wires = [...svg.querySelectorAll(".w[data-w]")];
+    const glows = [...svg.querySelectorAll(".glow[data-g]")];
+    const ends = w => {
+      const v = (w.getAttribute("d").match(/-?\d+(?:\.\d+)?/g) || []).map(Number);
+      return v.length < 4 ? [] : [[v[0], v[1]], [v[v.length - 2], v[v.length - 1]]];
+    };
+    // measured once, the first time a part is chosen: the drawing does not move
+    let touch = null;
+    const measure = () => {
+      touch = new Map();
+      for (const [id, gs] of groups) {
+        const bs = gs.map(g => g.getBBox()).filter(b => b.width || b.height);
+        const near = ([x, y]) => bs.some(b => x >= b.x - 6 && x <= b.x + b.width + 6 && y >= b.y - 6 && y <= b.y + b.height + 6);
+        touch.set(id, new Set(wires.filter(w => ends(w).some(near)).map(w => w.dataset.w)));
+      }
+    };
+    let sel = null, hover = null;
+    function paint() {
+      const id = sel || hover;
+      svg.classList.toggle("inspecting", !!id);
+      if (id && !touch) measure();
+      const ws = id ? touch.get(id) : null;
+      for (const w of wires) w.classList.toggle("lit", !!ws && ws.has(w.dataset.w));
+      for (const g of glows) g.classList.toggle("lit", !!ws && ws.has(g.dataset.g));
+      for (const [k, gs] of groups) for (const g of gs) {
+        g.classList.toggle("sel", k === id);
+        if (g.hasAttribute("tabindex")) g.setAttribute("aria-pressed", String(k === sel));
+      }
+    }
+    function refresh() {
+      if (!sel) { panel.hidden = true; panel.textContent = ""; return; }
+      const li = entries.get(sel), gs = groups.get(sel);
+      const val = gs.map(g => g.querySelector("[data-v]")).find(Boolean);
+      const a = li && li.querySelector("a"), code = li && li.querySelector("code");
+      panel.textContent = "";
+      const h = document.createElement("p"); h.className = "si-h";
+      const b = document.createElement("strong"); b.textContent = a ? a.textContent : sel; h.append(b);
+      if (a) { const l = a.cloneNode(true); l.textContent = `${fig.dataset.rtl || "source"} ${(li.querySelector(".small") || {}).textContent || ""}`.trim(); h.append(" · ", l); }
+      panel.append(h);
+      if (code) panel.append(code.cloneNode(true));
+      const p = document.createElement("p"); p.className = "si-v";
+      const ws = touch.get(sel).size;
+      p.textContent = (val && val.textContent ? `At this clock: ${val.textContent}. ` : "") +
+        `${ws} wire${ws === 1 ? "" : "s"} touch it, lit in the drawing. Escape lets go.`;
+      panel.append(p);
+      panel.hidden = false;
+    }
+    function choose(id) {
+      sel = sel === id ? null : id;
+      paint(); refresh();
+    }
+    for (const [id, gs] of groups) {
+      const g = gs.find(x => x.querySelector("title")) || gs[0];
+      const t = g.querySelector("title");
+      g.setAttribute("tabindex", "0"); g.setAttribute("role", "button");
+      g.setAttribute("aria-label", t ? t.textContent : id); g.setAttribute("aria-pressed", "false");
+      g.addEventListener("keydown", e => {
+        if (e.key === "Enter" || e.key === " ") { e.preventDefault(); e.stopPropagation(); choose(id); }
+      });
+      for (const x of gs) {
+        x.addEventListener("click", e => { e.stopPropagation(); choose(id); });
+        x.addEventListener("pointerenter", e => { if (e.pointerType === "mouse") { hover = id; paint(); } });
+        x.addEventListener("pointerleave", () => { if (hover === id) { hover = null; paint(); } });
+      }
+    }
+    fig.addEventListener("keydown", e => { if (e.key === "Escape" && sel) { sel = null; paint(); refresh(); } });
+    svg.addEventListener("click", () => { if (sel) { sel = null; paint(); refresh(); } });
+    return { refresh };
   }
 
   root.TQSchem = { mount };

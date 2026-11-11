@@ -764,3 +764,25 @@ section.sub > h2::before { display: none; }
 @media (prefers-reduced-motion: reduce) {
   .stack-legend li, .plane { transition: none; }
 }
+
+/* the schematic as a viewer: each part is a button; choosing one lights the wires that touch it, dims the rest,
+   and shows its RTL line beside the drawing (docs/site/lib/schematic.js) */
+.sc .part[tabindex] { cursor: pointer; outline: none; }
+.sc .part.sel :is(.box, .ff, .gate, .pad), .sc .part:focus-visible :is(.box, .ff, .gate, .pad) { stroke: var(--sch-cur); stroke-width: 2.6; }
+.sc .part:focus-visible :is(.box, .ff, .gate, .pad) { stroke-dasharray: 5 3; }
+.sc.inspecting .w:not(.lit), .sc.inspecting .dot { opacity: .28; }
+.sc.inspecting .glow:not(.lit) { opacity: 0 !important; }
+.sc.inspecting .w.lit:not(.on) { stroke: var(--sch-cur); }
+.sc.inspecting .part:not(.sel) { opacity: .62; }
+.schem-inspect { margin: .2rem .5rem .6rem; padding: .7rem .9rem; border: 1px solid var(--sch-edge); border-left: 3px solid var(--sch-cur);
+  border-radius: 10px; background: var(--sch-box); max-width: 72ch; }
+.schem-inspect[hidden] { display: none; }
+.schem-inspect p { margin: 0; }
+.schem-inspect .si-h { font-size: 1rem; }
+.schem-inspect .si-v { font-size: .9rem; color: var(--ink-2); margin-top: .35rem; }
+.schem-code { display: block; font: .84rem/1.45 var(--mono); color: var(--sch-ink); white-space: pre-wrap; overflow-wrap: anywhere; margin-top: .3rem; }
+.schem-parts li { break-inside: avoid; margin-bottom: .45rem; }
+.schem-parts .schem-code { color: var(--ink-2); }
+@media (prefers-reduced-motion: no-preference) {
+  .sc .w, .sc .dot, .sc .part { transition: opacity 180ms ease, stroke 180ms ease; }
+}

@@ -1,8 +1,12 @@
+<div align="center">
+
 # Tiqora-Serial — hardware timestamps and cycle-exact triggers over USB serial, no CPU
 
 **Tiny Tapeout 1 × 2 tiles · SkyWater sky130 · Apache 2.0 · maintained by [@Normansrule](https://github.com/Normansrule)**
 
-### [▶ Open the project website: normansrule.github.io/tinytapeout-tiqora](https://normansrule.github.io/tinytapeout-tiqora/)
+[**Open the website ▶**](https://normansrule.github.io/tinytapeout-tiqora/) · [**Quick start**](#quick-start) · [**Status**](#status) · [**How you talk to it**](#how-you-talk-to-it)
+
+</div>
 
 Everything in this repository, explained and explorable in your browser: watch a serial session, type your own command bytes, open the chip atlas and check the evidence behind every number. No install, works on a phone.
 
@@ -11,6 +15,29 @@ Everything in this repository, explained and explorable in your browser: watch a
 <sub>Recorded, not drawn: one window of `make -C test tour`, a simulation of the submitted top module
 driven only through its pins, rendered by `docs/tools/readme_media.py`.
 [Still image](docs/images/explorer/tour.png) for readers with motion turned off.</sub>
+
+<p align="center">
+<a href="docs/images/cards/time.svg"><img src="docs/images/cards/time.svg" width="49%" alt="Triggers on the exact tick: TRIG0 rises on exactly the tick written over serial, however busy the host is."></a> <a href="docs/images/cards/serial.svg"><img src="docs/images/cards/serial.svg" width="49%" alt="Driven over USB serial: Commands at 115,200 baud: a ping answers 5A 01, a register write answers 06."></a><br>
+<a href="docs/images/cards/die.svg"><img src="docs/images/cards/die.svg" width="49%" alt="Two tiles, 140 €: 21,322 µm² of standard cells, 59% of the 1 × 2 die, measured with Yosys 0.33 before placement."></a> <a href="docs/images/cards/evidence.svg"><img src="docs/images/cards/evidence.svg" width="49%" alt="Evidence on every number: Each result says measured, experimental, failed or not done, with the command and version behind it."></a>
+</p>
+
+<sub>Feature cards drawn by `docs/tools/cards.py` from the recorded deadline, the recorded serial session, the measured area and `docs/progress.json`; every number on them is quoted from this README, and `make -C test docs` fails if one drifts. They follow your light or dark setting.</sub>
+
+<details><summary><b>Key features, as text</b></summary>
+
+- **Timestamps in hardware.** Edges on eight inputs are stamped with the 32-bit timebase, to the
+  20 ns clock, and queued until the host reads them.
+- **Triggers on the exact tick.** Three deadline outputs rise on the programmed tick, however
+  busy the host is.
+- **No processor to program.** Six-byte commands over 115,200 baud serial; a Python library and
+  command line (`sw/tpctl.py`) do the talking.
+- **Same timing unit as Tiqora**, checked byte for byte by `make -C test shared`.
+- **Evidence on every number**: measured (with command and version), experimental, failed or not
+  done yet.
+- **An explorer you can open offline**: recorded tours, a protocol lab, a lab where you fire your
+  own deadline, and a zoom from a grain of salt down to one flip-flop.
+
+</details>
 
 > **Tiqora-Serial was called TinyPulse-Serial until October 2026.** The serial protocol,
 > register map and pin functions are unchanged.
@@ -31,20 +58,6 @@ microcontroller when the chip should run your code on its own.
 It exists as tested RTL and a clean layout, not yet as a chip. At 1 × 2, the size it submits, the
 Tiny Tapeout GDS, pre-flight and gate-level workflows pass, and the routed layout meets setup and
 hold timing at 50 MHz at all nine corners, +4.56 ns at the slowest (GitHub run 41346623526, branch timing-speed).
-
-**Key features**
-
-- **Timestamps in hardware.** Edges on eight inputs are stamped with the 32-bit timebase, to the
-  20 ns clock, and queued until the host reads them.
-- **Triggers on the exact tick.** Three deadline outputs rise on the programmed tick, however
-  busy the host is.
-- **No processor to program.** Six-byte commands over 115,200 baud serial; a Python library and
-  command line (`sw/tpctl.py`) do the talking.
-- **Same timing unit as Tiqora**, checked byte for byte by `make -C test shared`.
-- **Evidence on every number**: measured (with command and version), experimental, failed or not
-  done yet.
-- **An explorer you can open offline**: recorded tours, a protocol lab, a lab where you fire your
-  own deadline, and a zoom from a grain of salt down to one flip-flop.
 
 ### Explore it
 
@@ -350,6 +363,20 @@ pin comes out of a register: so the pin rises on the deadline itself.
 ![Recorded from the RTL: deadline channel 0 drawn as logic, lit clock by clock, from arming to the trigger pin rising on exactly the deadline tick](docs/images/schematic_deadline.svg)
 
 <sub>Probed inside `sync_compare` by `test/tb_tour.sv` during `make -C test tour`; `docs/tools/schematic.py` checks every clock against the RTL's equations before drawing it. [Step through it on the website](https://normansrule.github.io/tinytapeout-tiqora/#sc-h): play, pause, or use the arrow keys.</sub>
+
+**A deadline, step by step**, as the same recording tells it:
+
+<!-- steps:begin (generated by docs/tools/cards.py from docs/site/data/schematic.json; do not edit) -->
+
+| Step | Tick | What the recording shows |
+|---|---:|---|
+| **Arm** | 94,217 | Channel 0 is armed for tick 111,242 by a CMP0 write over serial: arm_time carries it and arm_we is high. The -1 makes 111,241, and the multiplexer steers it into the deadline register at this clock edge. reached is already 1, against the register's reset value, but armed is 0, so the AND gate holds fire low. |
+| **Count** | 94,218 | The register holds 111,241 and armed is 1. now - (deadline - 1) = -17,023: negative, so reached is 0. From here the same subtraction runs on every clock, and nothing outside the timing unit takes part. |
+| **Reached** | 111,241 | now = 111,241 = deadline - 1. The difference is 0, so reached rises, and with armed at 1 the AND gate raises fire. Nothing has moved yet: fire is a wire, and the clock edge has not come. |
+| **Fire** | 111,242 | The clock edge. The counter loads pw = 8 and armed clears. The counter is not zero, so TRIG0 on uo_out[0] goes high on this clock, when now = 111,242: the deadline exactly, 0 ticks late. |
+| **Pulse ends** | 111,250 | The counter reaches 0 and TRIG0 falls: a pulse of exactly 8 clocks. reached stays 1, since the deadline is now in the past, but armed is 0, so nothing fires again. |
+
+<!-- steps:end -->
 
 **An edge, queued and read.** A capture pin's edge becomes a timestamped event at once; a serial read pops it:
 

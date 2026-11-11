@@ -159,11 +159,14 @@ def schem_figure(ctx, d, sc, fid, aria, note):
     """A logic drawing that schematic.js steps through its recording: complete, at its still, without JavaScript."""
     e, s, site = d["edge"], d["steps"][d["edge"]], ctx["site"]
     src = f"{site['repo']}/blob/{site['ref']}/{d['rtl']}"
-    parts = "".join(f"<li><a href='{src}#L{d['lines'][k]}'>{esc(v)}</a> <span class=small>line {d['lines'][k]}</span></li>"
+    # each part with its RTL line, as written in the source: the list reads without JavaScript, and
+    # schematic.js shows the same entry beside the drawing when a part is chosen there
+    parts = "".join(f"<li data-part={k}><a href='{src}#L{d['lines'][k]}'>{esc(v)}</a> <span class=small>line {d['lines'][k]}</span>"
+                    f"<code class=schem-code>{esc(sc.PARTS[k][1]).replace('{', '&#123;').replace('}', '&#125;')}</code></li>"
                     for k, v in sorted(d["parts"].items(), key=lambda kv: d["lines"][kv[0]]))
     label = s.get("label") or f"cycle {s['cycle']:,} · now {s['now']:,}"
-    return (f"<figure class=schem id={fid}>"
-            f"<div class=schem-stage tabindex=0 role=group aria-label='{esc(aria)} Left and right arrows step one clock; space plays.'>"
+    return (f"<figure class=schem id={fid} data-rtl='{esc(d['rtl'])}'>"
+            f"<div class=schem-stage tabindex=0 role=group aria-label='{esc(aria)} Left and right arrows step one clock; space plays; Tab reaches each part.'>"
             f"{sc.site_svg(d, e)}</div>"
             f"<div class=schem-bar hidden><button class=btn type=button data-play aria-pressed=false>Play</button>"
             f"<button class='btn ghost' type=button data-step=-1 aria-label='Previous clock'>&#8249;</button>"
@@ -172,6 +175,7 @@ def schem_figure(ctx, d, sc, fid, aria, note):
             f"<output class=mono>{esc(label)}</output></div>"
             f"<div class=schem-strip>{sc.strip_svg(d, e)}</div>"
             f"<p class=schem-cap aria-live=polite>{esc(s['text'])}</p>"
+            f"<div class=schem-inspect hidden aria-live=polite></div>"
             f"<figcaption><span class='ev recorded'>recorded</span> {note}"
             f"<details><summary>Each part, in <code>{esc(d['rtl'])}</code></summary><ul class=schem-parts>{parts}</ul></details></figcaption></figure>")
 

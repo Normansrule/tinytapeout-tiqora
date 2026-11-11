@@ -1,0 +1,93 @@
+{
+  "note": "The README's feature cards, drawn by docs/tools/cards.py. Every number on a card must sit inside one of its cite strings, and each cite must appear word for word in README.md, where it carries its measurement.",
+  "cards": [
+    {
+      "id": "time",
+      "eyebrow": "Deadlines",
+      "evidence": "recorded",
+      "visual": "wave",
+      "title": "Triggers on the exact tick",
+      "lines": [
+        "TRIG0 rises on exactly the tick written over serial,",
+        "however busy the host is."
+      ],
+      "cite": []
+    },
+    {
+      "id": "serial",
+      "eyebrow": "No CPU",
+      "evidence": "recorded",
+      "visual": "bytes",
+      "commands": [
+        "ping",
+        "write CFG = 0x00000001"
+      ],
+      "title": "Driven over USB serial",
+      "lines": [
+        "Commands at 115,200 baud: a ping answers 5A 01,",
+        "a register write answers 06."
+      ],
+      "cite": [
+        "115,200 baud",
+        "5A 01",
+        "06"
+      ]
+    },
+    {
+      "id": "die",
+      "eyebrow": "Tiny Tapeout",
+      "evidence": "measured",
+      "visual": "die",
+      "tiles": [
+        1,
+        2
+      ],
+      "share": 59,
+      "title": "Two tiles, 140 €",
+      "lines": [
+        "21,322 µm² of standard cells, 59% of the 1 × 2 die,",
+        "measured with Yosys 0.33 before placement."
+      ],
+      "cite": [
+        "140 €",
+        "21,322 µm²",
+        "59% of the 1 × 2 die",
+        "Yosys 0.33"
+      ]
+    },
+    {
+      "id": "evidence",
+      "eyebrow": "Evidence",
+      "evidence": "measured",
+      "visual": "bars",
+      "title": "Evidence on every number",
+      "lines": [
+        "Each result says measured, experimental, failed or not done,",
+        "with the command and version behind it."
+      ],
+      "cite": []
+    }
+  ],
+  "steps": [
+    {
+      "name": "Arm",
+      "at": 0
+    },
+    {
+      "name": "Count",
+      "at": 1
+    },
+    {
+      "name": "Reached",
+      "at": 6
+    },
+    {
+      "name": "Fire",
+      "at": 7
+    },
+    {
+      "name": "Pulse ends",
+      "at": 15
+    }
+  ]
+}
