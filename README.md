@@ -59,6 +59,12 @@ It exists as tested RTL and a clean layout, not yet as a chip. At 1 × 2, the si
 Tiny Tapeout GDS, pre-flight and gate-level workflows pass, and the routed layout meets setup and
 hold timing at 50 MHz at all nine corners, +4.56 ns at the slowest (GitHub run 41346623526, branch timing-speed).
 
+### Your first five minutes
+
+1. **Fire a deadline of your own** on the [overview](https://normansrule.github.io/tinytapeout-tiqora/#dl-h): choose a tick and watch TRIG0 land on it, computed from the recorded tour.
+2. **Open the logic** [one level down](https://normansrule.github.io/tinytapeout-tiqora/#sc-h): step the deadline channel clock by clock, then choose any part of the drawing to light its wires and read its line of RTL.
+3. **Type your own command bytes** in the [tours](https://normansrule.github.io/tinytapeout-tiqora/tours.html) and see the serial frames and the chip's reply, or go straight to the [Quick start](#quick-start) with a board.
+
 ### Explore it
 
 | Page | What you can do there |
