@@ -102,6 +102,8 @@ docs:
 	cd .. && python3 docs/tools/schematic.py --mutants
 	cd .. && python3 docs/tools/cards.py --check
 	cd .. && python3 docs/tools/cards.py --mutants
+	cd .. && python3 docs/tools/site_lint.py
+	cd .. && python3 docs/tools/site_lint.py --mutants
 
 # the explorer site: atlas against the RTL (needs Yosys), tours against a fresh
 # simulation, then the site itself

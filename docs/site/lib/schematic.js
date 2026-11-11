@@ -46,6 +46,10 @@
     const steps = d.steps, n = steps.length;
     let i = d.edge, timer = 0, playing = false, seen = false, inspect = null;
     bar.hidden = false;
+    // on a phone the drawing and its timing strip each pan sideways; keep them lined up
+    const strip = fig.querySelector(".schem-strip");
+    if (strip) for (const [a, b] of [[stage, strip], [strip, stage]])
+      a.addEventListener("scroll", () => { if (b.scrollLeft !== a.scrollLeft) b.scrollLeft = a.scrollLeft; }, { passive: true });
 
     const bit = (s, sig) => sig === "armed_reached" ? (s.armed & s.reached) : s[sig];
     const text = (s, k) => {

@@ -106,7 +106,7 @@ def static_motion(ctx, feature=False):
     for r in m["reels"][:1] if feature else m["reels"]:
         fx = next(t for t in ctx["data"]["traces"] if t["id"] == r["fixture"])
         svg = open(f"{m['out']}/{fx['id']}.svg", encoding="utf-8").read().strip()
-        out.append(f"<figure class=reel>{svg}<figcaption><a href='tours.html#seq={esc(fx['id'])}'>Step through “{esc(fx['title'])}”</a> "
+        out.append(f"<figure class=reel><div class=pan>{svg}</div><figcaption><a href='tours.html#seq={esc(fx['id'])}'>Step through “{esc(fx['title'])}”</a> "
                    f"<span class='ev measured'>recorded</span> <span class=small>{esc(fx['kind_text'])}; drawn by <code>docs/tools/motion.py</code></span></figcaption></figure>")
     return ("<p class=reel-bar><button class='btn ghost' type=button id=reel-pause aria-pressed=false>Pause the animations</button> "
             "<span class=small>With reduced motion turned on in your system, each one is a still of the whole recording.</span></p>"

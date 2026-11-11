@@ -201,7 +201,7 @@ a.card { transition: border-color 150ms ease; }
 .hero-art { margin: 0; background: var(--surface); border-radius: var(--radius); padding: 12px; border: 1px solid var(--line); }
 .hero-art svg { display: block; width: 100%; height: auto; }
 /* on a phone the diagram keeps a readable size and scrolls sideways instead of shrinking */
-@media (max-width: 700px) { .hero-art { overflow-x: auto; } .hero-art svg { min-width: 680px; } }
+@media (max-width: 700px) { .hero-art { overflow-x: auto; } .hero-art svg { min-width: 760px; } }
 li { text-wrap: pretty; }
 .btn { display: inline-flex; align-items: center; gap: .45rem; background: var(--button); color: var(--button-ink); border: 1px solid var(--button); border-radius: 4px;
   padding: .55rem 1rem; font: inherit; font-size: .98rem; font-weight: 700; cursor: pointer; text-decoration: none; min-height: 44px;
@@ -530,7 +530,7 @@ html { overflow-x: clip; }
 .reveal-stage { position: relative; display: grid; justify-items: center; align-content: start; padding: 3.5rem 16px 2.5rem; overflow: hidden;
   background: radial-gradient(ellipse 70% 55% at 50% 78%, #13201a 0%, var(--screen) 70%); }
 .reveal-copy { text-align: center; max-width: 56rem; position: relative; z-index: 1; }
-.reveal .eyebrow { font: 600 .95rem var(--sans); letter-spacing: .08em; text-transform: uppercase; color: var(--screen-dim); margin: 0 auto .6rem; }
+.reveal .eyebrow { font: 600 1.05rem/1.35 var(--sans); color: var(--screen-dim); margin: 0 auto .6rem; }
 .reveal h1 { font-size: clamp(3.6rem, 13vw, 10rem); line-height: .9; letter-spacing: -.02em; margin: 0; max-width: none; color: var(--screen-ink); }
 .reveal .tagline { font-family: var(--display); font-weight: 600; font-size: clamp(1.7rem, 4.6vw, 3.4rem); line-height: 1.05; margin: .35rem 0 1rem; color: #ffb000; }
 .reveal .lede { color: #b9c0b8; margin: 0 auto 1.2rem; max-width: 46ch; }
@@ -689,12 +689,12 @@ canvas.routed:active { cursor: grabbing; }
 .schem-bar output { font-size: .9rem; color: var(--ink-2); font-variant-numeric: tabular-nums; min-width: 22ch; }
 .schem-strip { padding: 0 .5rem; }
 .schem-cap { font-size: 1.05rem; line-height: 1.5; color: var(--ink); max-width: 72ch; min-height: 4.6em; margin: .6rem .5rem .4rem; }
-.schem figcaption { font-size: .92rem; color: var(--ink-2); margin: .2rem .5rem 0; max-width: 80ch; }
+.schem figcaption { font-size: .92rem; color: var(--ink-2); margin: .2rem .5rem 0; max-width: 66ch; }
 .schem details { margin-top: .5rem; }
 .schem summary { cursor: pointer; font-weight: 700; }
 .schem-parts { columns: 2 18rem; margin: .4rem 0 0; padding-left: 1.1rem; }
 @media (max-width: 700px) {
-  .schem-stage { overflow-x: auto; overscroll-behavior-x: contain; } .schem-stage svg { width: 780px; max-width: none; }
+  .schem-stage, .schem-strip { overflow-x: auto; overscroll-behavior-x: contain; } .schem-stage svg, .schem-strip svg { width: 1000px; max-width: none; }
   .schem-cap { min-height: 7.5em; }
 }
 @media (prefers-contrast: more) { .schem { border-color: var(--ink); } }
@@ -708,7 +708,7 @@ main > section.reveal, main > section.layers { content-visibility: auto; contain
 
 /* ------------------------------------------------------------ the overview as chapters: a centred head, then the piece */
 .chapter { text-align: center; margin: 8rem auto 2.4rem; max-width: 62rem; }
-.chapter .eyebrow { font: 600 .88rem var(--sans); letter-spacing: .12em; text-transform: uppercase; color: var(--trace); margin: 0 0 .8rem; max-width: none; }
+.chapter .eyebrow { font: 600 1.05rem/1.35 var(--sans); color: var(--trace); margin: 0 0 .7rem; max-width: none; }
 .chapter h2 { font-size: clamp(2.3rem, 5.8vw, 4.6rem); line-height: 1; letter-spacing: -.022em; margin: 0 auto 1rem; max-width: 21ch; }
 .chapter .lede { margin: 0 auto; max-width: 44ch; font-size: clamp(1.1rem, 1.7vw, 1.32rem); }
 .chapter + * { margin-top: 0; }
@@ -805,6 +805,19 @@ section.sub > h2::before { display: none; }
 .schem-parts .schem-code { color: var(--ink-2); }
 @media (prefers-reduced-motion: no-preference) {
   .sc .w, .sc .dot, .sc .part { transition: opacity 180ms ease, stroke 180ms ease; }
+}
+
+/* ------------------------------------------------------------ drawings on a phone
+   A drawing keeps its labels at 9 px or more on screen (docs/tools/site_lint.py,
+   label-size): on a narrow window it keeps a minimum width and pans sideways
+   inside its own box instead of shrinking. */
+.pan { overflow-x: auto; overscroll-behavior-x: contain; }
+.pan > svg { display: block; }
+@media (max-width: 700px) {
+  .deadline .pan > svg { min-width: 610px; }
+  .reel .pan > svg { min-width: 720px; }
+  .board-live .scroll svg { min-width: 680px; }
+  .treemap { overflow-x: auto; overscroll-behavior-x: contain; } .treemap svg { min-width: 620px; max-height: none; }
 }
 </style>
 <script>try { const t = localStorage.getItem("tq-theme"); if (t) document.documentElement.dataset.theme = t; } catch (e) {}</script>
