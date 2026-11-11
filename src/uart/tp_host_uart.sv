@@ -22,6 +22,15 @@
 // `addr` is a sync register offset, 0 to 10 (see tp_pkg.sv). Reading offset
 // 1 pops the event queue, exactly as it does from the core in the full chip.
 //
+// Frame timeout: if the line goes quiet for 2^TOW clocks in the middle of a
+// command (after its first byte, before its last), the partial frame is
+// thrown away and the port waits for a command byte again. Without it, a
+// host that stopped mid-frame left the port waiting, and the next command's
+// bytes completed the old frame: a cut write followed by a good one wrote
+// garbage. At 50 MHz, TOW = 20 is 21 ms, far longer than any gap a USB serial
+// bridge leaves inside a frame and short enough that a host retrying after an
+// error is never confused.
+//
 // Area: one 32-bit register carries the write data in and the read data
 // out, because the two are never live at the same time. The register port
 // is driven combinationally during the single H_DO cycle, so it needs no
@@ -31,6 +40,7 @@
 module tp_host_uart #(
     parameter int  DIV     = 434,
     parameter int  DIVW    = 9,
+    parameter int  TOW     = 20,          // frame timeout: 2^TOW clocks of silence
     parameter logic [7:0] VERSION = 8'h01
 ) (
     input  wire  logic        clk,
@@ -92,6 +102,17 @@ module tp_host_uart #(
 
     assign active = (state != H_CMD) || tx_busy;
 
+    // Clocks since the last byte while a frame is half received. Saturating
+    // at all ones is the timeout; anything other than waiting for a frame's
+    // next byte holds it at zero.
+    logic [TOW-1:0] idle;
+    logic           timeout;
+    assign timeout = &idle;
+    always_ff @(posedge clk) begin
+        if (rst || rx_valid || !(state == H_ADDR || state == H_DATA)) idle <= '0;
+        else                                                          idle <= idle + 1'b1;
+    end
+
     always_ff @(posedge clk) begin
         if (rst) begin
             state    <= H_CMD;
@@ -132,6 +153,8 @@ module tp_host_uart #(
                         reg_addr <= rx_data[3:0];
                         count    <= 3'd4;
                         state    <= is_write ? H_DATA : H_DO;
+                    end else if (timeout) begin
+                        state    <= H_CMD;          // cut frame: drop it
                     end
                 end
 
@@ -142,6 +165,8 @@ module tp_host_uart #(
                         payload <= {rx_data, payload[31:8]};
                         count   <= count - 3'd1;
                         if (count == 3'd1) state <= H_DO;
+                    end else if (timeout) begin
+                        state   <= H_CMD;           // cut frame: nothing is written
                     end
                 end
 
