@@ -113,12 +113,13 @@ explorer:
 
 # Formal proofs of the shared timing unit (syn/formal/, identical to Tiqora's):
 # the timebase counts exactly, an armed deadline fires on its tick, pulses last pw,
-# and the event queue keeps every event in order or flags overflow.
+# the event queue keeps every event in order or flags overflow, and a pin edge is
+# captured a constant 3 clocks later (the glitch filter is proven too).
 # Needs yosys and z3.
 formal:
 	cd .. && sh syn/formal/run.sh
 
-# Break the timing unit 11 ways; every break must make `make formal` fail.
+# Break the timing unit 16 ways; every break must make `make formal` fail.
 formal-mutants:
 	cd .. && python3 syn/formal/mutants.py
 
