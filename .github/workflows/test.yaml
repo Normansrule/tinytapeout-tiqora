@@ -23,7 +23,14 @@ jobs:
         shell: bash
         run: pip install -r test/requirements.txt
 
+      # the built site's design check (docs/tools/site_lint.py) drives the runner's Chrome
+      - name: Install Playwright for the site design check
+        shell: bash
+        run: npm install --no-save --no-package-lock playwright-core@1.63.0
+
       - name: Run tests
+        env:
+          CHROMIUM: /usr/bin/google-chrome
         run: |
           cd test
           make clean

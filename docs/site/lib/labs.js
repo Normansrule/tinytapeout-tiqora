@@ -60,7 +60,8 @@
     const svg = el("svg", { viewBox: "0 0 760 156", class: "dl-scope", role: "img", "aria-labelledby": "dl-sum" });
     const sum = document.createElement("p"); sum.id = "dl-sum"; sum.className = "dl-sum";
     const facts = document.createElement("dl"); facts.className = "kv dl-facts";
-    host.append(form, svg, sum, facts);
+    const pan = document.createElement("div"); pan.className = "pan"; pan.append(svg);
+    host.append(form, pan, sum, facts);
     const input = form.querySelector("#dl-n"), msg = form.querySelector("#dl-msg");
     input.value = String(recN);
     let stop = () => {};
@@ -120,6 +121,9 @@
       // the cursor: where the timebase is now
       const ct = cursorTick == null ? d : cursorTick;
       svg.append(el("line", { x1: x(ct), x2: x(ct), y1: 40, y2: 150, class: "dl-cur" }));
+      // on a phone the scope pans sideways (labels stay readable); while it fires, the view follows the tick
+      if (cursorTick != null && pan.scrollWidth > pan.clientWidth + 1)
+        pan.scrollLeft = Math.max(0, x(ct) * pan.scrollWidth / 760 - pan.clientWidth * 0.6);
     }
 
     function show(n, animate) {
