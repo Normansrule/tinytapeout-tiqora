@@ -27,8 +27,8 @@
   "//": "Experiment (tape-out audit 2026-11-15): clock leaves of 8 sinks (the default left 29 leaves at 11-14, over the fanout limit of 10) and a design repair after global routing (slew/cap on routed-length wires).",
   "CTS_SINK_CLUSTERING_SIZE": 8,
   "RUN_POST_GRT_DESIGN_REPAIR": 1,
-  "GRT_DESIGN_REPAIR_MAX_SLEW_PCT": 70,
-  "GRT_DESIGN_REPAIR_MAX_CAP_PCT": 70,
+  "GRT_DESIGN_REPAIR_MAX_SLEW_PCT": 45,
+  "GRT_DESIGN_REPAIR_MAX_CAP_PCT": 45,
 
   "//": "CLOCK_PERIOD - Increase this in case you are getting setup time violations.",
   "//": "The value is in nanoseconds, so 20ns == 50MHz.",
