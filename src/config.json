@@ -24,6 +24,12 @@
   "//": "PNR_EXCLUDED_CELL_FILE - cells placement, CTS and the resizer may not use: the PDK's drc_exclude.cells plus the clkdlybuf4s* delay cells, which the resizer otherwise uses as ordinary buffers (see the file).",
   "PNR_EXCLUDED_CELL_FILE": "dir::pnr_exclude.cells",
 
+  "//": "Experiment (tape-out audit 2026-11-15): clock leaves of 8 sinks (the default left 29 leaves at 11-14, over the fanout limit of 10) and a design repair after global routing (slew/cap on routed-length wires).",
+  "CTS_SINK_CLUSTERING_SIZE": 8,
+  "RUN_POST_GRT_DESIGN_REPAIR": 1,
+  "GRT_DESIGN_REPAIR_MAX_SLEW_PCT": 30,
+  "GRT_DESIGN_REPAIR_MAX_CAP_PCT": 30,
+
   "//": "CLOCK_PERIOD - Increase this in case you are getting setup time violations.",
   "//": "The value is in nanoseconds, so 20ns == 50MHz.",
   "CLOCK_PERIOD": 20,
