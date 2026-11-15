@@ -69,3 +69,11 @@ sky130_fd_sc_hd__clkdlybuf4s25_1
 sky130_fd_sc_hd__clkdlybuf4s25_2
 sky130_fd_sc_hd__clkdlybuf4s50_1
 sky130_fd_sc_hd__clkdlybuf4s50_2
+
+# Tape-out audit (2026-11-15): the resizer built its fanout trees from 1x
+# buffers (fanoutNNN, buf_1/clkbuf_1, each driving 10 loads); at the slow
+# corner each of those nets missed the 0.75 ns slew limit (950 pins on
+# Tiqora-Serial, GitHub run 43765684876). Without 1x buffers the trees use
+# buf_2 or larger. Synthesis may still use 1x logic cells.
+sky130_fd_sc_hd__buf_1
+sky130_fd_sc_hd__clkbuf_1
