@@ -24,6 +24,12 @@
   "//": "PNR_EXCLUDED_CELL_FILE - cells placement, CTS and the resizer may not use: the PDK's drc_exclude.cells plus the clkdlybuf4s* delay cells, which the resizer otherwise uses as ordinary buffers (see the file).",
   "PNR_EXCLUDED_CELL_FILE": "dir::pnr_exclude.cells",
 
+  "//": "Electrical repair margins (tape-out audit, 2026-11-15). The routed design kept thousands of max-slew pins at the slow corners (limit 0.75 ns from the sky130 PDK config) because repair runs on estimated wires. Larger margins make the resizer repair slews and loads with headroom for the real routed wires.",
+  "DESIGN_REPAIR_MAX_SLEW_PCT": 40,
+  "DESIGN_REPAIR_MAX_CAP_PCT": 40,
+  "GRT_DESIGN_REPAIR_MAX_SLEW_PCT": 40,
+  "GRT_DESIGN_REPAIR_MAX_CAP_PCT": 40,
+
   "//": "CLOCK_PERIOD - Increase this in case you are getting setup time violations.",
   "//": "The value is in nanoseconds, so 20ns == 50MHz.",
   "CLOCK_PERIOD": 20,
