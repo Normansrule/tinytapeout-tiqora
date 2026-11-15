@@ -25,7 +25,8 @@
   "PNR_EXCLUDED_CELL_FILE": "dir::pnr_exclude.cells",
 
   "//": "Experiment (tape-out audit 2026-11-15): clock leaves of 8 sinks (the default left 29 leaves at 11-14, over the fanout limit of 10) and a design repair after global routing (slew/cap on routed-length wires).",
-  "CTS_SINK_CLUSTERING_SIZE": 8,
+  "CTS_SINK_CLUSTERING_SIZE": 6,
+  "MAX_FANOUT_CONSTRAINT": 6,
   "RUN_POST_GRT_DESIGN_REPAIR": 1,
   "GRT_DESIGN_REPAIR_MAX_SLEW_PCT": 55,
   "GRT_DESIGN_REPAIR_MAX_CAP_PCT": 55,
