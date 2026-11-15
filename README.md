@@ -460,6 +460,23 @@ measured against the real sky130 library; see [Area](#area).
 
 ---
 
+## Manufacturing facts
+
+| | |
+|---|---|
+| Process / PDK | SkyWater SKY130 (130 nm), sky130A from open_pdks `8afc8346`, cells `sky130_fd_sc_hd` |
+| Die area | 161.00 × 225.76 µm = 36,347 µm² (1 × 2 Tiny Tapeout tiles) |
+| IOs | 24 general-purpose (8 in, 8 out, 8 bidirectional) + `clk` + `rst_n`, all used; whole chip: 64-pin QFN |
+| IO cell | `sky130_ef_io__gpiov2_pad`, 80.000 µm wide (its pitch when abutted) × 197.965 µm, from the PDK's LEF |
+| Metal layers | li1, met1 to met4 used; met5 is Tiny Tapeout's power grid |
+| Power | core 1.8 V (`VPWR`), ground 0 V (`VGND`), pad IO 3.3 V on the demo board (1.71 to 5.5 V allowed) |
+| Other IP needed | Tiny Tapeout pad ring, multiplexer and power grid; a host computer on the serial port |
+
+Every row with its source file, command or GitHub run, including how to read the IO cell
+pitch yourself: [docs/MANUFACTURING.md](docs/MANUFACTURING.md). What it is good for at 130 nm
+and on smaller processes: [docs/APPLICATIONS.md](docs/APPLICATIONS.md). Tape-out and FPGA
+references: [docs/LIBRARY.md](docs/LIBRARY.md).
+
 ## Area
 
 **Measured**, not estimated. Yosys maps the design onto the real sky130_fd_sc_hd standard cell
