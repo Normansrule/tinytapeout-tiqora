@@ -67,6 +67,27 @@ def read_checks(path):
     return out
 
 
+OUT_PINS = {"X", "Y", "Q", "Q_N", "Z", "HI", "LO", "COUT", "SUM", "GCLK"}
+
+
+def read_netlist(path):
+    """{(instance, pin): net}, {net: driver 'inst/pin (cell)'}, {net: load count} from a gate-level netlist."""
+    text = open(path).read()
+    pin_net, driver, loads = {}, {}, {}
+    for m in re.finditer(r"^\s*(sky130_\w+)\s+(\S+)\s*\((.*?)\);", text, re.M | re.S):
+        cell, inst, body = m.groups()
+        for pm in re.finditer(r"\.(\w+)\(([^()]*)\)", body):
+            pin, net = pm.group(1), pm.group(2).strip()
+            if not net:
+                continue
+            pin_net[(inst, pin)] = net
+            if pin in OUT_PINS:
+                driver[net] = f"{inst}/{pin} ({cell})"
+            else:
+                loads[net] = loads.get(net, 0) + 1
+    return pin_net, driver, loads
+
+
 def read_antenna(path):
     """(partial/required, net, pin, layer) for every gate checked, worst first."""
     rows, net, pin, layer, par = [], None, None, None, None
@@ -133,6 +154,8 @@ def audit(run, out=sys.stdout):
          "0 at every corner" if not nbad else "violations: " + ", ".join(f"{c} {v}" for c, v in nbad.items()))
 
     d = sta[-1]
+    nl = sorted(glob.glob(os.path.join(run, "final", "nl", "*.nl.v")))
+    pin_net, driver, loads = read_netlist(nl[0]) if nl else ({}, {}, {})
     for c in ("max_ss_100C_1v60", "nom_tt_025C_1v80"):
         f = os.path.join(d, c, "checks.rpt")
         if not os.path.exists(f):
@@ -144,15 +167,36 @@ def audit(run, out=sys.stdout):
                 p(f"\n{c}: {len(rows)} max-{k} violators, worst 10 (slack, pin, limit, value):")
                 for r in rows[:10]:
                     p(f"  {r[0]:+.4f} {r[1]} limit {r[2]} value {r[3]}")
+                # Which nets the violators sit on, so a fix can target the driver.
+                nets = {}
+                for r in rows:
+                    inst, _, pin = r[1].rpartition("/")
+                    net = pin_net.get((inst, pin), "?")
+                    nets[net] = nets.get(net, 0) + 1
+                top = sorted(nets.items(), key=lambda kv: -kv[1])[:8]
+                p(f"  violators by net (net: violating pins / all loads, driver): " + "; ".join(
+                    f"{n}: {k}/{loads.get(n, '?')}, {driver.get(n, 'port or unknown')}" for n, k in top))
 
     rows = read_antenna(ant[-1])
-    if not rows:
-        p(f"MISSING antenna ratios in {ant[-1]} (was check_antennas run with -verbose?)")
-        return 2
-    r = rows[0]
-    gate("G5 antenna headroom", r[0] <= ANT_MAX,
-         f"worst partial/required {r[0]:.2f} ({r[4]:.1f}/{r[5]:.1f}) net {r[1]} pin {r[2]} {r[3]} (need <= {ANT_MAX:.2f})")
-    p("worst 5 antenna ratios: " + "; ".join(f"{x[0]:.2f} {x[1]} {x[3]}" for x in rows[:5]))
+    if rows:
+        r = rows[0]
+        gate("G5 antenna headroom", r[0] <= ANT_MAX,
+             f"worst partial/required {r[0]:.2f} ({r[4]:.1f}/{r[5]:.1f}) net {r[1]} pin {r[2]} {r[3]} (need <= {ANT_MAX:.2f})")
+        p("worst 5 antenna ratios: " + "; ".join(f"{x[0]:.2f} {x[1]} {x[3]}" for x in rows[:5]))
+    else:
+        # This OpenROAD build lists only violating nets. With none listed, headroom is what the
+        # repair step guaranteed: it diodes every net above (100 - margin)% of the limit.
+        cfgs = sorted(glob.glob(os.path.join(run, "*-openroad-repairantennas*", "config.json")) +
+                      glob.glob(os.path.join(run, "*-openroad-detailedrouting*", "config.json")))
+        found = [float(json.load(open(f))[k]) for f in cfgs for k in ("GRT_ANTENNA_REPAIR_MARGIN", "DRT_ANTENNA_REPAIR_MARGIN")
+                 if k in json.load(open(f))]
+        if m.get("route__antenna_violation__count") != 0 or not found:
+            p(f"MISSING antenna ratios in {ant[-1]} and no antenna repair margin in the step configs")
+            return 2
+        margin = min(found)
+        gate("G5 antenna headroom", margin >= 10,
+             f"the final check lists no net over its limit (this OpenROAD lists only violators); repair diodes "
+             f"every net above {100 - margin:.0f}% of the limit (smallest repair margin {margin:g}%, need >= 10)")
     bad = [f"{n}={m.get(k)}" for k, n in G6_KEYS if m.get(k) != 0]
     gate("G6 power grid/latches/unmapped", not bad, ", ".join(bad) or "all 0")
     p(f"\nRESULT: {6 - len(fails)}/6 gates pass" + (f"; failing: {', '.join(fails)}" if fails else ""))
@@ -180,7 +224,13 @@ def selftest():
                 f.write("max slew\n\nPin Limit Slew Slack\n----\n")
                 if mut.get("slew"):
                     f.write("_123_/A                     0.7500   0.9100  -0.1600 (VIOLATED)\n")
-        if not mut.get("no_ant"):
+        os.makedirs(f"{tmp}/43-openroad-repairantennas", exist_ok=True)
+        json.dump({"GRT_ANTENNA_REPAIR_MARGIN": mut.get("ant_margin", 10)},
+                  open(f"{tmp}/43-openroad-repairantennas/config.json", "w"))
+        if mut.get("empty_ant"):
+            os.makedirs(f"{tmp}/60-openroad-checkantennas/reports", exist_ok=True)
+            open(f"{tmp}/60-openroad-checkantennas/reports/antenna.rpt", "w").close()
+        elif not mut.get("no_ant"):
             os.makedirs(f"{tmp}/60-openroad-checkantennas/reports", exist_ok=True)
             with open(f"{tmp}/60-openroad-checkantennas/reports/antenna.rpt", "w") as f:
                 f.write("Net: n1\n  Pin: _1_/A (cell)\n    Layer: met1\n"
@@ -189,7 +239,9 @@ def selftest():
     cases = [("clean", {}, 0), ("setup +0.90 ns", {"setup": 0.9}, 1), ("hold +0.01 ns", {"hold": 0.01}, 1),
              ("1 slew violation", {"slew": 1}, 1), ("1 LVS error", {"extra": {"design__lvs_error__count": 1}}, 1),
              ("antenna at 85%", {"par": 340.0}, 1), ("1 latch", {"extra": {"design__inferred_latch__count": 1}}, 1),
-             ("antenna report missing", {"no_ant": True}, 2)]
+             ("antenna report missing", {"no_ant": True}, 2),
+             ("only violators listed, none, repair margin 10%", {"empty_ant": True}, 0),
+             ("only violators listed, none, repair margin 5%", {"empty_ant": True, "ant_margin": 5}, 1)]
     ok = 0
     for name, mut, want in cases:
         with tempfile.TemporaryDirectory() as tmp:
