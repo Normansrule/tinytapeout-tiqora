@@ -29,6 +29,10 @@
   "RUN_POST_GRT_DESIGN_REPAIR": 1,
   "GRT_DESIGN_REPAIR_MAX_SLEW_PCT": 70,
   "GRT_DESIGN_REPAIR_MAX_CAP_PCT": 70,
+  "GRT_DESIGN_REPAIR_MAX_WIRE_LENGTH": 150,
+  "DESIGN_REPAIR_MAX_WIRE_LENGTH": 150,
+  "DESIGN_REPAIR_MAX_SLEW_PCT": 30,
+  "DESIGN_REPAIR_MAX_CAP_PCT": 30,
 
   "//": "CLOCK_PERIOD - Increase this in case you are getting setup time violations.",
   "//": "The value is in nanoseconds, so 20ns == 50MHz.",
