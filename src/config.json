@@ -25,10 +25,12 @@
   "PNR_EXCLUDED_CELL_FILE": "dir::pnr_exclude.cells",
 
   "//": "Slow-corner signal edges (tape-out audit, 2026-11-15): clock leaves of 8 sinks (the default left 29 leaves at 11-14 flip-flops, over the fanout limit of 10), a second design repair after global routing, and a 55% slew/cap margin there because routed wires come out slower than the estimate. Measured on GitHub run 43774809628: slow-corner slew violations 950 -> 102, fanout 29 -> 0, capacitance 2 -> 0, worst setup slack +3.37 ns. A 70% margin overfilled the tile (DPL-0036).",
+  "//": "Experiment: place-and-route constraints with a tighter edge-rate target (src/pnr.sdc); signoff keeps the default 0.75 ns.",
+  "PNR_SDC_FILE": "dir::pnr.sdc",
   "CTS_SINK_CLUSTERING_SIZE": 8,
   "RUN_POST_GRT_DESIGN_REPAIR": 1,
-  "GRT_DESIGN_REPAIR_MAX_SLEW_PCT": 55,
-  "GRT_DESIGN_REPAIR_MAX_CAP_PCT": 55,
+  "GRT_DESIGN_REPAIR_MAX_SLEW_PCT": 45,
+  "GRT_DESIGN_REPAIR_MAX_CAP_PCT": 45,
 
   "//": "CLOCK_PERIOD - Increase this in case you are getting setup time violations.",
   "//": "The value is in nanoseconds, so 20ns == 50MHz.",
