@@ -5,8 +5,8 @@ file you can open, a command you can run, or a GitHub run. "Measured" means a to
 for this design; "spec" means the foundry or Tiny Tapeout states it; "estimate" means it was
 calculated, not measured. No chip exists yet.
 
-Run used for the measured rows: GitHub `gds` run 43765684876, branch `tapeout-audit` at
-917f982 (the speed-work stack, PRs #6, #7 and #9, plus the audit step), Tiny Tapeout
+Run used for the measured rows: GitHub `gds` run 43791387812, branch `tapeout-audit` at
+838e014 (the speed-work stack, PRs #6, #7 and #9, plus the audit step and the slew repair settings), Tiny Tapeout
 `tt-gds-action@ttsky26d`, LibreLane 3.0.14, 2026-11-15. It prints the flow's `final/metrics.json` to its log.
 
 ## The chip at a glance
@@ -21,8 +21,8 @@ Run used for the measured rows: GitHub `gds` run 43765684876, branch `tapeout-au
 | Tiles | 1 × 2 | spec | `info.yaml` (`tiles: "1x2"`) |
 | Die area (this design) | **161.00 × 225.76 µm = 36,347 µm²** | spec + measured | Tiny Tapeout [`tech/sky130A/tile_sizes.yaml`](https://github.com/TinyTapeout/tt-support-tools/blob/main/tech/sky130A/tile_sizes.yaml) `1x2: "0 0 161.00 225.76"`; the run's `design__die__bbox` `0.0 0.0 161.0 225.76` |
 | One tile | 161.00 × 111.52 µm | spec | same file, `1x1: "0 0 161.00 111.52"` |
-| Core area / utilisation | 34,255 µm², 78.6% filled with logic | measured | `design__core__area`, `design__instance__utilization` |
-| Standard cells placed | 3,612 (459 flip-flops), plus 2,552 fill | measured | `design__instance__count__stdcell`, `…class:sequential_cell`, `…class:fill_cell` |
+| Core area / utilisation | 34,255 µm², 84.0% filled with logic | measured | `design__core__area`, `design__instance__utilization` |
+| Standard cells placed | 3,703 (459 flip-flops), plus 2,032 fill | measured | `design__instance__count__stdcell`, `…class:sequential_cell`, `…class:fill_cell` |
 | Package (whole chip) | 64-pin QFN, shared by every project on the shuttle | spec | [tt-support-tools `docs/PINOUT.md`](https://github.com/TinyTapeout/tt-support-tools/blob/main/docs/PINOUT.md): "The chip is packaged in a 64-pin QFN package"; [tinytapeout.com/specs/clock](https://tinytapeout.com/specs/clock/) "pin number 37 in the QFN-64 chip package" |
 
 ## Inputs and outputs
@@ -97,8 +97,8 @@ pad directly.
 | Ground (`VGND`) | 0 V | spec | `GND_PIN_VOLTAGE "0.00"`, same file; [tinytapeout.com/specs/analog](https://tinytapeout.com/specs/analog/) "VGND: Ground rail" |
 | IO supply | 3.3 V on the demo board; the pads accept 1.71 to 5.5 V; inputs are **not** 5 V tolerant | spec | [tinytapeout.com/specs/gpio](https://tinytapeout.com/specs/gpio/) |
 | Power domains inside Tiqora-Serial | one (`VPWR`/`VGND`); no level shifters, no power gating | measured | the tile has two power ports; `design__power_grid_violation__count: 0` |
-| Core power | 2.2 mW at the typical corner, 50 MHz | estimate | `power__total 0.00218` W: OpenSTA with its default switching activity, not a measured chip |
-| Worst IR drop | 0.07 mV on `VPWR` | estimate | `design_powergrid__drop__worst__net:VPWR` (OpenROAD PDN analysis) |
+| Core power | 2.3 mW at the typical corner, 50 MHz | estimate | `power__total 0.00229` W: OpenSTA with its default switching activity, not a measured chip |
+| Worst IR drop | 0.09 mV on `VPWR` | estimate | `design_powergrid__drop__worst__net:VPWR` (OpenROAD PDN analysis) |
 
 ## What else has to be on the chip
 
@@ -116,16 +116,16 @@ Tiqora-Serial is one project on the shuttle. A working chip needs all of this, n
 
 | Check | Result | Run |
 |---|---|---|
-| Routing DRC (OpenROAD) | 0 | measured, run 43765684876 |
+| Routing DRC (OpenROAD) | 0 | measured, run 43791387812 |
 | Magic DRC | 0 | measured, same run |
 | KLayout FEOL, BEOL, off-grid, zero-area, pin-label, nwell checks | 0 errors | measured, `precheck` job of the same run ("Precheck passed") |
 | LVS (netgen) | 0 errors, 0 unmatched nets/pins | measured, same run |
-| Antenna | 0 violations after repair (1 diode inserted) | measured, same run |
-| Setup timing, 9 corners | met everywhere; worst +4.68 ns at max_ss_100C_1v60 | measured, same run |
-| Hold timing, 9 corners | met everywhere; worst +0.113 ns at min_ff_n40C_1v95 | measured, same run |
-| Max slew | **950 pins over 0.75 ns at max_ss; 45 at nom_tt** | measured, same run: not yet clean, see the audit PR |
-| Max capacitance | **2 nets at max_ss, by under 5%; 0 at nom_tt** | measured, same run: not yet clean |
-| Max fanout | **29 clock-tree leaf buffers driving 11 to 14 flip-flops (limit 10), every corner** | measured, same run: not yet clean |
+| Antenna | 0 violations after repair (8 diodes inserted) | measured, same run |
+| Setup timing, 9 corners | met everywhere; worst +3.37 ns at max_ss_100C_1v60 | measured, same run |
+| Hold timing, 9 corners | met everywhere; worst +0.106 ns at min_ff_n40C_1v95 | measured, same run |
+| Max slew | **102 pins over 0.75 ns at max_ss (66 at nom_ss, 38 at min_ss); 0 at every typical and fast corner** | measured, same run: not yet clean at the slow corner (950 before the repair settings, run 43765684876) |
+| Max capacitance | 0 at every corner | measured, same run (2 before) |
+| Max fanout | 0 at every corner (clock leaves of 8 flip-flops) | measured, same run (29 before) |
 | Gate-level test | pass | measured, `gl_test` job of the same run |
 | Tape-out margin audit | `syn/signoff_audit.py`: six gates, run by the `gds` workflow on branch `tapeout-audit` | see the PR |
 
