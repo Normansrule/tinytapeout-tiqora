@@ -15,6 +15,9 @@ Contract
     G4 max-slew, max-capacitance, max-fanout violations == 0 at every corner
     G5 worst antenna partial-area ratio <= 80% of the PDK limit, every net
     G6 power-grid violations == 0, inferred latches == 0, unmapped cells == 0
+    G7 every pin's slew <= 1.5 ns at every corner: the input max_transition of the
+       sky130_fd_sc_hd cells (slow-corner liberty), the range the timing models are
+       characterised for. G4 checks the flow's tighter 0.75 ns design target.
 
   The Tiny Tapeout pre-flight (KLayout FEOL/BEOL/off-grid, Magic DRC, pins,
   forbidden met5) is a separate CI job (precheck); this script does not repeat it.
@@ -35,6 +38,7 @@ import tempfile
 SETUP_MIN = 1.00
 HOLD_MIN = 0.05
 ANT_MAX = 0.80
+LIB_SLEW_MAX = 1.5  # sky130_fd_sc_hd ss_100C_1v60 input pin max_transition (ns)
 ZERO_KEYS = [
     ("route__drc_errors", "routing DRC"),
     ("magic__drc_error__count", "Magic DRC"),
@@ -199,7 +203,18 @@ def audit(run, out=sys.stdout):
              f"every net above {100 - margin:.0f}% of the limit (smallest repair margin {margin:g}%, need >= 10)")
     bad = [f"{n}={m.get(k)}" for k, n in G6_KEYS if m.get(k) != 0]
     gate("G6 power grid/latches/unmapped", not bad, ", ".join(bad) or "all 0")
-    p(f"\nRESULT: {6 - len(fails)}/6 gates pass" + (f"; failing: {', '.join(fails)}" if fails else ""))
+    top = (0.0, "none", "")
+    for c in corners:
+        f = os.path.join(d, c, "checks.rpt")
+        if not os.path.exists(f):
+            p(f"MISSING {f}")
+            return 2
+        for r in read_checks(f)["slew"]:
+            top = max(top, (r[3], c, r[1]))
+    gate("G7 slew within library range", top[0] <= LIB_SLEW_MAX,
+         f"worst slew {top[0]:.3f} ns ({top[2] or 'no violator listed'}, {top[1]}); "
+         f"need <= {LIB_SLEW_MAX} ns, the cells' characterised input transition")
+    p(f"\nRESULT: {7 - len(fails)}/7 gates pass" + (f"; failing: {', '.join(fails)}" if fails else ""))
     return 1 if fails else 0
 
 
@@ -223,7 +238,8 @@ def selftest():
             with open(f"{tmp}/55-openroad-stapostpnr/{c}/checks.rpt", "w") as f:
                 f.write("max slew\n\nPin Limit Slew Slack\n----\n")
                 if mut.get("slew"):
-                    f.write("_123_/A                     0.7500   0.9100  -0.1600 (VIOLATED)\n")
+                    v = mut.get("slew_value", 0.91)
+                    f.write(f"_123_/A                     0.7500   {v:.4f}  {0.75 - v:.4f} (VIOLATED)\n")
         os.makedirs(f"{tmp}/43-openroad-repairantennas", exist_ok=True)
         json.dump({"GRT_ANTENNA_REPAIR_MARGIN": mut.get("ant_margin", 10)},
                   open(f"{tmp}/43-openroad-repairantennas/config.json", "w"))
@@ -237,17 +253,21 @@ def selftest():
                         f"      Partial area ratio: {mut.get('par', 120.0)}\n      Required ratio: 400.0 (Gate area)\n")
 
     cases = [("clean", {}, 0), ("setup +0.90 ns", {"setup": 0.9}, 1), ("hold +0.01 ns", {"hold": 0.01}, 1),
-             ("1 slew violation", {"slew": 1}, 1), ("1 LVS error", {"extra": {"design__lvs_error__count": 1}}, 1),
+             ("1 slew violation", {"slew": 1}, 1),
+             ("slew 1.60 ns, over the library range", {"slew": 1, "slew_value": 1.6}, 1, "FAIL G7"),
+             ("slew 0.91 ns, inside the library range", {"slew": 1}, 1, "PASS G7"), ("1 LVS error", {"extra": {"design__lvs_error__count": 1}}, 1),
              ("antenna at 85%", {"par": 340.0}, 1), ("1 latch", {"extra": {"design__inferred_latch__count": 1}}, 1),
              ("antenna report missing", {"no_ant": True}, 2),
              ("only violators listed, none, repair margin 10%", {"empty_ant": True}, 0),
              ("only violators listed, none, repair margin 5%", {"empty_ant": True, "ant_margin": 5}, 1)]
     ok = 0
-    for name, mut, want in cases:
+    for name, mut, want, *must in cases:
         with tempfile.TemporaryDirectory() as tmp:
             make(tmp, **mut)
-            got = audit(tmp, out=open(os.devnull, "w"))
-        good = got == want
+            with open(f"{tmp}/report.txt", "w") as rep:
+                got = audit(tmp, out=rep)
+            text = open(f"{tmp}/report.txt").read()
+        good = got == want and all(x in text for x in must)
         ok += good
         print(f"{'ok ' if good else 'BAD'} {name}: exit {got} (want {want})")
     print(f"selftest {ok}/{len(cases)}")

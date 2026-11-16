@@ -123,11 +123,11 @@ Tiqora-Serial is one project on the shuttle. A working chip needs all of this, n
 | Antenna | 0 violations after repair (8 diodes inserted) | measured, same run |
 | Setup timing, 9 corners | met everywhere; worst +3.37 ns at max_ss_100C_1v60 | measured, same run |
 | Hold timing, 9 corners | met everywhere; worst +0.106 ns at min_ff_n40C_1v95 | measured, same run |
-| Max slew | **102 pins over 0.75 ns at max_ss (66 at nom_ss, 38 at min_ss); 0 at every typical and fast corner** | measured, same run: not yet clean at the slow corner (950 before the repair settings, run 43765684876) |
+| Max slew | **102 pins over the flow's 0.75 ns target at max_ss (66 at nom_ss, 38 at min_ss); 0 at every typical and fast corner.** Worst 0.950 ns, inside the cells' characterised 1.5 ns input transition (`max_transition` in the sky130_fd_sc_hd slow-corner liberty), so the timing numbers stay valid | measured, same run (950 pins before the repair settings, run 43765684876). DEFERRED WITH TECHNICAL JUSTIFICATION: six flow experiments stalled near 100 pins |
 | Max capacitance | 0 at every corner | measured, same run (2 before) |
 | Max fanout | 0 at every corner (clock leaves of 8 flip-flops) | measured, same run (29 before) |
 | Gate-level test | pass | measured, `gl_test` job of the same run |
-| Tape-out margin audit | `syn/signoff_audit.py`: six gates, run by the `gds` workflow on branch `tapeout-audit` | see the PR |
+| Tape-out margin audit | `syn/signoff_audit.py`: seven gates (G7: every slew within the cells' 1.5 ns characterised range), run by the `gds` workflow on branch `tapeout-audit` | see the PR |
 
 The flow fails only on typical-corner timing (`TIMING_VIOLATION_CORNERS = *tt*` in LibreLane's
 sky130 defaults), so a green `gds` job alone does not prove the slow corners or the electrical
