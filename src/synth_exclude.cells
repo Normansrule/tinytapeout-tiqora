@@ -68,3 +68,7 @@ sky130_fd_sc_hd__sdlclkp_4
 sky130_fd_sc_hd__sedfxbp_2
 sky130_fd_sc_hd__sedfxtp_2
 sky130_fd_sc_hd__sedfxtp_4
+
+# Tape-out audit experiment (2026-11-16): 1x flip-flops drove 6 to 8 loads and
+# missed the 0.75 ns slew limit at the slow corner; dfxtp_2 costs 1.25 um^2 more.
+sky130_fd_sc_hd__dfxtp_1

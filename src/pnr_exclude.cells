@@ -77,3 +77,7 @@ sky130_fd_sc_hd__clkdlybuf4s50_2
 # buf_2 or larger. Synthesis may still use 1x logic cells.
 sky130_fd_sc_hd__buf_1
 sky130_fd_sc_hd__clkbuf_1
+# Experiment (2026-11-16): 2x fanout buffers (fanoutNNN clkbuf_2) still drove
+# 10 loads over the slow-corner slew limit; use 4x or larger.
+sky130_fd_sc_hd__buf_2
+sky130_fd_sc_hd__clkbuf_2
