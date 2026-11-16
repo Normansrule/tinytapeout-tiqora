@@ -20,7 +20,7 @@ project:
   language:     "SystemVerilog"
   clock_hz:     50000000
 
-  tiles:        "1x2"
+  tiles:        "2x2"
 
   top_module:   "tt_um_normansrule_tiqora_serial"
 
