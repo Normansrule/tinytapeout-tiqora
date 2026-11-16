@@ -5,9 +5,9 @@ file you can open, a command you can run, or a GitHub run. "Measured" means a to
 for this design; "spec" means the foundry or Tiny Tapeout states it; "estimate" means it was
 calculated, not measured. No chip exists yet.
 
-Run used for the measured rows: GitHub `gds` run 43791387812, branch `tapeout-audit` at
-838e014 (the speed-work stack, PRs #6, #7 and #9, plus the audit step and the slew repair settings), Tiny Tapeout
-`tt-gds-action@ttsky26d`, LibreLane 3.0.14, 2026-11-15. It prints the flow's `final/metrics.json` to its log.
+Run used for the measured rows: GitHub `gds` run 43929775392, branch `exp-noinbuf` (the `tapeout-audit`
+branch plus `DESIGN_REPAIR_BUFFER_INPUT_PORTS: 0`, the same config as this branch), Tiny Tapeout
+`tt-gds-action@ttsky26d`, LibreLane 3.0.14, 2026-11-16. It prints the flow's `final/metrics.json` to its log.
 
 ## The chip at a glance
 
@@ -21,8 +21,8 @@ Run used for the measured rows: GitHub `gds` run 43791387812, branch `tapeout-au
 | Tiles | 1 × 2 | spec | `info.yaml` (`tiles: "1x2"`) |
 | Die area (this design) | **161.00 × 225.76 µm = 36,347 µm²** | spec + measured | Tiny Tapeout [`tech/sky130A/tile_sizes.yaml`](https://github.com/TinyTapeout/tt-support-tools/blob/main/tech/sky130A/tile_sizes.yaml) `1x2: "0 0 161.00 225.76"`; the run's `design__die__bbox` `0.0 0.0 161.0 225.76` |
 | One tile | 161.00 × 111.52 µm | spec | same file, `1x1: "0 0 161.00 111.52"` |
-| Core area / utilisation | 34,255 µm², 84.0% filled with logic | measured | `design__core__area`, `design__instance__utilization` |
-| Standard cells placed | 3,703 (459 flip-flops), plus 2,032 fill | measured | `design__instance__count__stdcell`, `…class:sequential_cell`, `…class:fill_cell` |
+| Core area / utilisation | 34,255 µm², 83.6% filled with logic | measured | `design__core__area`, `design__instance__utilization` |
+| Standard cells placed | 3,693 (459 flip-flops), plus 2,064 fill | measured | `design__instance__count__stdcell`, `…class:sequential_cell`, `…class:fill_cell` |
 | Package (whole chip) | 64-pin QFN, shared by every project on the shuttle | spec | [tt-support-tools `docs/PINOUT.md`](https://github.com/TinyTapeout/tt-support-tools/blob/main/docs/PINOUT.md): "The chip is packaged in a 64-pin QFN package"; [tinytapeout.com/specs/clock](https://tinytapeout.com/specs/clock/) "pin number 37 in the QFN-64 chip package" |
 
 ## Inputs and outputs
@@ -116,14 +116,14 @@ Tiqora-Serial is one project on the shuttle. A working chip needs all of this, n
 
 | Check | Result | Run |
 |---|---|---|
-| Routing DRC (OpenROAD) | 0 | measured, run 43791387812 |
+| Routing DRC (OpenROAD) | 0 | measured, run 43929775392 |
 | Magic DRC | 0 | measured, same run |
 | KLayout FEOL, BEOL, off-grid, zero-area, pin-label, nwell checks | 0 errors | measured, `precheck` job of the same run ("Precheck passed") |
 | LVS (netgen) | 0 errors, 0 unmatched nets/pins | measured, same run |
-| Antenna | 0 violations after repair (8 diodes inserted) | measured, same run |
-| Setup timing, 9 corners | met everywhere; worst +3.37 ns at max_ss_100C_1v60 | measured, same run |
-| Hold timing, 9 corners | met everywhere; worst +0.106 ns at min_ff_n40C_1v95 | measured, same run |
-| Max slew | **102 pins over the flow's 0.75 ns target at max_ss (66 at nom_ss, 38 at min_ss); 0 at every typical and fast corner.** Worst 0.950 ns, inside the cells' characterised 1.5 ns input transition (`max_transition` in the sky130_fd_sc_hd slow-corner liberty), so the timing numbers stay valid | measured, same run (950 pins before the repair settings, run 43765684876). DEFERRED WITH TECHNICAL JUSTIFICATION: six flow experiments stalled near 100 pins |
+| Antenna | 0 violations after repair (3 repair diodes, 7 antenna cells in all) | measured, same run |
+| Setup timing, 9 corners | met everywhere; worst +3.45 ns at max_ss_100C_1v60 | measured, same run |
+| Hold timing, 9 corners | met everywhere; worst +0.061 ns at min_ff_n40C_1v95 (the audit needs +0.05) | measured, same run (+0.106 ns with input buffers, run 43791387812) |
+| Max slew | **76 pins over the flow's 0.75 ns target at max_ss (44 at nom_ss, 32 at min_ss); 0 at every typical and fast corner.** Worst 0.954 ns, inside the cells' characterised 1.5 ns input transition (`max_transition` in the sky130_fd_sc_hd slow-corner liberty), so the timing numbers stay valid | measured, same run (950 pins before the repair settings, run 43765684876; 102 with input-port buffers, run 43791387812). Not yet closed: the remaining pins are weak gates and 1x flip-flops driving 5 to 7 loads, which the resizer leaves in place |
 | Max capacitance | 0 at every corner | measured, same run (2 before) |
 | Max fanout | 0 at every corner (clock leaves of 8 flip-flops) | measured, same run (29 before) |
 | Gate-level test | pass | measured, `gl_test` job of the same run |
