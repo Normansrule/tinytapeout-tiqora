@@ -61,6 +61,8 @@
   "//": "Don't put clock buffers on the outputs",
   "//": "Input ports are not buffered by the resizer: with the 1x buffers banned, buffer_ports picked the smallest remaining buffer, dlygate4sd3_1 (a delay cell, about 1 ns at the slow corner), on every input (seen on Tiqora run 43890240177, rst_n setup -1.11 ns). Design repair still buffers these nets for slew and fanout.",
   "DESIGN_REPAIR_BUFFER_INPUT_PORTS": 0,
+  "//": "Experiment: wire capacitance x1.4 in PnR estimates (tech LEF has no coupling).",
+  "LAYERS_RC": {"*": {"li1": {"res": 0.07176471, "cap": 0.0001227544}, "met1": {"res": 0.0008928571, "cap": 0.0001186402}, "met2": {"res": 0.0008928571, "cap": 0.0001090459}, "met3": {"res": 0.0001566667, "cap": 0.0001199658}, "met4": {"res": 0.0001566667, "cap": 0.0001062273}, "met5": {"res": 1.78125e-05, "cap": 0.000122941}}},
   "DESIGN_REPAIR_BUFFER_OUTPUT_PORTS": 0,
 
   "//": "Reduce wasted space",
