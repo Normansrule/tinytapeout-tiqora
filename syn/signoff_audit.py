@@ -211,9 +211,10 @@ def audit(run, out=sys.stdout):
             return 2
         for r in read_checks(f)["slew"]:
             top = max(top, (r[3], c, r[1]))
+    seen = (f"worst slew {top[0]:.3f} ns ({top[2]}, {top[1]})" if top[2] else
+            "no pin is over the flow's slew limit at any corner, so none is near this one")
     gate("G7 slew within library range", top[0] <= LIB_SLEW_MAX,
-         f"worst slew {top[0]:.3f} ns ({top[2] or 'no violator listed'}, {top[1]}); "
-         f"need <= {LIB_SLEW_MAX} ns, the cells' characterised input transition")
+         f"{seen}; need <= {LIB_SLEW_MAX} ns, the cells' characterised input transition")
     p(f"\nRESULT: {7 - len(fails)}/7 gates pass" + (f"; failing: {', '.join(fails)}" if fails else ""))
     return 1 if fails else 0
 

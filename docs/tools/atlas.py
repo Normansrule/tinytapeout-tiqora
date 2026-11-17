@@ -240,11 +240,15 @@ tee -o stat.txt stat -liberty c.lib
             sys.exit("atlas.py: area synthesis failed:\n" + r.stderr[-2000:])
         stat = open(os.path.join(tmp, "stat.txt")).read()
     per = {}
-    for m in re.finditer(r"^=== (.+?) ===\n(.*?)Chip area for module .*?: ([0-9.]+)", stat, re.S | re.M):
-        if m.group(1) == "design hierarchy":
+    # one section per module; a module with no cells (a plain wire) has no
+    # "Chip area" line, so split on the headers rather than letting one
+    # match run on into the next module's area
+    for name, body in re.findall(r"^=== (.+?) ===\n(.*?)(?=^=== |\Z)", stat, re.S | re.M):
+        if name == "design hierarchy":
             continue
-        base = re.sub(r"^\$paramod(\$[0-9a-f]+)?\\", "", m.group(1).lstrip("\\")).split("\\")[0]
-        per[base] = round(per.get(base, 0) + float(m.group(3)), 1)
+        a = re.search(r"Chip area for module .*?: ([0-9.]+)", body)
+        base = re.sub(r"^\$paramod(\$[0-9a-f]+)?\\", "", name.lstrip("\\")).split("\\")[0]
+        per[base] = round(per.get(base, 0) + (float(a.group(1)) if a else 0.0), 1)
     total = re.findall(r"Chip area for top module '[^']+': ([0-9.]+)", stat)
     return per, (float(total[-1]) if total else None)
 
