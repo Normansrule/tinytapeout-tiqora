@@ -88,7 +88,8 @@ module tp_host_uart #(
     // Register port: live only during H_DO, driven straight from state.
     assign reg_req   = (state == H_DO);
     assign reg_we    = is_write;
-    assign reg_wdata = payload;
+    // payload feeds six write paths in the sync unit, spread across the tile.
+    tp_drive #(.W(32)) u_wdata_drv (.a(payload), .x(reg_wdata));
 
     assign active = (state != H_CMD) || tx_busy;
 

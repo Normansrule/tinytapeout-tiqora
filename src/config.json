@@ -39,6 +39,8 @@
   "GRT_RESIZER_HOLD_SLACK_MARGIN": 0.05,
 
   "//": "RUN_LINTER, LINTER_INCLUDE_PDK_MODELS - Disabling the linter is not recommended!",
+  "//": "TP_SKY130_DRIVE: tp_drive.sv becomes sky130_fd_sc_hd__buf_4 cells on the named long nets (see the file); simulation and FPGA builds leave it undefined.",
+  "VERILOG_DEFINES": ["TP_SKY130_DRIVE"],
   "RUN_LINTER": 1,
   "LINTER_INCLUDE_PDK_MODELS": 1,
 
