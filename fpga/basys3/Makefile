@@ -9,7 +9,7 @@ SHELL := /bin/bash
 SRC = ../../src
 RTL = $(SRC)/tp_pkg.sv $(SRC)/sync/sync_timebase.sv $(SRC)/sync/sync_capture.sv \
       $(SRC)/sync/sync_event_fifo.sv $(SRC)/sync/sync_compare.sv $(SRC)/sync/sync_unit.sv \
-      $(SRC)/uart/tp_uart_rx.sv $(SRC)/uart/tp_uart_tx.sv $(SRC)/uart/tp_host_uart.sv \
+      $(SRC)/tp_drive.sv $(SRC)/uart/tp_uart_rx.sv $(SRC)/uart/tp_uart_tx.sv $(SRC)/uart/tp_host_uart.sv \
       $(SRC)/tp_sync_soc.sv $(SRC)/tt_um_normansrule_tiqora_serial.sv
 .PHONY: sim record bit prog resources clean
 sim:

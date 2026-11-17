@@ -9,6 +9,7 @@
    "sync_event_fifo": 2615.0,
    "sync_timebase": 4908.5,
    "sync_unit": 4588.2,
+   "tp_drive": 0.0,
    "tp_host_uart": 2037.0,
    "tp_sync_soc": 32.5,
    "tp_uart_rx": 1198.6,
@@ -21,10 +22,11 @@
    "src/sync/sync_event_fifo.sv": "8fbd9d34936c2624b9292253f31aa6ad31866a2c1c32879ca7a76ef24724c03a",
    "src/sync/sync_timebase.sv": "87d599d0c74435307ca6f45290b608ac9e6fee0e42ccab91e2e8dd5ba3bb32f6",
    "src/sync/sync_unit.sv": "2a4f9c3df3e71c382c9d11803a12b3c293fab6094ead429536c0edfc38972130",
+   "src/tp_drive.sv": "a40d4694d3d91a675dafbbbf91b2cda0be2e31e56845b5d821a698b53fac7578",
    "src/tp_pkg.sv": "49c69ecf3f032b2b59c8796765d878d7c40c7742d6deb421dd6dd7efd326ca78",
    "src/tp_sync_soc.sv": "462a14536fd2450134754e5f7c87a1fb90d28c6c95822d8596fed7975f1905aa",
    "src/tt_um_normansrule_tiqora_serial.sv": "09a201defac0fb179034a01edc9dbbc2f4828b927dc53658c01290469dc57efb",
-   "src/uart/tp_host_uart.sv": "e131a7447cb016ede4b67bfcfdea0d5f9faca7cbfd2d0fc7de93b74e1656c449",
+   "src/uart/tp_host_uart.sv": "f264a0defd82f531c9cd04006a12c2ade98ea40d7be23430972daa3c797a4cd0",
    "src/uart/tp_uart_rx.sv": "74ac23194c71027eff9a5fa8fef0acd5eb32af71e996affae7d25d0c01bc2f1a",
    "src/uart/tp_uart_tx.sv": "32458039699f7e41740457c80a820cc7132a2366a3f64bc58ee1675d674cb49a"
   },
@@ -240,7 +242,8 @@
    "category": "interface",
    "children": [
     "tt_um_normansrule_tiqora_serial/u_soc/u_host/u_rx",
-    "tt_um_normansrule_tiqora_serial/u_soc/u_host/u_tx"
+    "tt_um_normansrule_tiqora_serial/u_soc/u_host/u_tx",
+    "tt_um_normansrule_tiqora_serial/u_soc/u_host/u_wdata_drv"
    ],
    "errors": "An unknown command byte answers NAK 0x15. Only offsets 0, 1 and 2 can be read; every other offset reads 0. A write to an offset with no register behind it (0, 1, 2, 6, 11 to 15) is acknowledged and does nothing.",
    "example": "01 04 a0 bb 0d 00 writes 0x000dbba0 into CMP0 (arms TRIG0) and the chip answers 06; 02 01 pops the oldest event and returns it in four bytes, least significant first.",
@@ -459,6 +462,44 @@
     "tour"
    ],
    "title": "Serial transmitter"
+  },
+  {
+   "builds": [
+    "tile"
+   ],
+   "category": "interface",
+   "children": [],
+   "example": "The data of a write command (01 04 a0 bb 0d 00) leaves the host port through these buffers on its way to CMP0.",
+   "ff_bits": 0,
+   "file": "src/tp_drive.sv",
+   "line": 12,
+   "module": "tp_drive",
+   "params": {
+    "W": "32"
+   },
+   "path": "tt_um_normansrule_tiqora_serial/u_soc/u_host/u_wdata_drv",
+   "port_notes": {
+    "a": "[32] write data from the host port",
+    "x": "[32] the same data, driven for the long wires across the tile"
+   },
+   "ports": [
+    {
+     "dir": "input",
+     "name": "a",
+     "width": 32
+    },
+    {
+     "dir": "output",
+     "name": "x",
+     "width": 32
+    }
+   ],
+   "summary": "Strong buffers (sky130 buf_4) on the 32 write-data wires from the serial host port to the timing unit's registers. Only the chip build has them; in simulation and on the FPGA it is a plain wire.",
+   "tests": [
+    "uart",
+    "tour"
+   ],
+   "title": "Write-data drivers"
   },
   {
    "builds": [
@@ -1859,17 +1900,37 @@
    "in": "tt_um_normansrule_tiqora_serial/u_soc/u_host",
    "loads": [
     {
-     "bits": 32,
-     "block": "tt_um_normansrule_tiqora_serial/u_soc/u_host",
-     "port": "reg_wdata"
-    },
-    {
      "bits": 8,
      "block": "tt_um_normansrule_tiqora_serial/u_soc/u_host/u_tx",
      "port": "data"
+    },
+    {
+     "bits": 32,
+     "block": "tt_um_normansrule_tiqora_serial/u_soc/u_host/u_wdata_drv",
+     "port": "a"
     }
    ],
    "net": "payload",
+   "width": 32
+  },
+  {
+   "const_bits": 0,
+   "drivers": [
+    {
+     "bits": 32,
+     "block": "tt_um_normansrule_tiqora_serial/u_soc/u_host/u_wdata_drv",
+     "port": "x"
+    }
+   ],
+   "in": "tt_um_normansrule_tiqora_serial/u_soc/u_host",
+   "loads": [
+    {
+     "bits": 32,
+     "block": "tt_um_normansrule_tiqora_serial/u_soc/u_host",
+     "port": "reg_wdata"
+    }
+   ],
+   "net": "reg_wdata",
    "width": 32
   },
   {
@@ -2347,10 +2408,11 @@
    "src/sync/sync_event_fifo.sv": "8fbd9d34936c2624b9292253f31aa6ad31866a2c1c32879ca7a76ef24724c03a",
    "src/sync/sync_timebase.sv": "87d599d0c74435307ca6f45290b608ac9e6fee0e42ccab91e2e8dd5ba3bb32f6",
    "src/sync/sync_unit.sv": "2a4f9c3df3e71c382c9d11803a12b3c293fab6094ead429536c0edfc38972130",
+   "src/tp_drive.sv": "a40d4694d3d91a675dafbbbf91b2cda0be2e31e56845b5d821a698b53fac7578",
    "src/tp_pkg.sv": "49c69ecf3f032b2b59c8796765d878d7c40c7742d6deb421dd6dd7efd326ca78",
    "src/tp_sync_soc.sv": "462a14536fd2450134754e5f7c87a1fb90d28c6c95822d8596fed7975f1905aa",
    "src/tt_um_normansrule_tiqora_serial.sv": "09a201defac0fb179034a01edc9dbbc2f4828b927dc53658c01290469dc57efb",
-   "src/uart/tp_host_uart.sv": "e131a7447cb016ede4b67bfcfdea0d5f9faca7cbfd2d0fc7de93b74e1656c449",
+   "src/uart/tp_host_uart.sv": "f264a0defd82f531c9cd04006a12c2ade98ea40d7be23430972daa3c797a4cd0",
    "src/uart/tp_uart_rx.sv": "74ac23194c71027eff9a5fa8fef0acd5eb32af71e996affae7d25d0c01bc2f1a",
    "src/uart/tp_uart_tx.sv": "32458039699f7e41740457c80a820cc7132a2366a3f64bc58ee1675d674cb49a"
   },

@@ -71,6 +71,26 @@ jobs:
           done
           exit 0
 
+      # Tape-out margin audit (syn/signoff_audit.py): setup >= +1 ns and hold >= +0.05 ns at
+      # every corner, DRC/LVS/antenna 0, max slew/cap/fanout 0 at every corner, worst antenna
+      # ratio <= 80% of the limit. The step shows red when a gate fails, but it does not stop
+      # precheck or gl_test, so the report is always there to read.
+      - name: Tape-out margin audit
+        if: always()
+        continue-on-error: true
+        shell: bash
+        run: |
+          set -o pipefail
+          python3 syn/signoff_audit.py --selftest
+          python3 syn/signoff_audit.py runs/wokwi | tee -a "$GITHUB_STEP_SUMMARY"
+
+      - name: Slew violators traced to RTL nets
+        if: always()
+        continue-on-error: true
+        shell: bash
+        run: |
+          for c in max_ss_100C_1v60 nom_ss_100C_1v60; do python3 syn/slew_trace.py runs/wokwi $c; done
+
   precheck:
     needs: gds
     runs-on: ubuntu-24.04

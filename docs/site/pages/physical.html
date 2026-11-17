@@ -50,6 +50,31 @@
 <p class=small>From a local {{routed:flow}} run on {{routed:pdk}}, placement density {{routed:density}}%{{routed:note}}, read from the DEF after detailed routing and fill by <code>docs/tools/routed_map.py</code>. Wire segments per layer: {{routed:layers}}. It is not the GitHub run in the table above, whose layout cannot be downloaded from here: the placement differs in detail, and that local run, built with a different OpenROAD, missed setup at the slowest corner by 1.30 ns where GitHub's meets it by 1.43 ns.</p>
 <script>TQLayout.explore(document.getElementById("routed"), DATA("routed"));</script>
 <p class=small>Power: the run reports a power figure, but no switching activity from a real workload was given to it, so it is not shown. There is no power map.</p>
+
+<h2 id=manufacturing>Manufacturing facts</h2>
+<p>What it takes to make this chip, each with where the number comes from. <span class="ev measured">measured</span> rows come from GitHub <code>gds</code> run 44042025811 (branch exp-drv-rc18m30, the same RTL and config as tapeout-audit, LibreLane 3.0.14, 2026-11-17: 0 slew, capacitance and fanout violations at every corner, setup +4.47 ns and hold +0.081 ns at the worst corners); spec rows from the PDK or Tiny Tapeout.</p>
+<div class=tablewrap><table><caption class=sr>Manufacturing facts with sources</caption>
+<thead><tr><th>Fact</th><th>Value</th><th>Source</th></tr></thead><tbody>
+<tr><td>Process, PDK</td><td>SkyWater SKY130, 130 nm; sky130A, open_pdks <code>8afc8346</code>; cells <code>sky130_fd_sc_hd</code></td><td>the run's log (PDK path); <code>src/config.json</code></td></tr>
+<tr><td>Die area</td><td>161.00 × 225.76 µm = 36,347 µm² (1 × 2 tiles of 161.00 × 111.52 µm)</td><td>tt-support-tools <code>tech/sky130A/tile_sizes.yaml</code>; metric <code>design__die__bbox</code></td></tr>
+<tr><td>IOs</td><td>26 user pins (8 in, 8 out, 8 bidirectional, <code>clk</code>, <code>rst_n</code>), all used; chip package 64-pin QFN</td><td><code>info.yaml</code>; tinytapeout.com/specs/gpio; tt-support-tools <code>docs/PINOUT.md</code></td></tr>
+<tr><td>IO cell and its pitch</td><td><code>sky130_ef_io__gpiov2_pad</code>: <b>80.000 µm</b> wide (pitch when abutted) × 197.965 µm; inner cell <code>sky130_fd_io__top_gpiov2</code> 80 × 200 µm</td><td><code>grep SIZE sky130/custom/sky130_fd_io/lef/sky130_ef_io__gpiov2_pad.lef</code> in open_pdks at <code>8afc8346</code>; <code>cells/top_gpiov2/sky130_fd_io__top_gpiov2.lef</code> in google/skywater-pdk-libs-sky130_fd_io</td></tr>
+<tr><td>Tile pin pitch</td><td>2.76 µm, 0.30 × 1.00 µm pins on met4, top edge</td><td>tt-support-tools <code>tech/sky130A/def/tt_block_1x2_pg.def</code></td></tr>
+<tr><td>Metal layers</td><td>li1 and met1 to met4 used; met5 forbidden (Tiny Tapeout power grid)</td><td>run log "max routing layer to: met4"; pre-flight forbidden-layer check passed</td></tr>
+<tr><td>Core supply</td><td>1.80 V nominal (<code>VPWR</code>); timed at 1.60, 1.80 and 1.95 V</td><td>open_pdks <code>sky130/openlane/config.tcl</code> <code>VDD_PIN_VOLTAGE</code>; corner names</td></tr>
+<tr><td>Ground</td><td>0 V (<code>VGND</code>)</td><td>same file, <code>GND_PIN_VOLTAGE</code></td></tr>
+<tr><td>IO supply</td><td>3.3 V on the demo board; pads allow 1.71 to 5.5 V; inputs not 5 V tolerant</td><td>tinytapeout.com/specs/gpio</td></tr>
+<tr><td>Pad speed</td><td>in ≤ 66 MHz, out ≤ 33 MHz; Tiqora-Serial uses a 50 MHz clock; its outputs toggle at 25 MHz at most</td><td>tinytapeout.com/specs/gpio; <code>info.yaml</code></td></tr>
+<tr><td>Other IP needed</td><td>Tiny Tapeout pad ring, multiplexer and met5 power grid; 64-pin QFN and demo board; a host computer on the serial port</td><td>tinytapeout.com/specs</td></tr>
+</tbody></table></div>
+<p class=small>Every row, with the commands to reproduce it: <code>docs/MANUFACTURING.md</code> in the repository.</p>
+
+<h2 id=applications>What it is good for</h2>
+<div class=grid>
+ <div class=card><h3>At 130 nm, today</h3><p>Giving a PC or Raspberry Pi nanosecond timing it cannot get from its own pins: a USB time-interval meter, event logging with ordering across 8 inputs, and exact-tick triggers for cameras, lasers or data acquisition. Not for reacting to an event faster than a serial round trip; the Tiqora microcontroller does that on chip.</p></div>
+ <div class=card><h3>On a smaller process</h3><p>A faster clock gives finer timestamps (resolution is one clock period), and the shared timing unit, already CPU-independent, fits a larger system-on-chip as a timestamp-and-trigger peripheral behind a faster host link than the UART. None of this is measured.</p></div>
+ <div class=card><h3>Ready to move</h3><p>No process-specific cells in the RTL, no latches, no macros, synchronous reset, one clock. The sky130 parts live in <code>src/config.json</code>, the cell lists and the Tiny Tapeout wrapper. Details: <code>docs/APPLICATIONS.md</code>; references: <code>docs/LIBRARY.md</code>.</p></div>
+</div>
 <script>
 (function () {
   const A = DATA("atlas"), L = DATA("layout"), m = L.metrics, area = A.area.modules_um2;

@@ -97,6 +97,14 @@
    "port_notes": {"data": "[8] byte to send"},
    "tests": ["uart", "tour"]
   },
+  "tp_drive": {
+   "title": "Write-data drivers",
+   "category": "interface",
+   "summary": "Strong buffers (sky130 buf_4) on the 32 write-data wires from the serial host port to the timing unit's registers. Only the chip build has them; in simulation and on the FPGA it is a plain wire.",
+   "example": "The data of a write command (01 04 a0 bb 0d 00) leaves the host port through these buffers on its way to CMP0.",
+   "port_notes": {"a": "[32] write data from the host port", "x": "[32] the same data, driven for the long wires across the tile"},
+   "tests": ["uart", "tour"]
+  },
   "sync_unit": {
    "title": "Timing unit",
    "category": "timing",

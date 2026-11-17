@@ -18,6 +18,7 @@ RTL += $(SRC)/sync/sync_capture.sv
 RTL += $(SRC)/sync/sync_event_fifo.sv
 RTL += $(SRC)/sync/sync_compare.sv
 RTL += $(SRC)/sync/sync_unit.sv
+RTL += $(SRC)/tp_drive.sv
 RTL += $(SRC)/uart/tp_uart_rx.sv
 RTL += $(SRC)/uart/tp_uart_tx.sv
 RTL += $(SRC)/uart/tp_host_uart.sv

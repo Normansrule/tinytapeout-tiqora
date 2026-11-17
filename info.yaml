@@ -31,6 +31,7 @@ project:
     - "sync/sync_event_fifo.sv"
     - "sync/sync_compare.sv"
     - "sync/sync_unit.sv"
+    - "tp_drive.sv"
     - "uart/tp_uart_rx.sv"
     - "uart/tp_uart_tx.sv"
     - "uart/tp_host_uart.sv"
