@@ -20,7 +20,7 @@ import base64, html, json, math, os, re, sys
 SITE = "docs/site"
 LIB = SITE + "/lib"
 MEDIA = "docs/images/explorer"
-SCRIPTS = ["model", "wave", "player", "atlas", "die", "layout", "labs", "board"]
+SCRIPTS = ["model", "wave", "player", "atlas", "die", "layout", "labs", "board", "floorplan"]
 esc = lambda s: html.escape(str(s), quote=True)
 
 
@@ -93,6 +93,11 @@ def static_treemap(ctx):
     return treemap_svg(ctx, inline=True)
 
 
+def static_floorplan(ctx):
+    """The four floorplan panels docs/tools/tt_floorplan.py drew (run it first)."""
+    return open(SITE + "/data/floorplan.html").read()
+
+
 def static_motion(ctx):
     """Every reel docs/tools/motion.py drew, inlined so the pause button can stop it.
     Each reel names its classes after its tour, so they do not collide here."""
@@ -109,7 +114,8 @@ def static_motion(ctx):
 
 
 STATIC = {"atlas_table": static_atlas_table, "pins": static_pins, "progress": static_progress,
-          "ladder": static_ladder, "flow": static_flow, "treemap": static_treemap, "motion": static_motion}
+          "ladder": static_ladder, "flow": static_flow, "treemap": static_treemap, "motion": static_motion,
+          "floorplan": static_floorplan}
 
 
 # ------------------------------------------------------------------ diagram styling
