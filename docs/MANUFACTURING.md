@@ -25,6 +25,29 @@ Run used for the measured rows: GitHub `gds` run 44042025811, branch `exp-drv-rc
 | Standard cells placed | 3,713 (459 flip-flops), plus 2,028 fill | measured | `design__instance__count__stdcell`, `…class:sequential_cell`, `…class:fill_cell` |
 | Package (whole chip) | 64-pin QFN, shared by every project on the shuttle | spec | [tt-support-tools `docs/PINOUT.md`](https://github.com/TinyTapeout/tt-support-tools/blob/main/docs/PINOUT.md): "The chip is packaged in a 64-pin QFN package"; [tinytapeout.com/specs/clock](https://tinytapeout.com/specs/clock/) "pin number 37 in the QFN-64 chip package" |
 
+## On the chip, in millimetres
+
+Where this design sits on the shared Tiny Tapeout die, drawn to scale by
+`python3 docs/tools/tt_floorplan.py` (the README and the site's physical page show it). Every
+number below comes from a file at a pinned commit, recorded in `docs/tools/tt_chip.json`
+(`--refresh` rebuilds it from checkouts of the four repositories), and `make docs` checks that
+they agree with each other.
+
+| Fact | Value | Kind | Source |
+|---|---|---|---|
+| Package | QFN-64, 9.00 × 9.00 mm body, 0.5 mm pin pitch, 7.65 mm exposed pad | spec | TinyTapeout/breakout-pcb `4b6545f`, footprint `QFN-64-1EP_9x9mm_P0.5mm_EP7.65x7.65mm` |
+| Whole die | **3.588 × 5.188 mm = 18.61 mm²** | measured from the layout | efabless/caravel `27cbe49` `mag/caravel_openframe.mag`: `FIXED_BBOX 0 0 717600 1037600` at 0.005 µm per unit (Magic, `magscale 1 2`) |
+| Pad ring | 44 GPIO pads (`sky130_ef_io__gpiov2_pad`), 18 power and ground pads, 4 corner cells, 1 reset pad | measured from the layout | same commit, `mag/chip_io_openframe.mag` |
+| User area | **3.16663 × 4.76663 mm**, 210.685 µm in from every die edge | measured from the layout | `openframe_project_wrapper` placed at `transform 1 0 42137 0 1 42137` in `caravel_openframe.mag`; size from efabless/openframe_user_project `21c2e20` `lef/openframe_project_wrapper.lef` (`SIZE 3166.630 BY 4766.630`), the same as tt-multiplexer's `die` in `cfg/sky130.yaml` |
+| Tile grid | 16 columns × 32 rows, 480 tile slots (two branches kept for analog); tiles 161.00 × 111.52 µm on a 173.88 µm pitch, each with a 9.20 µm power switch; a 54.40 µm multiplexer row between the two tile rows of each branch; rows that meet are 2.72 µm apart | computed from spec | TinyTapeout/tt-multiplexer `885086c` `cfg/sky130.yaml`, with the arithmetic of `py/tt/layout.py` `global_layout()` redone in `tt_floorplan.py`; `make docs` checks the result against all 12 sizes in tt-support-tools `8f7b506` `tech/sky130A/tile_sizes.yaml` |
+| This design on it | 1 × 2 tiles, 161.00 × 225.76 µm, 0.24% of the user area, 0.20% of the die | measured | `design__die__bbox`, GitHub run 44042025811 |
+| Position on the die | assigned by Tiny Tapeout when the shuttle closes | open | the drawing shows an example slot |
+| Die position in the package | not published | open | the drawing centres it |
+
+That Tiny Tapeout's sky130 chips use this pad ring: tt-support-tools `shuttle.py` names
+`openframe_project_wrapper` as the top-level macro, and the QFN-64 symbol in breakout-pcb is
+`Openframe_QFN_TT06_REV2`.
+
 ## Inputs and outputs
 
 | Fact | Value | Kind | Source |
@@ -34,7 +57,7 @@ Run used for the measured rows: GitHub `gds` run 44042025811, branch `exp-drv-rc
 | Pins Tiqora-Serial uses | all 24 general-purpose pins, plus `clk` and `rst_n` (see [Pin audit](#pin-audit)) | measured | `info.yaml`, `src/tt_um_normansrule_tiqora_serial.sv` |
 | Pad cell | `sky130_ef_io__gpiov2_pad`, a wrapper of `sky130_fd_io__top_gpiov2` | spec | [tinytapeout.com/specs/gpio](https://tinytapeout.com/specs/gpio/): "The chip uses the sky130_ef_io_gpiov2_pad macro for the I/O pads" |
 | **IO cell size (pitch when abutted)** | **80.000 µm wide × 197.965 µm deep** (`sky130_ef_io__gpiov2_pad`); the bare `sky130_fd_io__top_gpiov2` is 80 × 200 µm | measured from the PDK's LEF | commands below |
-| Pad pitch of the finished chip | not published by Tiny Tapeout; at least 80 µm, because neighbouring pad cells abut | open | see below |
+| Pad pitch of the finished chip | **205.40 to 445.00 µm** centre to centre between neighbouring pads (GPIO, power or reset); along the right edge 215.53 to 227.99 µm. Pads do not abut: bus slices fill the gaps | measured from the layout | the openframe pad ring Tiny Tapeout's sky130 chips use, efabless/caravel `mag/chip_io_openframe.mag` at `27cbe49`; `python3 docs/tools/tt_floorplan.py --facts`. See [On the chip, in millimetres](#on-the-chip-in-millimetres) |
 | Pin pitch on the tile edge | 2.76 µm, pins 0.30 × 1.00 µm on metal 4, along the top edge | spec + measured | template DEF, command below; the run's log ("Wrote pin ui_in[0] at layer met4 at (138310, 224760, …)") |
 | Pad speed limits | inputs up to 66 MHz, outputs up to 33 MHz, 4 mA drive, ~20 ns round trip | spec (measured by Tiny Tapeout on TT3.5) | [tinytapeout.com/specs/gpio](https://tinytapeout.com/specs/gpio/) |
 | Tiqora-Serial against those limits | `clk` 50 MHz (≤ 66); outputs are decoded from registered state, so they change only after a 50 MHz clock edge and toggle at 25 MHz at most (≤ 33); UART 115,200 baud | spec of this design | `info.yaml` `clock_hz`, `README.md` |

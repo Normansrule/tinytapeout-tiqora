@@ -1,0 +1,761 @@
+{
+ "_about": "Chip-level facts for docs/tools/tt_floorplan.py. Regenerate with --refresh; never edit by hand, except 'designs' and 'package', which name their evidence.",
+ "designs": {
+  "tt_um_normansrule_tiqora": {
+   "die_um": [
+    508.76,
+    225.76
+   ],
+   "evidence": "design__die__bbox 0.0 0.0 508.76 225.76, GitHub gds run 44119238814 (Tiqora tapeout-audit 476dc44, LibreLane 3.0.14, 2026-11-17)"
+  },
+  "tt_um_normansrule_tiqora_serial": {
+   "die_um": [
+    161.0,
+    225.76
+   ],
+   "evidence": "design__die__bbox 0.0 0.0 161.0 225.76, GitHub gds run 44042025811 (Tiqora-Serial exp-drv-rc18m30 77ecdc6, LibreLane 3.0.14, 2026-11-17)"
+  }
+ },
+ "die_um": [
+  3588.0,
+  5188.0
+ ],
+ "grid": {
+  "analog_mux": [
+   11,
+   12
+  ],
+  "die_h": 4766630,
+  "die_w": 3166630,
+  "grid_x": 16,
+  "grid_y": 32,
+  "hlayer": "met3",
+  "hpitch": 680,
+  "margin": {
+   "bottom": 90000,
+   "left": 95000,
+   "right": 95000,
+   "top": 95000
+  },
+  "margin_x_sites": 4,
+  "margin_y_sites": 1,
+  "pg_vdd_w": 9200,
+  "site_h": 2720,
+  "site_w": 460,
+  "uio": {
+   "ae": 12,
+   "au": 8,
+   "i": 10,
+   "io": 8,
+   "o": 8
+  },
+  "units": "nm (DEF database units, 1000 per \u00b5m)",
+  "vlayer": "met4",
+  "vpitch": 920
+ },
+ "package": {
+  "body_mm": 9.0,
+  "exposed_pad_mm": 7.65,
+  "pins": 64,
+  "pitch_mm": 0.5,
+  "source": "TinyTapeout/breakout-pcb 4b6545f breakout-sky-qfn footprint QFN-64-1EP_9x9mm_P0.5mm_EP7.65x7.65mm"
+ },
+ "pads": [
+  {
+   "cell": "sky130_ef_io__corner_pad",
+   "h": 204.0,
+   "inst": "user0_corner[0]",
+   "kind": "corner",
+   "w": 200.0,
+   "x": 0.0,
+   "y": 0.0
+  },
+  {
+   "cell": "sky130_ef_io__vssa_hvc_clamped_pad",
+   "h": 200.0,
+   "inst": "mgmt_vssa_hvclamp_pad",
+   "kind": "power",
+   "w": 75.0,
+   "x": 394.0,
+   "y": 0.0
+  },
+  {
+   "cell": "sky130_fd_io__top_xres4v2",
+   "h": 200.0,
+   "inst": "master_resetb_pad",
+   "kind": "reset",
+   "w": 76.135,
+   "x": 662.38,
+   "y": 0.0
+  },
+  {
+   "cell": "sky130_ef_io__gpiov2_pad",
+   "h": 200.0,
+   "inst": "area0_gpio_pad[0]",
+   "kind": "gpio",
+   "w": 81.385,
+   "x": 931.33,
+   "y": 0.0
+  },
+  {
+   "cell": "sky130_ef_io__vssd_lvc_clamped_pad",
+   "h": 208.5,
+   "inst": "mgmt_vssd_lvclamp_pad",
+   "kind": "power",
+   "w": 86.195,
+   "x": 1194.805,
+   "y": 0.0
+  },
+  {
+   "cell": "sky130_ef_io__gpiov2_pad",
+   "h": 200.0,
+   "inst": "area0_gpio_pad[1]",
+   "kind": "gpio",
+   "w": 81.385,
+   "x": 1474.33,
+   "y": 0.0
+  },
+  {
+   "cell": "sky130_ef_io__gpiov2_pad",
+   "h": 200.0,
+   "inst": "area0_gpio_pad[2]",
+   "kind": "gpio",
+   "w": 81.385,
+   "x": 1748.33,
+   "y": 0.0
+  },
+  {
+   "cell": "sky130_ef_io__gpiov2_pad",
+   "h": 200.0,
+   "inst": "area0_gpio_pad[3]",
+   "kind": "gpio",
+   "w": 81.385,
+   "x": 2022.33,
+   "y": 0.0
+  },
+  {
+   "cell": "sky130_ef_io__gpiov2_pad",
+   "h": 200.0,
+   "inst": "area0_gpio_pad[4]",
+   "kind": "gpio",
+   "w": 81.385,
+   "x": 2296.33,
+   "y": 0.0
+  },
+  {
+   "cell": "sky130_ef_io__gpiov2_pad",
+   "h": 200.0,
+   "inst": "area0_gpio_pad[5]",
+   "kind": "gpio",
+   "w": 81.385,
+   "x": 2570.33,
+   "y": 0.0
+  },
+  {
+   "cell": "sky130_ef_io__vssio_hvc_clamped_pad",
+   "h": 200.0,
+   "inst": "mgmt_vssio_hvclamp_pad[0]",
+   "kind": "power",
+   "w": 75.0,
+   "x": 2845.0,
+   "y": 0.0
+  },
+  {
+   "cell": "sky130_ef_io__vdda_hvc_clamped_pad",
+   "h": 200.0,
+   "inst": "mgmt_vdda_hvclamp_pad",
+   "kind": "power",
+   "w": 75.0,
+   "x": 3114.0,
+   "y": 0.0
+  },
+  {
+   "cell": "sky130_ef_io__corner_pad",
+   "h": 200.0,
+   "inst": "user0_corner[1]",
+   "kind": "corner",
+   "w": 204.0,
+   "x": 3384.0,
+   "y": 0.0
+  },
+  {
+   "cell": "sky130_ef_io__vccd_lvc_clamped_pad",
+   "h": 86.195,
+   "inst": "mgmt_vccd_lvclamp_pad",
+   "kind": "power",
+   "w": 208.5,
+   "x": 0.0,
+   "y": 340.0
+  },
+  {
+   "cell": "sky130_ef_io__gpiov2_pad",
+   "h": 81.385,
+   "inst": "sky130_ef_io__gpiov2_pad_18",
+   "kind": "gpio",
+   "w": 200.0,
+   "x": 3388.0,
+   "y": 499.33
+  },
+  {
+   "cell": "sky130_ef_io__vddio_hvc_clamped_pad",
+   "h": 75.0,
+   "inst": "mgmt_vddio_hvclamp_pad[0]",
+   "kind": "power",
+   "w": 200.0,
+   "x": 0.0,
+   "y": 551.0
+  },
+  {
+   "cell": "sky130_ef_io__gpiov2_pad",
+   "h": 81.385,
+   "inst": "sky130_ef_io__gpiov2_pad_17",
+   "kind": "gpio",
+   "w": 200.0,
+   "x": 3388.0,
+   "y": 725.33
+  },
+  {
+   "cell": "sky130_ef_io__gpiov2_pad",
+   "h": 81.385,
+   "inst": "sky130_ef_io__gpiov2_pad_0",
+   "kind": "gpio",
+   "w": 200.0,
+   "x": 0.0,
+   "y": 907.285
+  },
+  {
+   "cell": "sky130_ef_io__gpiov2_pad",
+   "h": 81.385,
+   "inst": "sky130_ef_io__gpiov2_pad_16",
+   "kind": "gpio",
+   "w": 200.0,
+   "x": 3388.0,
+   "y": 950.33
+  },
+  {
+   "cell": "sky130_ef_io__gpiov2_pad",
+   "h": 81.385,
+   "inst": "sky130_ef_io__gpiov2_pad_1",
+   "kind": "gpio",
+   "w": 200.0,
+   "x": 0.0,
+   "y": 1123.285
+  },
+  {
+   "cell": "sky130_ef_io__gpiov2_pad",
+   "h": 81.385,
+   "inst": "sky130_ef_io__gpiov2_pad_15",
+   "kind": "gpio",
+   "w": 200.0,
+   "x": 3388.0,
+   "y": 1176.33
+  },
+  {
+   "cell": "sky130_ef_io__gpiov2_pad",
+   "h": 81.385,
+   "inst": "sky130_ef_io__gpiov2_pad_2",
+   "kind": "gpio",
+   "w": 200.0,
+   "x": 0.0,
+   "y": 1339.285
+  },
+  {
+   "cell": "sky130_ef_io__gpiov2_pad",
+   "h": 81.385,
+   "inst": "sky130_ef_io__gpiov2_pad_14",
+   "kind": "gpio",
+   "w": 200.0,
+   "x": 3388.0,
+   "y": 1401.33
+  },
+  {
+   "cell": "sky130_ef_io__gpiov2_pad",
+   "h": 81.385,
+   "inst": "sky130_ef_io__gpiov2_pad_3",
+   "kind": "gpio",
+   "w": 200.0,
+   "x": 0.0,
+   "y": 1555.285
+  },
+  {
+   "cell": "sky130_ef_io__gpiov2_pad",
+   "h": 81.385,
+   "inst": "sky130_ef_io__gpiov2_pad_13",
+   "kind": "gpio",
+   "w": 200.0,
+   "x": 3388.0,
+   "y": 1626.33
+  },
+  {
+   "cell": "sky130_ef_io__gpiov2_pad",
+   "h": 81.385,
+   "inst": "sky130_ef_io__gpiov2_pad_4",
+   "kind": "gpio",
+   "w": 200.0,
+   "x": 0.0,
+   "y": 1771.285
+  },
+  {
+   "cell": "sky130_ef_io__gpiov2_pad",
+   "h": 81.385,
+   "inst": "sky130_ef_io__gpiov2_pad_12",
+   "kind": "gpio",
+   "w": 200.0,
+   "x": 3388.0,
+   "y": 1852.33
+  },
+  {
+   "cell": "sky130_ef_io__gpiov2_pad",
+   "h": 81.385,
+   "inst": "sky130_ef_io__gpiov2_pad_5",
+   "kind": "gpio",
+   "w": 200.0,
+   "x": 0.0,
+   "y": 1987.285
+  },
+  {
+   "cell": "sky130_ef_io__vssa_hvc_clamped_pad",
+   "h": 75.0,
+   "inst": "user1_vssa_hvclamp_pad[1]",
+   "kind": "power",
+   "w": 200.0,
+   "x": 3388.0,
+   "y": 2078.0
+  },
+  {
+   "cell": "sky130_ef_io__vssd_lvc_clamped3_pad",
+   "h": 85.935,
+   "inst": "user2_vssd_lvclamp_pad",
+   "kind": "power",
+   "w": 208.85,
+   "x": 0.0,
+   "y": 2204.0
+  },
+  {
+   "cell": "sky130_ef_io__vssd_lvc_clamped3_pad",
+   "h": 85.935,
+   "inst": "user1_vssd_lvclamp_pad",
+   "kind": "power",
+   "w": 208.85,
+   "x": 3379.15,
+   "y": 2288.065
+  },
+  {
+   "cell": "sky130_ef_io__vdda_hvc_clamped_pad",
+   "h": 75.0,
+   "inst": "user2_vdda_hvclamp_pad",
+   "kind": "power",
+   "w": 200.0,
+   "x": 0.0,
+   "y": 2415.0
+  },
+  {
+   "cell": "sky130_ef_io__vdda_hvc_clamped_pad",
+   "h": 75.0,
+   "inst": "user1_vdda_hvclamp_pad[1]",
+   "kind": "power",
+   "w": 200.0,
+   "x": 3388.0,
+   "y": 2519.0
+  },
+  {
+   "cell": "sky130_ef_io__gpiov2_pad",
+   "h": 81.385,
+   "inst": "sky130_ef_io__gpiov2_pad_6",
+   "kind": "gpio",
+   "w": 200.0,
+   "x": 0.0,
+   "y": 2625.285
+  },
+  {
+   "cell": "sky130_ef_io__gpiov2_pad",
+   "h": 81.385,
+   "inst": "sky130_ef_io__gpiov2_pad_11",
+   "kind": "gpio",
+   "w": 200.0,
+   "x": 3388.0,
+   "y": 2738.33
+  },
+  {
+   "cell": "sky130_ef_io__gpiov2_pad",
+   "h": 81.385,
+   "inst": "sky130_ef_io__gpiov2_pad_7",
+   "kind": "gpio",
+   "w": 200.0,
+   "x": 0.0,
+   "y": 2841.285
+  },
+  {
+   "cell": "sky130_ef_io__gpiov2_pad",
+   "h": 81.385,
+   "inst": "sky130_ef_io__gpiov2_pad_10",
+   "kind": "gpio",
+   "w": 200.0,
+   "x": 3388.0,
+   "y": 2964.33
+  },
+  {
+   "cell": "sky130_ef_io__gpiov2_pad",
+   "h": 81.385,
+   "inst": "sky130_ef_io__gpiov2_pad_8",
+   "kind": "gpio",
+   "w": 200.0,
+   "x": 0.0,
+   "y": 3057.285
+  },
+  {
+   "cell": "sky130_ef_io__gpiov2_pad",
+   "h": 81.385,
+   "inst": "area1_gpio_pad[9]",
+   "kind": "gpio",
+   "w": 200.0,
+   "x": 3388.0,
+   "y": 3189.33
+  },
+  {
+   "cell": "sky130_ef_io__gpiov2_pad",
+   "h": 81.385,
+   "inst": "sky130_ef_io__gpiov2_pad_9",
+   "kind": "gpio",
+   "w": 200.0,
+   "x": 0.0,
+   "y": 3273.285
+  },
+  {
+   "cell": "sky130_ef_io__gpiov2_pad",
+   "h": 81.385,
+   "inst": "area1_gpio_pad[10]",
+   "kind": "gpio",
+   "w": 200.0,
+   "x": 3388.0,
+   "y": 3415.33
+  },
+  {
+   "cell": "sky130_ef_io__gpiov2_pad",
+   "h": 81.385,
+   "inst": "area1_gpio_pad[8]",
+   "kind": "gpio",
+   "w": 200.0,
+   "x": 0.0,
+   "y": 3489.285
+  },
+  {
+   "cell": "sky130_ef_io__gpiov2_pad",
+   "h": 81.385,
+   "inst": "area1_gpio_pad[11]",
+   "kind": "gpio",
+   "w": 200.0,
+   "x": 3388.0,
+   "y": 3640.33
+  },
+  {
+   "cell": "sky130_ef_io__gpiov2_pad",
+   "h": 81.385,
+   "inst": "area1_gpio_pad[7]",
+   "kind": "gpio",
+   "w": 200.0,
+   "x": 0.0,
+   "y": 3705.285
+  },
+  {
+   "cell": "sky130_ef_io__gpiov2_pad",
+   "h": 81.385,
+   "inst": "area1_gpio_pad[12]",
+   "kind": "gpio",
+   "w": 200.0,
+   "x": 3388.0,
+   "y": 3865.33
+  },
+  {
+   "cell": "sky130_ef_io__gpiov2_pad",
+   "h": 81.385,
+   "inst": "area1_gpio_pad[6]",
+   "kind": "gpio",
+   "w": 200.0,
+   "x": 0.0,
+   "y": 3921.285
+  },
+  {
+   "cell": "sky130_ef_io__vdda_hvc_clamped_pad",
+   "h": 75.0,
+   "inst": "user1_vdda_hvclamp_pad[0]",
+   "kind": "power",
+   "w": 200.0,
+   "x": 3388.0,
+   "y": 4092.0
+  },
+  {
+   "cell": "sky130_ef_io__vssa_hvc_clamped_pad",
+   "h": 75.0,
+   "inst": "user2_vssa_hvclamp_pad",
+   "kind": "power",
+   "w": 200.0,
+   "x": 0.0,
+   "y": 4138.0
+  },
+  {
+   "cell": "sky130_ef_io__gpiov2_pad",
+   "h": 81.385,
+   "inst": "area1_gpio_pad[13]",
+   "kind": "gpio",
+   "w": 200.0,
+   "x": 3388.0,
+   "y": 4311.33
+  },
+  {
+   "cell": "sky130_ef_io__vddio_hvc_clamped_pad",
+   "h": 75.0,
+   "inst": "mgmt_vddio_hvclamp_pad[1]",
+   "kind": "power",
+   "w": 200.0,
+   "x": 0.0,
+   "y": 4349.0
+  },
+  {
+   "cell": "sky130_ef_io__vccd_lvc_clamped3_pad",
+   "h": 85.935,
+   "inst": "user1_vccd_lvclamp_pad",
+   "kind": "power",
+   "w": 208.85,
+   "x": 3379.15,
+   "y": 4527.065
+  },
+  {
+   "cell": "sky130_ef_io__vccd_lvc_clamped3_pad",
+   "h": 85.935,
+   "inst": "user2_vccd_lvclamp_pad",
+   "kind": "power",
+   "w": 208.85,
+   "x": 0.0,
+   "y": 4560.0
+  },
+  {
+   "cell": "sky130_ef_io__gpiov2_pad",
+   "h": 81.385,
+   "inst": "area1_gpio_pad[14]",
+   "kind": "gpio",
+   "w": 200.0,
+   "x": 3388.0,
+   "y": 4757.33
+  },
+  {
+   "cell": "sky130_ef_io__gpiov2_pad",
+   "h": 81.385,
+   "inst": "area1_gpio_pad[5]",
+   "kind": "gpio",
+   "w": 200.0,
+   "x": 0.0,
+   "y": 4770.285
+  },
+  {
+   "cell": "sky130_ef_io__corner_pad",
+   "h": 204.0,
+   "inst": "user1_corner",
+   "kind": "corner",
+   "w": 200.0,
+   "x": 3388.0,
+   "y": 4984.0
+  },
+  {
+   "cell": "sky130_ef_io__corner_pad",
+   "h": 200.0,
+   "inst": "user2_corner",
+   "kind": "corner",
+   "w": 204.0,
+   "x": 0.0,
+   "y": 4988.0
+  },
+  {
+   "cell": "sky130_ef_io__gpiov2_pad",
+   "h": 200.0,
+   "inst": "area1_gpio_pad[4]",
+   "kind": "gpio",
+   "w": 81.385,
+   "x": 380.285,
+   "y": 4988.0
+  },
+  {
+   "cell": "sky130_ef_io__gpiov2_pad",
+   "h": 200.0,
+   "inst": "area1_gpio_pad[3]",
+   "kind": "gpio",
+   "w": 81.385,
+   "x": 637.285,
+   "y": 4988.0
+  },
+  {
+   "cell": "sky130_ef_io__gpiov2_pad",
+   "h": 200.0,
+   "inst": "area1_gpio_pad[2]",
+   "kind": "gpio",
+   "w": 81.385,
+   "x": 894.285,
+   "y": 4988.0
+  },
+  {
+   "cell": "sky130_ef_io__gpiov2_pad",
+   "h": 200.0,
+   "inst": "area1_gpio_pad[1]",
+   "kind": "gpio",
+   "w": 81.385,
+   "x": 1151.285,
+   "y": 4988.0
+  },
+  {
+   "cell": "sky130_ef_io__gpiov2_pad",
+   "h": 200.0,
+   "inst": "area1_gpio_pad[0]",
+   "kind": "gpio",
+   "w": 81.385,
+   "x": 1409.285,
+   "y": 4988.0
+  },
+  {
+   "cell": "sky130_ef_io__vssio_hvc_clamped_pad",
+   "h": 200.0,
+   "inst": "mgmt_vssio_hvclamp_pad[1]",
+   "kind": "power",
+   "w": 75.0,
+   "x": 1667.0,
+   "y": 4988.0
+  },
+  {
+   "cell": "sky130_ef_io__gpiov2_pad",
+   "h": 200.0,
+   "inst": "area1_gpio_pad[18]",
+   "kind": "gpio",
+   "w": 81.385,
+   "x": 1918.285,
+   "y": 4988.0
+  },
+  {
+   "cell": "sky130_ef_io__gpiov2_pad",
+   "h": 200.0,
+   "inst": "area1_gpio_pad[17]",
+   "kind": "gpio",
+   "w": 81.385,
+   "x": 2363.285,
+   "y": 4988.0
+  },
+  {
+   "cell": "sky130_ef_io__gpiov2_pad",
+   "h": 200.0,
+   "inst": "area1_gpio_pad[16]",
+   "kind": "gpio",
+   "w": 81.385,
+   "x": 2620.285,
+   "y": 4988.0
+  },
+  {
+   "cell": "sky130_ef_io__vssa_hvc_clamped_pad",
+   "h": 200.0,
+   "inst": "user1_vssa_hvclamp_pad[0]",
+   "kind": "power",
+   "w": 75.0,
+   "x": 2878.0,
+   "y": 4988.0
+  },
+  {
+   "cell": "sky130_ef_io__gpiov2_pad",
+   "h": 200.0,
+   "inst": "area1_gpio_pad[15]",
+   "kind": "gpio",
+   "w": 81.385,
+   "x": 3129.285,
+   "y": 4988.0
+  }
+ ],
+ "sources": {
+  "chip": {
+   "commit": "27cbe49c90ba5362ad52c9968dd98e035c30c74f",
+   "files": [
+    "mag/caravel_openframe.mag",
+    "mag/chip_io_openframe.mag"
+   ],
+   "how": "FIXED_BBOX of caravel_openframe and the placement of openframe_project_wrapper in it; every *_pad and xres cell placed in chip_io_openframe; Magic units at magscale 1 2 are 0.005 \u00b5m",
+   "repo": "efabless/caravel"
+  },
+  "grid": {
+   "commit": "885086c91ebbe5e636559f540c23a492a7d1284a",
+   "files": [
+    "cfg/sky130.yaml",
+    "py/tt/layout.py"
+   ],
+   "how": "config read here; global_layout() arithmetic re-done in tt_floorplan.py",
+   "repo": "TinyTapeout/tt-multiplexer"
+  },
+  "tiles": {
+   "commit": "8f7b5060d7f6df73bfd2e0b8d8fa0fd1dca0a0b1",
+   "files": [
+    "tech/sky130A/tile_sizes.yaml",
+    "shuttle.py"
+   ],
+   "how": "tile sizes; shuttle.py names openframe_project_wrapper as the sky130 top-level macro",
+   "repo": "TinyTapeout/tt-support-tools"
+  },
+  "user_area": {
+   "commit": "21c2e2060d7c8bacf20e89b23b07e1208867cbfd",
+   "files": [
+    "lef/openframe_project_wrapper.lef"
+   ],
+   "how": "SIZE",
+   "repo": "efabless/openframe_user_project"
+  }
+ },
+ "tile_sizes_um": {
+  "1x1": [
+   161.0,
+   111.52
+  ],
+  "1x2": [
+   161.0,
+   225.76
+  ],
+  "2x2": [
+   334.88,
+   225.76
+  ],
+  "3x2": [
+   508.76,
+   225.76
+  ],
+  "3x4": [
+   508.76,
+   511.36
+  ],
+  "4x2": [
+   682.64,
+   225.76
+  ],
+  "4x4": [
+   682.64,
+   511.36
+  ],
+  "5x4": [
+   856.52,
+   511.36
+  ],
+  "6x2": [
+   1030.4,
+   225.76
+  ],
+  "6x4": [
+   1030.4,
+   511.36
+  ],
+  "8x2": [
+   1378.16,
+   225.76
+  ],
+  "8x4": [
+   1378.16,
+   511.36
+  ]
+ },
+ "user_area_um": {
+  "h": 4766.63,
+  "w": 3166.63,
+  "x": 210.685,
+  "y": 210.685
+ }
+}

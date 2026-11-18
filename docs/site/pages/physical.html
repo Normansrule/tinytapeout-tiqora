@@ -1,4 +1,4 @@
-<!-- {"title": "Physical design", "description": "Tiqora-Serial's layout at 1x2: measured cell area per block, the routed layout and its sign-off results.", "data": ["atlas", "layout", "routed"], "scripts": ["die", "layout"]} -->
+<!-- {"title": "Physical design", "description": "Tiqora-Serial's layout at 1x2: measured cell area per block, the routed layout and its sign-off results.", "data": ["atlas", "layout", "routed"], "scripts": ["die", "layout", "floorplan"]} -->
 <h1>Physical design</h1>
 <div class="note"><b>Tiqora-Serial has a clean layout at 1x2, the size <code>info.yaml</code> submits.</b> The Tiny Tapeout <code>gds</code>, pre-flight and gate-level workflows pass on GitHub, and that run's own report gives the numbers in the table on this page (run 40624495043, src/ as on main 168fc84). It meets setup and hold timing at 50 MHz at all nine corners. No chip exists yet.</div>
 
@@ -8,6 +8,14 @@
  <div class=card><h3>Core area</h3><p>Where cells may go, inside the power ring: <b><span id=core></span> µm²</b> <span class="ev measured">measured</span>, from LibreLane.</p></div>
  <div class=card><h3>Summed cell area</h3><p><b>21,322 µm²</b> <span class="ev measured">measured</span> flat synthesis (<code>make area</code>, Yosys 0.33, the cells <code>src/synth_exclude.cells</code> leaves): 59% of the die. <span class="ev measured">measured</span> after placement, with timing-repair buffers, taps and clock tree but no fill: <b><span id=placed></span> µm²</b>, <span id=util></span> of the core.</p></div>
 </div>
+
+<h2 id=on-the-chip>On the Tiny Tapeout chip, in millimetres</h2>
+<p>From the package down to this design, every length to scale and labelled. The QFN-64 package is 9.00 mm square. Inside it, the shared die is 3.588 × 5.188 mm (18.61 mm²): a ring of 44 GPIO pads and 23 power, ground, corner and reset pads around a 3.167 × 4.767 mm user area, which Tiny Tapeout fills with 480 tile slots of 161.00 × 111.52 µm, each with its own power switch, on a 173.88 µm pitch, with a multiplexer row between each pair of tile rows. Tiqora-Serial takes two of those tiles as one 1x2 block, 161.00 × 225.76 µm, about 0.16 × 0.23 mm: 0.24% of the user area.</p>
+<figure class=figure>
+{{static:floorplan}}
+<figcaption><span class="ev measured">measured</span> from the sources, by <code>python3 docs/tools/tt_floorplan.py</code>: the die and every pad from efabless/caravel's <code>caravel_openframe.mag</code> and <code>chip_io_openframe.mag</code> (Tiny Tapeout's sky130 chips use this openframe pad ring); the user area from <code>openframe_project_wrapper.lef</code>; the tile grid computed from tt-multiplexer's <code>cfg/sky130.yaml</code> with its own layout arithmetic, which <code>make docs</code> checks reproduces all 12 sizes in tt-support-tools' <code>tile_sizes.yaml</code>; this block's size from the routed run's <code>design__die__bbox</code> (GitHub run 44042025811). The commit of each source is in <code>docs/tools/tt_chip.json</code>. Two things are not known and are drawn as such: Tiny Tapeout assigns each project's slot at tape-out, so the slot shown is an example, and the die's position in the package is not published, so it is drawn centred.</figcaption>
+</figure>
+<script>TQFloorplan.init(document.getElementById("fp"));</script>
 
 <h2>Where the cells go</h2>
 <p>Each block's cells, synthesized one module at a time and drawn <b>to scale</b> inside the 1x2 die outline. Positions mean nothing: this is proportion, not a floorplan.</p>

@@ -99,6 +99,8 @@ docs:
 	cd .. && python3 docs/tools/motion.py --check
 	cd .. && python3 docs/tools/routed_map.py --check
 	cd .. && python3 docs/tools/routed_map.py --mutants
+	cd .. && python3 docs/tools/tt_floorplan.py --check
+	cd .. && python3 docs/tools/tt_floorplan.py --mutants
 
 # the explorer site: atlas against the RTL (needs Yosys), tours against a fresh
 # simulation, then the site itself

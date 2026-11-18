@@ -128,6 +128,25 @@ multiplexer, and Tiqora-Serial is one 1 × 2 block of tiles on it:
 
 ![From the demo board to Tiqora-Serial's tiles on the die](docs/images/board_to_silicon.svg)
 
+<sub>A drawing, not to scale. The same journey with real dimensions follows.</sub>
+
+**On the Tiny Tapeout chip, in millimetres.** The QFN-64 package is 9.00 mm square. The die
+inside is 3.588 × 5.188 mm: 44 GPIO pads and 23 power, ground, corner and reset pads around a
+3.167 × 4.767 mm user area, which holds 480 tile slots of 161.00 × 111.52 µm on a 173.88 µm
+pitch. Tiqora-Serial is one 1 × 2 block of them, 161.00 × 225.76 µm (0.161 × 0.226 mm,
+0.036 mm²), 0.24% of the user area:
+
+![To scale, in mm and µm: the QFN-64 package, the 3.588 × 5.188 mm die with its pad ring and 480 tile slots, the tile grid around Tiqora-Serial, and its 161.00 × 225.76 µm block](docs/images/tt_floorplan.svg)
+
+<sub>Drawn by `docs/tools/tt_floorplan.py` from the sources, each pinned to a commit in
+`docs/tools/tt_chip.json`: the die and pads from efabless/caravel's openframe layout
+(`caravel_openframe.mag`, `chip_io_openframe.mag`), the tile grid computed from tt-multiplexer's
+`cfg/sky130.yaml` and checked by `make docs` against all 12 sizes in tt-support-tools'
+`tile_sizes.yaml`, and the block from the routed run's `design__die__bbox` (GitHub run
+44042025811). Tiny Tapeout assigns the slot at tape-out, so the one shown is an example; the
+die's position in the package is not published, so it is drawn centred.
+[Step through it](https://normansrule.github.io/tinytapeout-tiqora/physical.html#on-the-chip).</sub>
+
 **Where the area goes, to scale.** Each block's measured cell area from synthesis, laid out in
 the real 161.00 × 225.76 µm die outline. A treemap of measured numbers, not a placement:
 
@@ -610,7 +629,7 @@ docs/site/     the explorer site: pages/ (templates), lib/ (shared styles, scrip
                data/ (atlas, tours, die map), and the built pages next to them
 docs/fpga/     the recorded Basys 3 run behind the board animation
 docs/tools/    atlas.py, traces.py, die_map.py, build_site.py, check_site.py, readme_media.py,
-               motion.py, site_shots.py, fpga_media.py: the site and its README pictures; the other images' generators
+               motion.py, site_shots.py, fpga_media.py, tt_floorplan.py: the site and its README pictures; the other images' generators
 syn/           synthesis and area scripts
 ```
 
