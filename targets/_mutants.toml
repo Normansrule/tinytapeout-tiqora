@@ -1,0 +1,44 @@
+# _mutants.toml — RTL mutants for `tapeout.py rtl-mutants` (make targets).
+#
+# Each entry breaks one line of target RTL, runs the lockstep bench
+# (`make -C test targets-bench`) and expects it to FAIL, then restores the
+# file. On top of these, rtl-mutants swaps two output pads of every carrier
+# in its generated core. A mutant that survives means the bench cannot see
+# that kind of wiring mistake.
+bench = ["make", "-s", "-C", "test", "targets-bench"]
+
+[[mutant]]
+file = "src/targets/tiqora_serial_macro.sv"
+find = "        .rst        (~rst_n),"
+replace = "        .rst        (1'b0),"
+why = "the macro ignores reset"
+
+[[mutant]]
+file = "src/targets/tiqora_serial_caravel_core.sv"
+find = "assign io_oeb[16] = 1'b0;"
+replace = "assign io_oeb[16] = 1'b1;"
+why = "a Caravel output pad left undriven"
+
+[[mutant]]
+file = "src/targets/tiqora_serial_caravel_core.sv"
+find = "wire m_rst_n = ~wb_rst_i;"
+replace = "wire m_rst_n = wb_rst_i;"
+why = "Caravel reset polarity inverted"
+
+[[mutant]]
+file = "src/targets/tiqora_serial_openframe_core.sv"
+find = "assign {gpio_dm2[24], gpio_dm1[24], gpio_dm0[24]} = 3'b110;"
+replace = "assign {gpio_dm2[24], gpio_dm1[24], gpio_dm0[24]} = 3'b001;"
+why = "an Openframe output pad left in input-only mode"
+
+[[mutant]]
+file = "src/targets/tiqora_serial_openframe_core.sv"
+find = "wire m_rst_n = resetb_l & porb_l;"
+replace = "wire m_rst_n = porb_l;"
+why = "the Openframe reset pad is ignored"
+
+[[mutant]]
+file = "src/targets/openframe_project_wrapper.sv"
+find = "        .gpio_oeb(gpio_oeb),"
+replace = "        .gpio_oeb(),"
+why = "the wrapper drops the core's output enables"

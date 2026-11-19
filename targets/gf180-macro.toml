@@ -1,0 +1,27 @@
+# gf180-macro — the same plain-pin macro on GlobalFoundries 180 nm
+# (gf180mcuD, 5 V 7-track cells), for gf180 shuttles. The RTL has no
+# technology cells, so nothing changes but the PDK, the die and the clock.
+name = "gf180-macro"
+kind = "macro"
+summary = "Hard macro on GlobalFoundries gf180mcuD (5 V cells)"
+pdk = "gf180mcuD"
+
+[design]
+top = "tiqora_serial_macro"
+files = ["src/targets/tiqora_serial_macro.sv"]
+clock_port = "clk"
+clock_period_ns = 40.0
+io_delay_pct = 20
+
+[floorplan]
+die_um = [450, 450]
+density_pct = 60
+max_util_pct = 45
+
+[signoff]
+setup_min_ns = 0.0
+hold_min_ns = 0.0
+max_util_pct = 70
+
+[librelane]
+CTS_SINK_CLUSTERING_SIZE = 10

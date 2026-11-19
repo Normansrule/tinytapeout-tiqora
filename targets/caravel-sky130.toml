@@ -1,0 +1,73 @@
+# caravel-sky130 — Tiqora-Serial in the Caravel user project area (Efabless
+# caravel_user_project, the chipIgnite harness).
+#
+# Two hardening stages:
+#   core     tiqora_serial_caravel_core: the plain macro plus the pad logic
+#            (output enables, constants), with Caravel's io_in/io_out/io_oeb
+#            names. All logic lives here.
+#   wrapper  user_project_wrapper: the fixed 2920 x 3520 um frame, wiring
+#            only, with the core placed as macro "mprj".
+# The pad list below generates both RTL files and user_defines.v.
+name = "caravel-sky130"
+kind = "carrier"
+summary = "Caravel user project area (Efabless chipIgnite harness)"
+pdk = "sky130A"
+
+[design]
+files = ["src/targets/tiqora_serial_macro.sv"]
+# Caravel's user clock is the management SoC's wb_clk_i; its frequency is
+# set by the management core. 25 ns is caravel_user_project's own setting.
+# The serial baud rate is clk / 434, so it follows that clock.
+clock_period_ns = 25.0
+io_delay_pct = 20
+
+[floorplan]
+die_um = [250, 250]
+density_pct = 60
+max_util_pct = 45
+
+[signoff]
+setup_min_ns = 0.0
+hold_min_ns = 0.0
+max_util_pct = 70
+
+[librelane]
+SYNTH_EXCLUDED_CELL_FILE = "dir::../../src/synth_exclude.cells"
+CTS_SINK_CLUSTERING_SIZE = 10
+RT_MAX_LAYER = "met4"
+PDN_MULTILAYER = 0
+
+[carrier]
+frame = "caravel"
+macro = "tiqora_serial_macro"
+core = "tiqora_serial_caravel_core"
+instance = "mprj"
+location_um = [60, 15]          # caravel_user_project macro.cfg places mprj here
+clock = "wb_clk_i"
+reset_n = ["!wb_rst_i"]
+pins = [
+  { pad = 8,  in = "cap_in[0]" },
+  { pad = 9,  in = "cap_in[1]" },
+  { pad = 10, in = "cap_in[2]" },
+  { pad = 11, in = "cap_in[3]" },
+  { pad = 12, in = "cap_in[4]" },
+  { pad = 13, in = "cap_in[5]" },
+  { pad = 14, in = "cap_in[6]" },
+  { pad = 15, in = "cap_in[7]" },
+  { pad = 16, out = "trig_out[0]" },
+  { pad = 17, out = "trig_out[1]" },
+  { pad = 18, out = "trig_out[2]" },
+  { pad = 19, out = "evt_pending" },
+  { pad = 20, out = "uart_tx" },
+  { pad = 21, out = "ovf" },
+  { pad = 22, out = "heartbeat" },
+  { pad = 23, out = "evt_pulse" },
+  { pad = 24, in = "uart_rx" },
+  { pad = 25, out = "uart_active" },
+  { pad = 26, out = "ev_chan[0]" },
+  { pad = 27, out = "ev_chan[1]" },
+  { pad = 28, out = "ev_chan[2]" },
+  { pad = 29, out = "ev_edge" },
+  { pad = 30, out = "ev_count[0]" },
+  { pad = 31, out = "ev_count[1]" },
+]

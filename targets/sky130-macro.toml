@@ -1,0 +1,39 @@
+# sky130-macro — Tiqora-Serial as a hard macro for any sky130 chip: a custom
+# SoC, a Caravel or Openframe user area, or a multi-project die. Plain named
+# pins (src/targets/tiqora_serial_macro.sv), power on vccd1/vssd1 as Caravel
+# and Openframe user areas expect.
+name = "sky130-macro"
+kind = "macro"
+summary = "Hard macro for any sky130 chip, plain pins"
+pdk = "sky130A"
+
+[design]
+top = "tiqora_serial_macro"
+files = ["src/targets/tiqora_serial_macro.sv"]
+clock_port = "clk"
+# 20 ns: the Tiny Tapeout run of the same RTL met setup at all nine corners
+# (+1.43 ns at max_ss, gds run 40624495043 on branch real-numbers-main).
+clock_period_ns = 20.0
+io_delay_pct = 20
+
+[floorplan]
+die_um = [250, 250]
+density_pct = 60
+# synthesised cell area / die area: rule T8 fails above this
+max_util_pct = 45
+
+[power]
+vdd = "vccd1"
+gnd = "vssd1"
+
+[signoff]
+setup_min_ns = 0.0
+hold_min_ns = 0.0
+max_util_pct = 70
+
+# Passed to LibreLane as written; rule T6 checks every name.
+[librelane]
+SYNTH_EXCLUDED_CELL_FILE = "dir::../../src/synth_exclude.cells"
+CTS_SINK_CLUSTERING_SIZE = 10
+RT_MAX_LAYER = "met4"
+PDN_MULTILAYER = 0

@@ -40,11 +40,36 @@ COMPILE_ARGS += -g2012
 TOPLEVEL = tb
 COCOTB_TEST_MODULES = test
 
-.PHONY: warnings sim lint synth area uart tour clean-sim explorer proto shared syncref
+.PHONY: warnings sim lint synth area uart tour clean-sim explorer proto shared syncref targets targets-bench
 
 sim: uart proto tour shared syncref docs
 	@echo ""
 	@echo "all testbenches finished — check for FAILED above"
+
+# Tape-out targets (targets/*.toml, syn/targets/tapeout.py): the generated
+# Caravel and Openframe tops and the plain macro run in lockstep with the
+# Tiny Tapeout top on the same host commands; then the framework checks its
+# rules, lints the target tops and kills its mutants.
+TARGET_RTL = $(RTL) $(SRC)/targets/tiqora_serial_macro.sv $(SRC)/targets/tiqora_serial_caravel_core.sv \
+             $(SRC)/targets/user_project_wrapper.sv $(SRC)/targets/tiqora_serial_openframe_core.sv \
+             $(SRC)/targets/openframe_project_wrapper.sv
+SEED ?= 1
+
+targets:
+	python3 ../syn/targets/tapeout.py check
+	@# -Wno-UNUSEDPARAM as in `make lint`: tp_pkg.sv's shared constants
+	verilator --lint-only -Wall -Wno-UNUSEDPARAM --timing $(RTL) $(SRC)/targets/tiqora_serial_macro.sv --top-module tiqora_serial_macro
+	verilator --lint-only -Wall -Wno-UNUSEDPARAM --timing $(TARGET_RTL) --top-module user_project_wrapper
+	verilator --lint-only -Wall -Wno-UNUSEDPARAM --timing $(TARGET_RTL) --top-module openframe_project_wrapper
+	verilator --lint-only -Wall -Wno-UNUSEDPARAM --timing -DUSE_POWER_PINS $(TARGET_RTL) --top-module user_project_wrapper
+	verilator --lint-only -Wall -Wno-UNUSEDPARAM --timing -DUSE_POWER_PINS $(TARGET_RTL) --top-module openframe_project_wrapper
+	$(MAKE) --no-print-directory targets-bench
+	python3 ../syn/targets/tapeout.py mutants
+	python3 ../syn/targets/tapeout.py rtl-mutants
+
+targets-bench:
+	iverilog -g2012 -o tb_targets.vvp -s tb_targets $(TARGET_RTL) tb_targets.sv
+	sh vv.sh tb_targets.vvp +SEED=$(SEED)
 
 uart:
 	iverilog -g2012 -o tb_uart.vvp -s tb_uart $(RTL) tb_uart.sv
@@ -116,6 +141,7 @@ explorer:
 # editing one copy without updating both manifests fails here.
 shared:
 	cd .. && sha256sum -c --quiet docs/shared_timing.sha256 && echo "shared timing unit: $$(wc -l < docs/shared_timing.sha256) files match the manifest"
+	cd .. && sha256sum -c --quiet docs/shared_flow.sha256 && echo "shared tape-out flow: $$(wc -l < docs/shared_flow.sha256) files match the manifest"
 
 # The timing unit against a Python reference model (sync_model.py), every
 # output compared on every clock: 60,000 random clocks of pins, Xpulse

@@ -1,0 +1,60 @@
+name: targets
+
+# Tape-out targets beyond Tiny Tapeout (targets/*.toml, syn/targets/tapeout.py).
+#   check   the framework rules, lint, the lockstep bench and every mutant
+#   harden  LibreLane 3.0.14 per target, then the signoff gates on its
+#           metrics; the job fails when a gate fails, and the log ends with
+#           the whole final/metrics.json and the gate table
+# The Tiny Tapeout target keeps hardening in gds.yaml.
+
+on:
+  push:
+    paths:
+      - "src/**"
+      - "targets/**"
+      - "syn/targets/**"
+      - "test/tb_targets.sv"
+      - "test/Makefile"
+      - ".github/workflows/targets.yaml"
+  workflow_dispatch:
+
+jobs:
+  check:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+      - name: Install simulators
+        run: sudo apt-get update && sudo apt-get install -y iverilog verilator yosys
+      - name: Checks, lockstep bench, mutants
+        run: make -C test targets
+
+  harden:
+    needs: check
+    runs-on: ubuntu-24.04
+    timeout-minutes: 340
+    strategy:
+      fail-fast: false
+      matrix:
+        target: [sky130-macro, gf180-macro, caravel-sky130, openframe-sky130]
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+      - name: Install LibreLane
+        run: pip install librelane==3.0.14
+      - name: Harden and apply the signoff gates
+        run: python3 syn/targets/tapeout.py harden ${{ matrix.target }}
+      - name: Upload the run
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: ${{ matrix.target }}
+          path: |
+            targets/${{ matrix.target }}/runs/*/final
+            targets/${{ matrix.target }}/runs/*/*-checker-*
+            targets/${{ matrix.target }}/runs/*/flow.log
+          if-no-files-found: warn

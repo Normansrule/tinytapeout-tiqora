@@ -1,0 +1,73 @@
+# frames.toml — the fixed chip frames a carrier target plugs into.
+#
+# Shared, byte-identical in both repos (docs/shared_flow.sha256).
+# A frame is someone else's padframe with a fixed user-project wrapper:
+# its module name, port list, die size and wrapper floorplan cannot change.
+# The port lists are not typed here: `tapeout.py refresh-frames` extracts
+# them from the pinned upstream files into frames.json, and `tapeout.py
+# check` compares every generated wrapper against that list.
+#
+# Everything else below is copied from the pinned upstream files named in
+# each entry.
+
+[caravel]
+description = "Efabless Caravel user project area (chipIgnite harness; ChipFoundry maintains a fork, chipfoundry/caravel_user_project, not pinned here)"
+module = "user_project_wrapper"
+repo = "https://github.com/efabless/caravel_user_project"
+commit = "f534826abc72af4f9d467446b8b82c9471df68da"
+file = "verilog/rtl/user_project_wrapper.v"
+# MPRJ_IO_PADS comes from caravel's defines.v, which caravel_user_project
+# includes from the caravel checkout.
+defines_repo = "https://github.com/efabless/caravel"
+defines_commit = "27cbe49c90ba5362ad52c9968dd98e035c30c74f"
+defines_file = "verilog/rtl/defines.v"
+pdk = "sky130A"
+die_um = [2920.0, 3520.0]           # openlane/user_project_wrapper/config.json DIE_AREA
+def_template = "openlane/user_project_wrapper/fixed_dont_change/user_project_wrapper.def"
+pad_in = "io_in"
+pad_out = "io_out"
+pad_oeb = "io_oeb"
+# "GPIO[5] to GPIO[37] require configuration, while GPIO[0] to GPIO[4] are
+# preset and cannot be changed." (caravel_user_project docs/source/index.md
+# line 130). The user design leaves pads 0-4 alone.
+reserved_pads = [0, 1, 2, 3, 4]
+core_inputs = ["wb_clk_i", "wb_rst_i"]
+power = { vdd = "vccd1", gnd = "vssd1" }
+wrapper_vdd_nets = ["vccd1", "vccd2", "vdda1", "vdda2"]
+wrapper_gnd_nets = ["vssd1", "vssd2", "vssa1", "vssa2"]
+# user_defines.v power-on mode per pad (verilog/rtl/user_defines.v)
+gpio_modes = { in = "GPIO_MODE_USER_STD_INPUT_NOPULL", out = "GPIO_MODE_USER_STD_OUTPUT", io = "GPIO_MODE_USER_STD_BIDIRECTIONAL", unused = "GPIO_MODE_MGMT_STD_INPUT_NOPULL" }
+gpio_mode_first = 5
+# PDN of the fixed wrapper, from openlane/user_project_wrapper/config.json,
+# renamed to LibreLane 3 variables.
+wrapper_librelane = { PDN_CORE_RING = 1, PDN_CORE_RING_VWIDTH = 3.1, PDN_CORE_RING_HWIDTH = 3.1, PDN_CORE_RING_VOFFSET = 12.45, PDN_CORE_RING_HOFFSET = 12.45, PDN_CORE_RING_VSPACING = 1.7, PDN_CORE_RING_HSPACING = 1.7, PDN_VWIDTH = 3.1, PDN_HWIDTH = 3.1, PDN_VSPACING = 15.5, PDN_HSPACING = 15.5, PDN_VPITCH = 180, PDN_HPITCH = 180, PDN_VOFFSET = 5, PDN_HOFFSET = 5, RT_MAX_LAYER = "met4" }
+
+[openframe]
+description = "Efabless Openframe: the bare padframe, 44 GPIO, no management core (the frame Tiny Tapeout's sky130 chips use)"
+module = "openframe_project_wrapper"
+repo = "https://github.com/efabless/caravel_openframe_project"
+commit = "c3946a4fc3a2d1efe840b92b9ad954068c7cd52d"
+file = "verilog/rtl/openframe_project_wrapper.v"
+defines_repo = "https://github.com/efabless/caravel"
+defines_commit = "27cbe49c90ba5362ad52c9968dd98e035c30c74f"
+defines_file = "verilog/rtl/defines.v"
+pdk = "sky130A"
+die_um = [3166.63, 4766.63]         # openlane/openframe_project_wrapper/config.json DIE_AREA
+def_template = "openlane/openframe_project_wrapper/fixed_dont_change/openframe_project_wrapper.def"
+pad_in = "gpio_in"
+pad_out = "gpio_out"
+pad_oeb = "gpio_oeb"
+reserved_pads = []
+core_inputs = ["porb_l", "resetb_l"]
+power = { vdd = "vccd1", gnd = "vssd1" }
+wrapper_vdd_nets = ["vccd1"]
+wrapper_gnd_nets = ["vssd1"]
+# Digital mode per pad role, from the openframe example's CONFIG_GPIO_INIT
+# (verilog/rtl/picosoc.v lines 505-550) decoded with gpio_wb.v's bit map:
+# 12'h4c1 input (dm 001, input on), 12'h2c6 output (dm 110, input off),
+# 12'h006 bidirectional (dm 110, input on).
+pad_dm = { in = 1, out = 6, io = 6, unused = 1 }
+pad_inp_dis = { in = 0, out = 1, io = 0, unused = 0 }
+# Static pad controls the upstream wrapper ties to gpio_loopback_zero.
+loopback_zero = ["gpio_analog_en", "gpio_analog_pol", "gpio_analog_sel", "gpio_holdover", "gpio_ib_mode_sel", "gpio_vtrip_sel", "gpio_slow_sel"]
+wrapper_librelane = { PDN_CORE_RING = 1, PDN_CORE_RING_VWIDTH = 20, PDN_CORE_RING_HWIDTH = 20, PDN_CORE_RING_VOFFSET = -4, PDN_CORE_RING_HOFFSET = -4, PDN_CORE_RING_VSPACING = 2.4, PDN_CORE_RING_HSPACING = 2.4, PDN_VWIDTH = 6.4, PDN_HWIDTH = 6.4, PDN_VSPACING = 3.2, PDN_HSPACING = 3.2, PDN_VPITCH = 40, PDN_HPITCH = 40, PDN_VOFFSET = 18.43, PDN_HOFFSET = 22.83 }
