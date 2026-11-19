@@ -97,4 +97,9 @@ loopback_zero = ["gpio_analog_en", "gpio_analog_pol", "gpio_analog_sel", "gpio_h
 # port-to-port wires, which Yosys can only write as assign statements, and LibreLane 3 stops on those by default (Checker.
 # NetlistAssignStatements). They are allowed here and nowhere else; the
 # wrapper's LVS gate (G3) still has to show the layout wires them.
-wrapper_librelane = { ERROR_ON_NL_ASSIGN_STATEMENTS = false, PDN_CORE_RING = 1, PDN_CORE_RING_VWIDTH = 20, PDN_CORE_RING_HWIDTH = 20, PDN_CORE_RING_VOFFSET = -4, PDN_CORE_RING_HOFFSET = -4, PDN_CORE_RING_VSPACING = 2.4, PDN_CORE_RING_HSPACING = 2.4, PDN_VWIDTH = 6.4, PDN_HWIDTH = 6.4, PDN_VSPACING = 3.2, PDN_HSPACING = 3.2, PDN_VPITCH = 40, PDN_HPITCH = 40, PDN_VOFFSET = 18.43, PDN_HOFFSET = 22.83 }
+# Antenna repair is off in this stage too: OpenROAD's diode insertion
+# crashed on the wrapper ("Unable to repair antennas on net with diodes",
+# then a stack trace; targets run 44640065735), where upstream had
+# GRT_REPAIR_ANTENNAS = 1 under OpenLane 2. Antenna violations are left for
+# gate G3 to report.
+wrapper_librelane = { ERROR_ON_NL_ASSIGN_STATEMENTS = false, RUN_ANTENNA_REPAIR = false, DRT_ANTENNA_REPAIR_ITERS = 0, PDN_CORE_RING = 1, PDN_CORE_RING_VWIDTH = 20, PDN_CORE_RING_HWIDTH = 20, PDN_CORE_RING_VOFFSET = -4, PDN_CORE_RING_HOFFSET = -4, PDN_CORE_RING_VSPACING = 2.4, PDN_CORE_RING_HSPACING = 2.4, PDN_VWIDTH = 6.4, PDN_HWIDTH = 6.4, PDN_VSPACING = 3.2, PDN_HSPACING = 3.2, PDN_VPITCH = 40, PDN_HPITCH = 40, PDN_VOFFSET = 18.43, PDN_HOFFSET = 22.83 }
