@@ -140,6 +140,10 @@ with the whole metrics file and the gate table.
   SoC drives. Those ties are port-to-port wires, so the Openframe wrapper
   stage allows assign statements in its netlist; its LVS gate still checks
   the wiring.
+  Upstream's Openframe floorplan template declares its supply pins as
+  signal pins; the wrapper stage reads a copy with those 14 pins marked
+  as power or ground and nothing else changed (`template_power_pins` in
+  `syn/targets/frames.toml`), as the Caravel template already marks them.
 - **gf180** changes nothing in the RTL: the core has no technology cells.
 
 ## Adding a target

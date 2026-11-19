@@ -14,7 +14,7 @@
         3166.63,
         4766.63
     ],
-    "FP_DEF_TEMPLATE": "dir::../.upstream/openframe/openlane/openframe_project_wrapper/fixed_dont_change/openframe_project_wrapper.def",
+    "FP_DEF_TEMPLATE": "dir::../.upstream/openframe.template.def",
     "SYNTH_ELABORATE_ONLY": 1,
     "VERILOG_POWER_DEFINE": "USE_POWER_PINS",
     "VDD_NETS": [

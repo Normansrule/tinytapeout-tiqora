@@ -61,6 +61,14 @@ defines_file = "verilog/rtl/defines.v"
 pdk = "sky130A"
 die_um = [3166.63, 4766.63]         # openlane/openframe_project_wrapper/config.json DIE_AREA
 def_template = "openlane/openframe_project_wrapper/fixed_dont_change/openframe_project_wrapper.def"
+# That template declares its 14 supply pins as plain signal pins, so
+# LibreLane's template step expects matching signal ports and stops
+# ("vccd1 not found in design layout", targets run 44637392833). The
+# Caravel template marks its supply pins + USE POWER / GROUND, and LibreLane
+# then leaves them out of the match. tapeout.py writes a copy of this
+# template with these pins marked that way (vss* GROUND, the rest POWER) and
+# nothing else changed: targets/.upstream/openframe.template.def.
+template_power_pins = ["vdda", "vdda1", "vdda2", "vssa", "vssa1", "vssa2", "vccd", "vccd1", "vccd2", "vssd", "vssd1", "vssd2", "vddio", "vssio"]
 pad_in = "gpio_in"
 pad_out = "gpio_out"
 pad_oeb = "gpio_oeb"

@@ -500,7 +500,7 @@ def gen_configs(world: dict, t: dict) -> dict[str, str]:
             "CLOCK_PERIOD": t["design"]["clock_period_ns"],
             "FP_SIZING": "absolute",
             "DIE_AREA": [0, 0, fr["die_um"][0], fr["die_um"][1]],
-            "FP_DEF_TEMPLATE": f"dir::../.upstream/{c['frame']}/{fr['def_template']}",
+            "FP_DEF_TEMPLATE": f"dir::../.upstream/{template_def_name(c['frame'], fr)}",
             "SYNTH_ELABORATE_ONLY": 1,
             "VERILOG_POWER_DEFINE": "USE_POWER_PINS",
             "VDD_NETS": fr["wrapper_vdd_nets"],
@@ -1312,6 +1312,37 @@ def print_gates(rows) -> bool:
     return ok
 
 
+def template_def_name(frame: str, fr: dict) -> str:
+    """The floorplan template a frame's wrapper stage reads, under targets/.upstream/."""
+    if fr.get("template_power_pins"):
+        return f"{frame}.template.def"
+    return f"{frame}/{fr['def_template']}"
+
+
+def mark_power_pins(def_text: str, pins: list[str]) -> str:
+    """The template with each named pin declared + SPECIAL + USE POWER (or
+    GROUND for vss*). Nothing else changes: same pins, same shapes, same places."""
+    out, in_pins, marked = [], False, set()
+    for line in def_text.splitlines(keepends=True):
+        st = line.strip()
+        if st.startswith("PINS "):
+            in_pins = True
+        elif st.startswith("END PINS"):
+            in_pins = False
+        m = re.match(r"(\s*- (\S+) \+ NET (\S+))(.*)$", line.rstrip("\n")) if in_pins else None
+        if m and m.group(2) in pins:
+            if "+ USE " in m.group(4):
+                raise SystemExit(f"template pin {m.group(2)} already has a USE")
+            use = "GROUND" if m.group(2).startswith("vss") else "POWER"
+            line = f"{m.group(1)} + SPECIAL + USE {use}{m.group(4)}\n"
+            marked.add(m.group(2))
+        out.append(line)
+    missing = set(pins) - marked
+    if missing:
+        raise SystemExit(f"template has no pin named {sorted(missing)}")
+    return "".join(out)
+
+
 def fetch_upstream(world: dict, t: dict):
     c = t["carrier"]
     fr = world["frames"][c["frame"]]
@@ -1320,6 +1351,10 @@ def fetch_upstream(world: dict, t: dict):
         d.parent.mkdir(parents=True, exist_ok=True)
         subprocess.run(["git", "clone", "-q", "--filter=blob:none", fr["repo"], str(d)], check=True)
     subprocess.run(["git", "-C", str(d), "checkout", "-q", fr["commit"]], check=True)
+    if fr.get("template_power_pins"):
+        src = (d / fr["def_template"]).read_text()
+        (TARGETS / ".upstream" / template_def_name(c["frame"], fr)).write_text(
+            mark_power_pins(src, fr["template_power_pins"]))
 
 
 def harden(world: dict, t: dict, extra: list[str]) -> int:
