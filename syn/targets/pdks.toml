@@ -47,3 +47,12 @@ limits = { max_transition_ns = 3.0, max_capacitance_pf = 0.2, max_fanout = 10 }
 # LibreLane hardens on gf180mcuD (fetched by ciel). Pre-layout numbers in
 # targets/results/ name the package their liberty came from.
 source = "open_pdks 1.0.471: libs.tech/openlane/gf180mcu_fd_sc_mcu7t5v0/config.tcl lines 14-51, libs.tech/openlane/config.tcl line 21; LibreLane 3.0.14 pdk_compat.py"
+# LibreLane 3.0.14 skips KLayout DRC on gf180mcuD unless KLAYOUT_DRC_RUNSET
+# is set (steps/klayout.py, run_gf180mcu), and the PDK revision it pins
+# (open_pdks 54435919) does not set it. The path is where that revision
+# puts the deck (gf180mcu/Makefile.in, klayout-% copies wafer-space/gf180mcu
+# gf180mcuD/libs.tech/klayout/tech); the options are that repository's own
+# (gf180mcuD/libs.tech/librelane/config.tcl lines 164-173).
+[gf180mcuD.librelane]
+KLAYOUT_DRC_RUNSET = "pdk_dir::libs.tech/klayout/tech/drc/gf180mcu.drc"
+KLAYOUT_DRC_DEFINES = { feol = "true", beol = "true", dummy = "true", dummy_no_sub_prev = "true", offgrid = "true", conn_drc = "true", wedge = "true", run_mode = "deep" }

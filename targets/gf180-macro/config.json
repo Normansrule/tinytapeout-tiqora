@@ -35,5 +35,16 @@
     "RUN_MAGIC_DRC": 1,
     "RUN_KLAYOUT_DRC": 1,
     "RUN_LVS": 1,
+    "KLAYOUT_DRC_RUNSET": "pdk_dir::libs.tech/klayout/tech/drc/gf180mcu.drc",
+    "KLAYOUT_DRC_DEFINES": {
+        "feol": "true",
+        "beol": "true",
+        "dummy": "true",
+        "dummy_no_sub_prev": "true",
+        "offgrid": "true",
+        "conn_drc": "true",
+        "wedge": "true",
+        "run_mode": "deep"
+    },
     "CTS_SINK_CLUSTERING_SIZE": 10
 }

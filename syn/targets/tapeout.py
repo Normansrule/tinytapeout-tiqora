@@ -464,6 +464,7 @@ def ll_common(world: dict, t: dict, design: str, die: list, files: list[str]) ->
         "RUN_KLAYOUT_DRC": 1,
         "RUN_LVS": 1,
     }
+    cfg.update(pdk.get("librelane", {}))   # PDK settings LibreLane lacks
     cfg.update(t.get("librelane", {}))
     return cfg
 
@@ -848,8 +849,10 @@ def gates(world: dict, t: dict, metrics: dict, stage: str = "core") -> list[tupl
                            ("hold", "G2", s.get("hold_min_ns", 0.0))):
         for cn in pdk["corners"]:
             v = need(f"timing__{kind}__ws__corner:{cn}")
+            r2r = need(f"timing__{kind}_r2r__ws__corner:{cn}")
+            note = "" if r2r is None else f", flop to flop {r2r:+.3f}"   # shows whether a pin path is the worst
             row(g, f"{kind} slack {cn}", v is not None and v >= floor,
-                "missing" if v is None else f"{v:+.3f} ns (floor {floor:+.2f})")
+                "missing" if v is None else f"{v:+.3f} ns (floor {floor:+.2f}{note})")
     # G3 physical verification
     for key, what in (("route__drc_errors", "router DRC"),
                       ("magic__drc_error__count", "Magic DRC"),
