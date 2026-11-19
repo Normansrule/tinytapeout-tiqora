@@ -135,7 +135,11 @@ with the whole metrics file and the gate table.
 - **Openframe** takes its clock from pad 38 and puts the UART where the upstream
   example SoC has it (5 and 6). Every pad's digital mode comes from the
   example's own encodings; the analog and hold controls are tied to
-  `gpio_loopback_zero` in the wrapper, as upstream does.
+  `gpio_loopback_zero` in the wrapper, as upstream does, and so are the
+  input-buffer mode, trip-point and slew controls, which upstream's example
+  SoC drives. Those ties are port-to-port wires, so the Openframe wrapper
+  stage allows assign statements in its netlist; its LVS gate still checks
+  the wiring.
 - **gf180** changes nothing in the RTL: the core has no technology cells.
 
 ## Adding a target
