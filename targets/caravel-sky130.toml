@@ -82,7 +82,10 @@ pins = [
 PDN_ENABLE_RAILS = 1
 RUN_TAP_ENDCAP_INSERTION = 1
 RUN_POST_GPL_DESIGN_REPAIR = true
-RUN_POST_GRT_DESIGN_REPAIR = true
+# Post-global-route repair stops with OpenROAD RSZ-0074 ("found route to 1
+# pins, expected 0") on this wrapper: run 44643652345. Placement-time repair
+# above, now with the core's timing models, sizes the pad wires instead.
+RUN_POST_GRT_DESIGN_REPAIR = false
 DESIGN_REPAIR_BUFFER_OUTPUT_PORTS = true
 RUN_ANTENNA_REPAIR = true
 DRT_ANTENNA_REPAIR_ITERS = 3

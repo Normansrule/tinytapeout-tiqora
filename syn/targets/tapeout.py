@@ -512,6 +512,11 @@ def gen_configs(world: dict, t: dict) -> dict[str, str]:
                 "nl": [f"{run}/nl/{cc}.nl.v"],
                 "pnl": [f"{run}/pnl/{cc}.pnl.v"],
                 "spef": {f"{rc}_*": [f"{run}/spef/{rc}/{cc}.{rc}.spef"] for rc in ("min", "nom", "max")},
+                # Timing models the core's signoff STA wrote (LibreLane 3.0.14
+                # STAPostPNR: final/lib/<corner>/<design>__<corner>.lib). Without
+                # them the resizer black-boxes the macro and cannot size the
+                # wires from its pins to the pads.
+                "lib": {cn: [f"{run}/lib/{cn}/{cc}__{cn}.lib"] for cn in world["pdks"][t["pdk"]]["corners"]},
                 "instances": {c["instance"]: {"location": c["location_um"], "orientation": "N"}},
             }},
             "RUN_CTS": 0,

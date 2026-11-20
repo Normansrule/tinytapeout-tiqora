@@ -51,6 +51,35 @@
                     "dir::runs/core/final/spef/max/tiqora_serial_openframe_core.max.spef"
                 ]
             },
+            "lib": {
+                "nom_tt_025C_1v80": [
+                    "dir::runs/core/final/lib/nom_tt_025C_1v80/tiqora_serial_openframe_core__nom_tt_025C_1v80.lib"
+                ],
+                "nom_ss_100C_1v60": [
+                    "dir::runs/core/final/lib/nom_ss_100C_1v60/tiqora_serial_openframe_core__nom_ss_100C_1v60.lib"
+                ],
+                "nom_ff_n40C_1v95": [
+                    "dir::runs/core/final/lib/nom_ff_n40C_1v95/tiqora_serial_openframe_core__nom_ff_n40C_1v95.lib"
+                ],
+                "min_tt_025C_1v80": [
+                    "dir::runs/core/final/lib/min_tt_025C_1v80/tiqora_serial_openframe_core__min_tt_025C_1v80.lib"
+                ],
+                "min_ss_100C_1v60": [
+                    "dir::runs/core/final/lib/min_ss_100C_1v60/tiqora_serial_openframe_core__min_ss_100C_1v60.lib"
+                ],
+                "min_ff_n40C_1v95": [
+                    "dir::runs/core/final/lib/min_ff_n40C_1v95/tiqora_serial_openframe_core__min_ff_n40C_1v95.lib"
+                ],
+                "max_tt_025C_1v80": [
+                    "dir::runs/core/final/lib/max_tt_025C_1v80/tiqora_serial_openframe_core__max_tt_025C_1v80.lib"
+                ],
+                "max_ss_100C_1v60": [
+                    "dir::runs/core/final/lib/max_ss_100C_1v60/tiqora_serial_openframe_core__max_ss_100C_1v60.lib"
+                ],
+                "max_ff_n40C_1v95": [
+                    "dir::runs/core/final/lib/max_ff_n40C_1v95/tiqora_serial_openframe_core__max_ff_n40C_1v95.lib"
+                ]
+            },
             "instances": {
                 "tiqora": {
                     "location": [
