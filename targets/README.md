@@ -133,12 +133,11 @@ with the whole metrics file and the gate table.
   power-on mode; unused pads stay with the management core.
 - **Openframe** takes its clock from pad 38 and puts the UART where the upstream
   example SoC has it (5 and 6). Every pad's digital mode comes from the
-  example's own encodings; the analog and hold controls are tied to
-  `gpio_loopback_zero` in the wrapper, as upstream does, and the core
-  drives the input-buffer mode, trip-point and slew controls to 0, as
-  upstream's example SoC drives them. The wrapper ties are port-to-port wires, so the Openframe wrapper
-  stage allows assign statements in its netlist; its LVS gate still checks
-  the wiring.
+  example's own encodings. The core drives the other seven static pad
+  controls (analog, hold, input-buffer mode, trip point, slew) to 0, so
+  every wrapper net runs from the core to one pad. Upstream ties four of
+  them to `gpio_loopback_zero` in the wrapper instead; with those ties the
+  router could not reach 24 left-edge pins.
   Upstream's Openframe floorplan template declares its supply pins as
   signal pins; the wrapper stage reads a copy with those 14 pins marked
   as power or ground and nothing else changed (`template_power_pins` in

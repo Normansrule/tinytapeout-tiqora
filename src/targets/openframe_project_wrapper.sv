@@ -67,14 +67,14 @@ module openframe_project_wrapper (
         .gpio_dm2(gpio_dm2),
         .gpio_dm1(gpio_dm1),
         .gpio_dm0(gpio_dm0),
+        .gpio_analog_en(gpio_analog_en),
+        .gpio_analog_pol(gpio_analog_pol),
+        .gpio_analog_sel(gpio_analog_sel),
+        .gpio_holdover(gpio_holdover),
         .gpio_ib_mode_sel(gpio_ib_mode_sel),
         .gpio_vtrip_sel(gpio_vtrip_sel),
         .gpio_slow_sel(gpio_slow_sel)
     );
-    assign gpio_analog_en = gpio_loopback_zero;
-    assign gpio_analog_pol = gpio_loopback_zero;
-    assign gpio_analog_sel = gpio_loopback_zero;
-    assign gpio_holdover = gpio_loopback_zero;
 endmodule : openframe_project_wrapper
 /* verilator lint_on UNDRIVEN */
 /* verilator lint_on UNUSEDPARAM */

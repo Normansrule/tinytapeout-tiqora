@@ -87,26 +87,23 @@ wrapper_gnd_nets = ["vssd1"]
 # 12'h006 bidirectional (dm 110, input on).
 pad_dm = { in = 1, out = 6, io = 6, unused = 1 }
 pad_inp_dis = { in = 0, out = 1, io = 0, unused = 0 }
-# Static pad controls, split the way upstream splits them. The wrapper ties
-# loopback_zero straight to the pads' own gpio_loopback_zero, as upstream's
-# wrapper does (verilog/rtl/openframe_project_wrapper.v lines 138-141); the
-# core drives core_zero to 0, as upstream's example SoC drives them (lines
-# 117-119).
-loopback_zero = ["gpio_analog_en", "gpio_analog_pol", "gpio_analog_sel", "gpio_holdover"]
-core_zero = ["gpio_ib_mode_sel", "gpio_vtrip_sel", "gpio_slow_sel"]
-# The upstream wrapper ties four pad-control buses straight to the pads'
-# own gpio_loopback_zero (verilog/rtl/openframe_project_wrapper.v lines
-# 138-141), and so does the generated one (loopback_zero above). These are
-# port-to-port wires, which Yosys can only write as assign statements, and LibreLane 3 stops on those by default (Checker.
-# NetlistAssignStatements). They are allowed here and nowhere else; the
-# wrapper's LVS gate (G3) still has to show the layout wires them.
+# Static pad controls. Upstream's wrapper ties four of these buses straight
+# to the pads' own gpio_loopback_zero (verilog/rtl/openframe_project_wrapper.v
+# lines 138-141) and its example SoC drives the other three (lines 117-119).
+# Here the core drives all seven to 0 (core_zero), so every pad pin is a
+# point-to-point wire from the core and the wrapper has no port-to-port
+# nets. With the four upstream ties, detailed routing stopped every time
+# with 24 left-edge pins lacking an access point (DRT-1231), most of them on
+# the tie nets: runs 44641290197, 44643652345, 44647052370, 44649518757.
+# Wrapper-level ties stay available through loopback_zero.
+loopback_zero = []
+core_zero = ["gpio_analog_en", "gpio_analog_pol", "gpio_analog_sel", "gpio_holdover", "gpio_ib_mode_sel", "gpio_vtrip_sel", "gpio_slow_sel"]
 # Antenna repair is off in this stage too: OpenROAD's diode insertion
 # crashed on the wrapper ("Unable to repair antennas on net with diodes",
 # then a stack trace; targets run 44640065735), where upstream had
 # GRT_REPAIR_ANTENNAS = 1 under OpenLane 2. Antenna violations are left for
 # gate G3 to report.
-# CORE_AREA is upstream's (config.json: 40 µm in from each die edge). Without
-# it LibreLane drew the core 5.5 µm from the left edge, the 20 µm power ring
-# then ran off the die over the left-edge pads, and 24 of their pins had no
-# router access point (DRT-1231, runs 44641290197, 44643652345, 44647052370).
-wrapper_librelane = { CORE_AREA = [40, 40, 3126.63, 4726.63], ERROR_ON_NL_ASSIGN_STATEMENTS = false, RUN_ANTENNA_REPAIR = false, DRT_ANTENNA_REPAIR_ITERS = 0, PDN_CORE_RING = 1, PDN_CORE_RING_VWIDTH = 20, PDN_CORE_RING_HWIDTH = 20, PDN_CORE_RING_VOFFSET = -4, PDN_CORE_RING_HOFFSET = -4, PDN_CORE_RING_VSPACING = 2.4, PDN_CORE_RING_HSPACING = 2.4, PDN_VWIDTH = 6.4, PDN_HWIDTH = 6.4, PDN_VSPACING = 3.2, PDN_HSPACING = 3.2, PDN_VPITCH = 40, PDN_HPITCH = 40, PDN_VOFFSET = 18.43, PDN_HOFFSET = 22.83 }
+# CORE_AREA is upstream's (config.json: 40 µm in from each die edge), so its
+# power ring settings below sit where upstream put them. LibreLane's default
+# was 5.5 µm from the left edge.
+wrapper_librelane = { CORE_AREA = [40, 40, 3126.63, 4726.63], RUN_ANTENNA_REPAIR = false, DRT_ANTENNA_REPAIR_ITERS = 0, PDN_CORE_RING = 1, PDN_CORE_RING_VWIDTH = 20, PDN_CORE_RING_HWIDTH = 20, PDN_CORE_RING_VOFFSET = -4, PDN_CORE_RING_HOFFSET = -4, PDN_CORE_RING_VSPACING = 2.4, PDN_CORE_RING_HSPACING = 2.4, PDN_VWIDTH = 6.4, PDN_HWIDTH = 6.4, PDN_VSPACING = 3.2, PDN_HSPACING = 3.2, PDN_VPITCH = 40, PDN_HPITCH = 40, PDN_VOFFSET = 18.43, PDN_HOFFSET = 22.83 }
