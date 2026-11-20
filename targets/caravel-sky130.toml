@@ -74,18 +74,13 @@ pins = [
 
 # The core sits in one corner of the user area and drives pads up to a few
 # millimetres away. With no cells in the wrapper (the frame's default, as
-# upstream), those wires failed max slew, max capacitance and antenna gates
-# (targets runs 44640065735 / 44640071986): no single driver meets 0.2 pF
-# over that length. Here the wrapper gets standard-cell rails and tap cells,
-# and LibreLane may place repeaters, port buffers and antenna diodes on them.
-[wrapper_librelane]
-PDN_ENABLE_RAILS = 1
-RUN_TAP_ENDCAP_INSERTION = 1
-RUN_POST_GPL_DESIGN_REPAIR = true
-# Post-global-route repair stops with OpenROAD RSZ-0074 ("found route to 1
-# pins, expected 0") on this wrapper: run 44643652345. Placement-time repair
-# above, now with the core's timing models, sizes the pad wires instead.
-RUN_POST_GRT_DESIGN_REPAIR = false
-DESIGN_REPAIR_BUFFER_OUTPUT_PORTS = true
-RUN_ANTENNA_REPAIR = true
-DRT_ANTENNA_REPAIR_ITERS = 3
+# upstream), those wires fail max slew, max capacitance and antenna gates
+# (targets runs 44640065735 / 44640071986). Repeaters in the wrapper were
+# tried and are off again: with standard-cell rails, tap cells and
+# placement-time repair (runs 44647052370, 44649518757, Serial) antenna and
+# fanout went to 0 and max capacitance to 1-2 nets, but Magic DRC reported
+# 8789 errors (nwell.1, nwell.4, LU.3, nwell.2a: taps not metal-connected)
+# and LVS 2944, while OpenROAD's power check found every shape connected.
+# That disagreement is not yet understood, and a layout that fails DRC and
+# LVS is worse than one that fails electrical gates, so the wrapper keeps
+# the frame default until it is.
