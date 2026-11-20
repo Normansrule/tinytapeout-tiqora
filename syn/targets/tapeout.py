@@ -1383,6 +1383,25 @@ def print_failed_step(run: Path, lines: int = 120):
         print("\n".join(text[-lines:]))
 
 
+def print_failed_reports(run: Path, metrics: dict, lines: int = 80):
+    """Excerpts of the DRC and LVS reports behind a failing G3 row, for the
+    same reason as print_failed_step: CI keeps only the log readable."""
+    picks = [("magic__drc_error__count", "*-magic-drc/reports/*.rpt",
+              re.compile(r"^[^\d\s-]")),   # rule names, not the coordinates
+             ("design__lvs_error__count", "*-netgen-lvs/reports/lvs.netgen.rpt",
+              re.compile(r"no matching|[Mm]ismatch|disconnected|do not match|failed|^Net: ")),
+             ]
+    for key, pattern, keep in picks:
+        if not metrics.get(key):
+            continue
+        for rpt in sorted(run.glob(pattern)):
+            text = rpt.read_text(errors="replace").splitlines()
+            if keep is not None:
+                text = [ln for ln in text if keep.search(ln)]
+            print(f"--- {key} = {metrics[key]}: first {min(lines, len(text))} lines of {rpt.relative_to(ROOT)} ---")
+            print("\n".join(text[:lines]))
+
+
 def harden(world: dict, t: dict, extra: list[str]) -> int:
     stages = []
     if t["kind"] == "macro":
@@ -1412,6 +1431,7 @@ def harden(world: dict, t: dict, extra: list[str]) -> int:
         print(json.dumps(metrics, indent=1, sort_keys=True))
         print(f"--- {stage} signoff gates ---")
         ok = print_gates(gates(world, t, metrics, stage))
+        print_failed_reports(ROOT / "targets" / t["_stem"] / "runs" / stage, metrics)
         verdicts[stage] = "PASS" if ok else "FAIL"
         ok_all &= ok and r.returncode == 0
     print("verdict: " + ", ".join(f"{k} {v}" for k, v in verdicts.items()))
