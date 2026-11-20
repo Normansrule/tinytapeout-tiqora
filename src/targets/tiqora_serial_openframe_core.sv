@@ -44,7 +44,10 @@ module tiqora_serial_openframe_core (
     output wire [43:0] gpio_inp_dis,
     output wire [43:0] gpio_dm2,
     output wire [43:0] gpio_dm1,
-    output wire [43:0] gpio_dm0
+    output wire [43:0] gpio_dm0,
+    output wire [43:0] gpio_ib_mode_sel,
+    output wire [43:0] gpio_vtrip_sel,
+    output wire [43:0] gpio_slow_sel
 );
 
     // the macro's pins, prefixed m_ so they cannot clash with frame names
@@ -268,6 +271,9 @@ module tiqora_serial_openframe_core (
     assign gpio_oeb[43] = 1'b1;
     assign {gpio_dm2[43], gpio_dm1[43], gpio_dm0[43]} = 3'b001;
     assign gpio_inp_dis[43] = 1'b0;
+    assign gpio_ib_mode_sel = 44'b0;
+    assign gpio_vtrip_sel = 44'b0;
+    assign gpio_slow_sel = 44'b0;
 
     wire _unused = &{1'b0, gpio_in[0], gpio_in[1], gpio_in[2], gpio_in[3], gpio_in[4], gpio_in[6], gpio_in[7], gpio_in[8], gpio_in[9], gpio_in[10], gpio_in[11], gpio_in[12], gpio_in[13], gpio_in[14], gpio_in[15], gpio_in[24], gpio_in[25], gpio_in[26], gpio_in[27], gpio_in[28], gpio_in[29], gpio_in[30], gpio_in[31], gpio_in[32], gpio_in[33], gpio_in[34], gpio_in[35], gpio_in[36], gpio_in[37], gpio_in[39], gpio_in[40], gpio_in[41], gpio_in[42], gpio_in[43], 1'b0};
 endmodule : tiqora_serial_openframe_core

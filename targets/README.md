@@ -134,9 +134,9 @@ with the whole metrics file and the gate table.
 - **Openframe** takes its clock from pad 38 and puts the UART where the upstream
   example SoC has it (5 and 6). Every pad's digital mode comes from the
   example's own encodings; the analog and hold controls are tied to
-  `gpio_loopback_zero` in the wrapper, as upstream does, and so are the
-  input-buffer mode, trip-point and slew controls, which upstream's example
-  SoC drives. Those ties are port-to-port wires, so the Openframe wrapper
+  `gpio_loopback_zero` in the wrapper, as upstream does, and the core
+  drives the input-buffer mode, trip-point and slew controls to 0, as
+  upstream's example SoC drives them. The wrapper ties are port-to-port wires, so the Openframe wrapper
   stage allows assign statements in its netlist; its LVS gate still checks
   the wiring.
   Upstream's Openframe floorplan template declares its supply pins as

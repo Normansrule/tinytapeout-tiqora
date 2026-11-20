@@ -87,13 +87,19 @@ wrapper_gnd_nets = ["vssd1"]
 # 12'h006 bidirectional (dm 110, input on).
 pad_dm = { in = 1, out = 6, io = 6, unused = 1 }
 pad_inp_dis = { in = 0, out = 1, io = 0, unused = 0 }
-# Static pad controls the generated wrapper ties to gpio_loopback_zero. Upstream
-# ties the first four (wrapper lines 138-141) and lets its example SoC drive
-# the other three (lines 117-119); this design has no use for them.
-loopback_zero = ["gpio_analog_en", "gpio_analog_pol", "gpio_analog_sel", "gpio_holdover", "gpio_ib_mode_sel", "gpio_vtrip_sel", "gpio_slow_sel"]
+# Static pad controls, split the way upstream splits them. The wrapper ties
+# loopback_zero straight to the pads' own gpio_loopback_zero, as upstream's
+# wrapper does (verilog/rtl/openframe_project_wrapper.v lines 138-141); the
+# core drives core_zero to 0, as upstream's example SoC drives them (lines
+# 117-119). Tying all seven in the wrapper put eight pins on each pad's
+# loopback net, and 24 of the left-edge ones then had no router access point
+# (DRT-1231, runs 44641290197 and 44643652345); fewer pins per net is the
+# suspected fix, not yet confirmed by a run.
+loopback_zero = ["gpio_analog_en", "gpio_analog_pol", "gpio_analog_sel", "gpio_holdover"]
+core_zero = ["gpio_ib_mode_sel", "gpio_vtrip_sel", "gpio_slow_sel"]
 # The upstream wrapper ties four pad-control buses straight to the pads'
 # own gpio_loopback_zero (verilog/rtl/openframe_project_wrapper.v lines
-# 138-141); the generated one ties seven (loopback_zero above). These are
+# 138-141), and so does the generated one (loopback_zero above). These are
 # port-to-port wires, which Yosys can only write as assign statements, and LibreLane 3 stops on those by default (Checker.
 # NetlistAssignStatements). They are allowed here and nowhere else; the
 # wrapper's LVS gate (G3) still has to show the layout wires them.

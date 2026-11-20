@@ -282,6 +282,7 @@ def gen_core_rtl(world: dict, t: dict) -> str:
                  f"    output wire [{n-1}:0] gpio_dm2",
                  f"    output wire [{n-1}:0] gpio_dm1",
                  f"    output wire [{n-1}:0] gpio_dm0"]
+        decl += [f"    output wire [{n-1}:0] {z}" for z in fr.get("core_zero", [])]
     L.append(",\n".join(decl))
     L.append(");")
 
@@ -348,6 +349,8 @@ def gen_core_rtl(world: dict, t: dict) -> str:
             dm = fr["pad_dm"][key]
             L.append(f"    assign {{gpio_dm2[{pad}], gpio_dm1[{pad}], gpio_dm0[{pad}]}} = 3'b{dm:03b};")
             L.append(f"    assign gpio_inp_dis[{pad}] = 1'b{fr['pad_inp_dis'][key]};")
+    for z in fr.get("core_zero", []) if openframe else []:
+        L.append(f"    assign {z} = {n}'b0;")
     L.append("")
     if unused_in:
         L.append("    wire _unused = &{1'b0, " + ", ".join(unused_in) + ", 1'b0};")
@@ -406,6 +409,7 @@ def gen_wrapper_rtl(world: dict, t: dict) -> str:
     if "pad_dm" in fr:
         body += ["        .gpio_inp_dis(gpio_inp_dis)", "        .gpio_dm2(gpio_dm2)",
                  "        .gpio_dm1(gpio_dm1)", "        .gpio_dm0(gpio_dm0)"]
+        body += [f"        .{z}({z})" for z in fr.get("core_zero", [])]
     L.append(f"    {c['core']} {c['instance']} (")
     L += conns
     L.append(",\n".join(body))
