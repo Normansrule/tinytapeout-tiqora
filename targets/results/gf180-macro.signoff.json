@@ -1,6 +1,6 @@
 {
-  "verdict": "FAIL at 40 ns: core 40/55 (setup -2.69 ns max_ss flop to flop; slew, cap) — run 44641290197; clock since raised to 45 ns, not yet rerun",
+  "verdict": "FAIL at 45 ns: core 43/55 (slew at ss, 1 capacitance net; setup +2.31 ns max_ss, every corner passes timing; DRC, LVS clean) — run 44651901727",
   "measured": "LibreLane 3.0.14 --dockerized, tapeout.py signoff, GitHub targets workflow",
-  "run": "https://github.com/Normansrule/tinytapeout-tiqora/actions/runs/44641290197",
-  "commit": "c108c3f"
+  "run": "https://github.com/Normansrule/tinytapeout-tiqora/actions/runs/44651901727",
+  "commit": "64b047b"
 }
