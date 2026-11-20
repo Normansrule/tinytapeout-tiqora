@@ -100,6 +100,12 @@
     "RUN_KLAYOUT_DRC": 1,
     "RUN_LVS": 1,
     "MAGIC_ZEROIZE_ORIGIN": 0,
+    "CORE_AREA": [
+        40,
+        40,
+        3126.63,
+        4726.63
+    ],
     "ERROR_ON_NL_ASSIGN_STATEMENTS": false,
     "RUN_ANTENNA_REPAIR": false,
     "DRT_ANTENNA_REPAIR_ITERS": 0,

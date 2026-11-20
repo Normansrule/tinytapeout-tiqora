@@ -91,10 +91,7 @@ pad_inp_dis = { in = 0, out = 1, io = 0, unused = 0 }
 # loopback_zero straight to the pads' own gpio_loopback_zero, as upstream's
 # wrapper does (verilog/rtl/openframe_project_wrapper.v lines 138-141); the
 # core drives core_zero to 0, as upstream's example SoC drives them (lines
-# 117-119). Tying all seven in the wrapper put eight pins on each pad's
-# loopback net, and 24 of the left-edge ones then had no router access point
-# (DRT-1231, runs 44641290197 and 44643652345); fewer pins per net is the
-# suspected fix, not yet confirmed by a run.
+# 117-119).
 loopback_zero = ["gpio_analog_en", "gpio_analog_pol", "gpio_analog_sel", "gpio_holdover"]
 core_zero = ["gpio_ib_mode_sel", "gpio_vtrip_sel", "gpio_slow_sel"]
 # The upstream wrapper ties four pad-control buses straight to the pads'
@@ -108,4 +105,8 @@ core_zero = ["gpio_ib_mode_sel", "gpio_vtrip_sel", "gpio_slow_sel"]
 # then a stack trace; targets run 44640065735), where upstream had
 # GRT_REPAIR_ANTENNAS = 1 under OpenLane 2. Antenna violations are left for
 # gate G3 to report.
-wrapper_librelane = { ERROR_ON_NL_ASSIGN_STATEMENTS = false, RUN_ANTENNA_REPAIR = false, DRT_ANTENNA_REPAIR_ITERS = 0, PDN_CORE_RING = 1, PDN_CORE_RING_VWIDTH = 20, PDN_CORE_RING_HWIDTH = 20, PDN_CORE_RING_VOFFSET = -4, PDN_CORE_RING_HOFFSET = -4, PDN_CORE_RING_VSPACING = 2.4, PDN_CORE_RING_HSPACING = 2.4, PDN_VWIDTH = 6.4, PDN_HWIDTH = 6.4, PDN_VSPACING = 3.2, PDN_HSPACING = 3.2, PDN_VPITCH = 40, PDN_HPITCH = 40, PDN_VOFFSET = 18.43, PDN_HOFFSET = 22.83 }
+# CORE_AREA is upstream's (config.json: 40 µm in from each die edge). Without
+# it LibreLane drew the core 5.5 µm from the left edge, the 20 µm power ring
+# then ran off the die over the left-edge pads, and 24 of their pins had no
+# router access point (DRT-1231, runs 44641290197, 44643652345, 44647052370).
+wrapper_librelane = { CORE_AREA = [40, 40, 3126.63, 4726.63], ERROR_ON_NL_ASSIGN_STATEMENTS = false, RUN_ANTENNA_REPAIR = false, DRT_ANTENNA_REPAIR_ITERS = 0, PDN_CORE_RING = 1, PDN_CORE_RING_VWIDTH = 20, PDN_CORE_RING_HWIDTH = 20, PDN_CORE_RING_VOFFSET = -4, PDN_CORE_RING_HOFFSET = -4, PDN_CORE_RING_VSPACING = 2.4, PDN_CORE_RING_HSPACING = 2.4, PDN_VWIDTH = 6.4, PDN_HWIDTH = 6.4, PDN_VSPACING = 3.2, PDN_HSPACING = 3.2, PDN_VPITCH = 40, PDN_HPITCH = 40, PDN_VOFFSET = 18.43, PDN_HOFFSET = 22.83 }
