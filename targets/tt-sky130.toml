@@ -1,0 +1,12 @@
+# tt-sky130 — the Tiny Tapeout submission. This file only mirrors
+# info.yaml and src/config.json (rule T3 keeps them in step); the build is
+# .github/workflows/gds.yaml with TinyTapeout/tt-gds-action.
+name = "tt-sky130"
+kind = "tinytapeout"
+summary = "Tiny Tapeout shuttle tile on sky130 (current submission)"
+pdk = "sky130A"
+tiles = "1x2"
+
+[design]
+top = "tt_um_normansrule_tiqora_serial"
+clock_period_ns = 20.0

@@ -1,0 +1,6 @@
+{
+  "verdict": "FAIL: core 49/55, wrapper 33/52 (wrapper: 9 antenna nets, capacitance on 48 pad wires, slew; timing, DRC and LVS pass) — run 44651901727",
+  "measured": "LibreLane 3.0.14 --dockerized, tapeout.py signoff, GitHub targets workflow",
+  "run": "https://github.com/Normansrule/tinytapeout-tiqora/actions/runs/44651901727",
+  "commit": "64b047b"
+}

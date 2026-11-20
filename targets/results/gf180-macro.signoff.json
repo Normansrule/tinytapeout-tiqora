@@ -1,0 +1,6 @@
+{
+  "verdict": "FAIL at 45 ns: core 43/55 (slew at ss, 1 capacitance net; setup +2.31 ns max_ss, every corner passes timing; DRC, LVS clean) — run 44651901727",
+  "measured": "LibreLane 3.0.14 --dockerized, tapeout.py signoff, GitHub targets workflow",
+  "run": "https://github.com/Normansrule/tinytapeout-tiqora/actions/runs/44651901727",
+  "commit": "64b047b"
+}

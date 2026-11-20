@@ -1,0 +1,6 @@
+{
+  "verdict": "FAIL: core 46/55 (slew); wrapper stopped in detailed routing, 22 left-edge pad pins without an access point (DRT-1231) — run 44651901727",
+  "measured": "LibreLane 3.0.14 --dockerized, tapeout.py signoff, GitHub targets workflow",
+  "run": "https://github.com/Normansrule/tinytapeout-tiqora/actions/runs/44651901727",
+  "commit": "64b047b"
+}

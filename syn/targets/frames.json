@@ -1,0 +1,526 @@
+{
+ "caravel": {
+  "params": "parameter BITS = 32",
+  "ports": [
+   {
+    "name": "vdda1",
+    "dir": "inout",
+    "msb": 0,
+    "lsb": 0,
+    "vector": false,
+    "power": true
+   },
+   {
+    "name": "vdda2",
+    "dir": "inout",
+    "msb": 0,
+    "lsb": 0,
+    "vector": false,
+    "power": true
+   },
+   {
+    "name": "vssa1",
+    "dir": "inout",
+    "msb": 0,
+    "lsb": 0,
+    "vector": false,
+    "power": true
+   },
+   {
+    "name": "vssa2",
+    "dir": "inout",
+    "msb": 0,
+    "lsb": 0,
+    "vector": false,
+    "power": true
+   },
+   {
+    "name": "vccd1",
+    "dir": "inout",
+    "msb": 0,
+    "lsb": 0,
+    "vector": false,
+    "power": true
+   },
+   {
+    "name": "vccd2",
+    "dir": "inout",
+    "msb": 0,
+    "lsb": 0,
+    "vector": false,
+    "power": true
+   },
+   {
+    "name": "vssd1",
+    "dir": "inout",
+    "msb": 0,
+    "lsb": 0,
+    "vector": false,
+    "power": true
+   },
+   {
+    "name": "vssd2",
+    "dir": "inout",
+    "msb": 0,
+    "lsb": 0,
+    "vector": false,
+    "power": true
+   },
+   {
+    "name": "wb_clk_i",
+    "dir": "input",
+    "msb": 0,
+    "lsb": 0,
+    "vector": false,
+    "power": false
+   },
+   {
+    "name": "wb_rst_i",
+    "dir": "input",
+    "msb": 0,
+    "lsb": 0,
+    "vector": false,
+    "power": false
+   },
+   {
+    "name": "wbs_stb_i",
+    "dir": "input",
+    "msb": 0,
+    "lsb": 0,
+    "vector": false,
+    "power": false
+   },
+   {
+    "name": "wbs_cyc_i",
+    "dir": "input",
+    "msb": 0,
+    "lsb": 0,
+    "vector": false,
+    "power": false
+   },
+   {
+    "name": "wbs_we_i",
+    "dir": "input",
+    "msb": 0,
+    "lsb": 0,
+    "vector": false,
+    "power": false
+   },
+   {
+    "name": "wbs_sel_i",
+    "dir": "input",
+    "msb": 3,
+    "lsb": 0,
+    "vector": true,
+    "power": false
+   },
+   {
+    "name": "wbs_dat_i",
+    "dir": "input",
+    "msb": 31,
+    "lsb": 0,
+    "vector": true,
+    "power": false
+   },
+   {
+    "name": "wbs_adr_i",
+    "dir": "input",
+    "msb": 31,
+    "lsb": 0,
+    "vector": true,
+    "power": false
+   },
+   {
+    "name": "wbs_ack_o",
+    "dir": "output",
+    "msb": 0,
+    "lsb": 0,
+    "vector": false,
+    "power": false
+   },
+   {
+    "name": "wbs_dat_o",
+    "dir": "output",
+    "msb": 31,
+    "lsb": 0,
+    "vector": true,
+    "power": false
+   },
+   {
+    "name": "la_data_in",
+    "dir": "input",
+    "msb": 127,
+    "lsb": 0,
+    "vector": true,
+    "power": false
+   },
+   {
+    "name": "la_data_out",
+    "dir": "output",
+    "msb": 127,
+    "lsb": 0,
+    "vector": true,
+    "power": false
+   },
+   {
+    "name": "la_oenb",
+    "dir": "input",
+    "msb": 127,
+    "lsb": 0,
+    "vector": true,
+    "power": false
+   },
+   {
+    "name": "io_in",
+    "dir": "input",
+    "msb": 37,
+    "lsb": 0,
+    "vector": true,
+    "power": false
+   },
+   {
+    "name": "io_out",
+    "dir": "output",
+    "msb": 37,
+    "lsb": 0,
+    "vector": true,
+    "power": false
+   },
+   {
+    "name": "io_oeb",
+    "dir": "output",
+    "msb": 37,
+    "lsb": 0,
+    "vector": true,
+    "power": false
+   },
+   {
+    "name": "analog_io",
+    "dir": "inout",
+    "msb": 28,
+    "lsb": 0,
+    "vector": true,
+    "power": false
+   },
+   {
+    "name": "user_clock2",
+    "dir": "input",
+    "msb": 0,
+    "lsb": 0,
+    "vector": false,
+    "power": false
+   },
+   {
+    "name": "user_irq",
+    "dir": "output",
+    "msb": 2,
+    "lsb": 0,
+    "vector": true,
+    "power": false
+   }
+  ],
+  "source": "https://github.com/efabless/caravel_user_project/blob/f534826abc72af4f9d467446b8b82c9471df68da/verilog/rtl/user_project_wrapper.v"
+ },
+ "openframe": {
+  "params": "",
+  "ports": [
+   {
+    "name": "vdda",
+    "dir": "inout",
+    "msb": 0,
+    "lsb": 0,
+    "vector": false,
+    "power": true
+   },
+   {
+    "name": "vdda1",
+    "dir": "inout",
+    "msb": 0,
+    "lsb": 0,
+    "vector": false,
+    "power": true
+   },
+   {
+    "name": "vdda2",
+    "dir": "inout",
+    "msb": 0,
+    "lsb": 0,
+    "vector": false,
+    "power": true
+   },
+   {
+    "name": "vssa",
+    "dir": "inout",
+    "msb": 0,
+    "lsb": 0,
+    "vector": false,
+    "power": true
+   },
+   {
+    "name": "vssa1",
+    "dir": "inout",
+    "msb": 0,
+    "lsb": 0,
+    "vector": false,
+    "power": true
+   },
+   {
+    "name": "vssa2",
+    "dir": "inout",
+    "msb": 0,
+    "lsb": 0,
+    "vector": false,
+    "power": true
+   },
+   {
+    "name": "vccd",
+    "dir": "inout",
+    "msb": 0,
+    "lsb": 0,
+    "vector": false,
+    "power": true
+   },
+   {
+    "name": "vccd1",
+    "dir": "inout",
+    "msb": 0,
+    "lsb": 0,
+    "vector": false,
+    "power": true
+   },
+   {
+    "name": "vccd2",
+    "dir": "inout",
+    "msb": 0,
+    "lsb": 0,
+    "vector": false,
+    "power": true
+   },
+   {
+    "name": "vssd",
+    "dir": "inout",
+    "msb": 0,
+    "lsb": 0,
+    "vector": false,
+    "power": true
+   },
+   {
+    "name": "vssd1",
+    "dir": "inout",
+    "msb": 0,
+    "lsb": 0,
+    "vector": false,
+    "power": true
+   },
+   {
+    "name": "vssd2",
+    "dir": "inout",
+    "msb": 0,
+    "lsb": 0,
+    "vector": false,
+    "power": true
+   },
+   {
+    "name": "porb_h",
+    "dir": "input",
+    "msb": 0,
+    "lsb": 0,
+    "vector": false,
+    "power": false
+   },
+   {
+    "name": "porb_l",
+    "dir": "input",
+    "msb": 0,
+    "lsb": 0,
+    "vector": false,
+    "power": false
+   },
+   {
+    "name": "por_l",
+    "dir": "input",
+    "msb": 0,
+    "lsb": 0,
+    "vector": false,
+    "power": false
+   },
+   {
+    "name": "resetb_h",
+    "dir": "input",
+    "msb": 0,
+    "lsb": 0,
+    "vector": false,
+    "power": false
+   },
+   {
+    "name": "resetb_l",
+    "dir": "input",
+    "msb": 0,
+    "lsb": 0,
+    "vector": false,
+    "power": false
+   },
+   {
+    "name": "mask_rev",
+    "dir": "input",
+    "msb": 31,
+    "lsb": 0,
+    "vector": true,
+    "power": false
+   },
+   {
+    "name": "gpio_in",
+    "dir": "input",
+    "msb": 43,
+    "lsb": 0,
+    "vector": true,
+    "power": false
+   },
+   {
+    "name": "gpio_in_h",
+    "dir": "input",
+    "msb": 43,
+    "lsb": 0,
+    "vector": true,
+    "power": false
+   },
+   {
+    "name": "gpio_out",
+    "dir": "output",
+    "msb": 43,
+    "lsb": 0,
+    "vector": true,
+    "power": false
+   },
+   {
+    "name": "gpio_oeb",
+    "dir": "output",
+    "msb": 43,
+    "lsb": 0,
+    "vector": true,
+    "power": false
+   },
+   {
+    "name": "gpio_inp_dis",
+    "dir": "output",
+    "msb": 43,
+    "lsb": 0,
+    "vector": true,
+    "power": false
+   },
+   {
+    "name": "gpio_ib_mode_sel",
+    "dir": "output",
+    "msb": 43,
+    "lsb": 0,
+    "vector": true,
+    "power": false
+   },
+   {
+    "name": "gpio_vtrip_sel",
+    "dir": "output",
+    "msb": 43,
+    "lsb": 0,
+    "vector": true,
+    "power": false
+   },
+   {
+    "name": "gpio_slow_sel",
+    "dir": "output",
+    "msb": 43,
+    "lsb": 0,
+    "vector": true,
+    "power": false
+   },
+   {
+    "name": "gpio_holdover",
+    "dir": "output",
+    "msb": 43,
+    "lsb": 0,
+    "vector": true,
+    "power": false
+   },
+   {
+    "name": "gpio_analog_en",
+    "dir": "output",
+    "msb": 43,
+    "lsb": 0,
+    "vector": true,
+    "power": false
+   },
+   {
+    "name": "gpio_analog_sel",
+    "dir": "output",
+    "msb": 43,
+    "lsb": 0,
+    "vector": true,
+    "power": false
+   },
+   {
+    "name": "gpio_analog_pol",
+    "dir": "output",
+    "msb": 43,
+    "lsb": 0,
+    "vector": true,
+    "power": false
+   },
+   {
+    "name": "gpio_dm2",
+    "dir": "output",
+    "msb": 43,
+    "lsb": 0,
+    "vector": true,
+    "power": false
+   },
+   {
+    "name": "gpio_dm1",
+    "dir": "output",
+    "msb": 43,
+    "lsb": 0,
+    "vector": true,
+    "power": false
+   },
+   {
+    "name": "gpio_dm0",
+    "dir": "output",
+    "msb": 43,
+    "lsb": 0,
+    "vector": true,
+    "power": false
+   },
+   {
+    "name": "analog_io",
+    "dir": "inout",
+    "msb": 43,
+    "lsb": 0,
+    "vector": true,
+    "power": false
+   },
+   {
+    "name": "analog_noesd_io",
+    "dir": "inout",
+    "msb": 43,
+    "lsb": 0,
+    "vector": true,
+    "power": false
+   },
+   {
+    "name": "gpio_loopback_one",
+    "dir": "input",
+    "msb": 43,
+    "lsb": 0,
+    "vector": true,
+    "power": false
+   },
+   {
+    "name": "gpio_loopback_zero",
+    "dir": "input",
+    "msb": 43,
+    "lsb": 0,
+    "vector": true,
+    "power": false
+   }
+  ],
+  "source": "https://github.com/efabless/caravel_openframe_project/blob/c3946a4fc3a2d1efe840b92b9ad954068c7cd52d/verilog/rtl/openframe_project_wrapper.v"
+ }
+}

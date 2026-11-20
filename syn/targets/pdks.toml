@@ -1,0 +1,58 @@
+# pdks.toml — process facts the tape-out targets build on.
+#
+# Shared, byte-identical in tiqora-skywater130 and tinytapeout-tiqora
+# (docs/shared_flow.sha256). Every number here is copied from a named file in
+# a named release; nothing is estimated. syn/targets/tapeout.py reads it.
+#
+# corners    the LibreLane 3.0.14 STA corners for the PDK, in its order
+#            (librelane/config/pdk_compat.py, STA_CORNERS). Signoff gates
+#            require a result for every one of them.
+# lib_pvt    the liberty file behind each process/voltage/temperature point
+#            ({scl}__{pvt}.lib under libs.ref/{scl}/lib/).
+# limits     the electrical limits LibreLane applies by default
+#            (open_pdks libs.tech/openlane/{scl}/config.tcl).
+
+[sky130A]
+description = "SkyWater 130 nm (open_pdks sky130A)"
+foundry = "SkyWater"
+scl = "sky130_fd_sc_hd"
+corners = [
+  "nom_tt_025C_1v80", "nom_ss_100C_1v60", "nom_ff_n40C_1v95",
+  "min_tt_025C_1v80", "min_ss_100C_1v60", "min_ff_n40C_1v95",
+  "max_tt_025C_1v80", "max_ss_100C_1v60", "max_ff_n40C_1v95",
+]
+lib_pvt = { tt = "tt_025C_1v80", ss = "ss_100C_1v60", ff = "ff_n40C_1v95" }
+default_power = { vdd = "VPWR", gnd = "VGND" }
+driving_cell = { cell = "sky130_fd_sc_hd__inv_2", pin = "Y" }
+output_load_pf = 0.033442
+tie = { hi = "sky130_fd_sc_hd__conb_1 HI", lo = "sky130_fd_sc_hd__conb_1 LO" }
+limits = { max_transition_ns = 0.75, max_capacitance_pf = 0.2, max_fanout = 10 }
+source = "open_pdks 1.0.471: libs.tech/openlane/sky130_fd_sc_hd/config.tcl lines 27-65; LibreLane 3.0.14 pdk_compat.py"
+
+[gf180mcuD]
+description = "GlobalFoundries 180 nm MCU (open_pdks gf180mcuD), 5 V cells"
+foundry = "GlobalFoundries"
+scl = "gf180mcu_fd_sc_mcu7t5v0"
+corners = [
+  "nom_tt_025C_5v00", "nom_ss_125C_4v50", "nom_ff_n40C_5v50",
+  "min_tt_025C_5v00", "min_ss_125C_4v50", "min_ff_n40C_5v50",
+  "max_tt_025C_5v00", "max_ss_125C_4v50", "max_ff_n40C_5v50",
+]
+lib_pvt = { tt = "tt_025C_5v00", ss = "ss_125C_4v50", ff = "ff_n40C_5v50" }
+default_power = { vdd = "VDD", gnd = "VSS" }
+driving_cell = { cell = "gf180mcu_fd_sc_mcu7t5v0__inv_1", pin = "ZN" }
+output_load_pf = 0.07291
+tie = { hi = "gf180mcu_fd_sc_mcu7t5v0__tieh Z", lo = "gf180mcu_fd_sc_mcu7t5v0__tiel ZN" }
+limits = { max_transition_ns = 3.0, max_capacitance_pf = 0.2, max_fanout = 10 }
+# LibreLane hardens on gf180mcuD (fetched by ciel). Pre-layout numbers in
+# targets/results/ name the package their liberty came from.
+source = "open_pdks 1.0.471: libs.tech/openlane/gf180mcu_fd_sc_mcu7t5v0/config.tcl lines 14-51, libs.tech/openlane/config.tcl line 21; LibreLane 3.0.14 pdk_compat.py"
+# LibreLane 3.0.14 skips KLayout DRC on gf180mcuD unless KLAYOUT_DRC_RUNSET
+# is set (steps/klayout.py, run_gf180mcu), and the PDK revision it pins
+# (open_pdks 54435919) does not set it. The path is where that revision
+# puts the deck (gf180mcu/Makefile.in, klayout-% copies wafer-space/gf180mcu
+# gf180mcuD/libs.tech/klayout/tech); the options are that repository's own
+# (gf180mcuD/libs.tech/librelane/config.tcl lines 164-173).
+[gf180mcuD.librelane]
+KLAYOUT_DRC_RUNSET = "pdk_dir::libs.tech/klayout/tech/drc/gf180mcu.drc"
+KLAYOUT_DRC_DEFINES = { feol = "true", beol = "true", dummy = "true", dummy_no_sub_prev = "true", offgrid = "true", conn_drc = "true", wedge = "true", run_mode = "deep" }

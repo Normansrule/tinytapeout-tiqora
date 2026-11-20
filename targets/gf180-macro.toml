@@ -1,0 +1,32 @@
+# gf180-macro — the same plain-pin macro on GlobalFoundries 180 nm
+# (gf180mcuD, 5 V 7-track cells), for gf180 shuttles. The RTL has no
+# technology cells, so nothing changes but the PDK, the die and the clock.
+name = "gf180-macro"
+kind = "macro"
+summary = "Hard macro on GlobalFoundries gf180mcuD (5 V cells)"
+pdk = "gf180mcuD"
+
+[design]
+top = "tiqora_serial_macro"
+files = ["src/targets/tiqora_serial_macro.sv"]
+clock_port = "clk"
+# 45 ns, set from a measured routed result: at 40 ns LibreLane 3.0.14 routed
+# the macro with setup slack -2.692 ns at max_ss_125C_4v50, flop to flop,
+# targets run 44641290197, so it needs 42.7 ns; 45 ns adds about 5% margin.
+# The UART divisor is fixed (434), so the baud rate is 1 / (434 x period).
+# The next harden run checks it.
+clock_period_ns = 45.0
+io_delay_pct = 20
+
+[floorplan]
+die_um = [450, 450]
+density_pct = 60
+max_util_pct = 45
+
+[signoff]
+setup_min_ns = 0.0
+hold_min_ns = 0.0
+max_util_pct = 70
+
+[librelane]
+CTS_SINK_CLUSTERING_SIZE = 10
