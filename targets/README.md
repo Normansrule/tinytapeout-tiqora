@@ -119,9 +119,8 @@ with the whole metrics file and the gate table.
   Tapeout, where the same RTL met setup at all nine corners (+1.43 ns at
   max_ss, gds run 40624495043 on branch real-numbers-main). Caravel uses 25 ns because that is
   caravel_user_project's own setting for `wb_clk_i`; the baud rate is
-  clk / 434, so it follows that clock. `gf180-macro` uses 40 ns: pre-layout,
-  its slowest corner needs 20.7 ns register to register (an estimate of the
-  routed figure is about 1.6 times that, as on sky130). Pre-layout timing in STATUS.md has no
+  clk / 434, so it follows that clock. `gf180-macro` uses 45 ns, set from its
+  measured routed slack at 40 ns plus about 5% margin (see its file). Pre-layout timing in STATUS.md has no
   wires and an ideal clock, so it is a bound, not a rating.
 - **Routing and timing repair**: `CTS_SINK_CLUSTERING_SIZE` 10 keeps clock
   leaves within the fanout limit of 10 (the Tiny Tapeout run had 29 fanout

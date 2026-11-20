@@ -9,10 +9,10 @@ they bound what place and route can reach, they do not predict it.
 
 | Target | Kind | PDK | Top | Clock | Die (µm) | Cell area (µm², pre-layout) | Pre-layout setup slack, slowest corner | Signoff (LibreLane) |
 |---|---|---|---|---|---|---|---|---|
-| `caravel-sky130` | carrier | sky130A | `tiqora_serial_caravel_core` | 25.0 ns | 250 × 250 | 21,960 | +12.64 ns (nom_ss_100C_1v60) | not run |
-| `gf180-macro` | macro | gf180mcuD | `tiqora_serial_macro` | 40.0 ns | 450 × 450 | 69,704 | +18.75 ns (nom_ss_125C_4v50) | not run |
-| `openframe-sky130` | carrier | sky130A | `tiqora_serial_openframe_core` | 20.0 ns | 270 × 270 | 22,097 | +9.92 ns (nom_ss_100C_1v60) | not run |
-| `sky130-macro` | macro | sky130A | `tiqora_serial_macro` | 20.0 ns | 250 × 250 | 22,076 | +10.39 ns (nom_ss_100C_1v60) | not run |
+| `caravel-sky130` | carrier | sky130A | `tiqora_serial_caravel_core` | 25.0 ns | 250 × 250 | 21,960 | +12.64 ns (nom_ss_100C_1v60) | FAIL: core 49/55, wrapper 33/52 (slew, cap; wrapper 8 antenna nets; timing, DRC, LVS pass) — run 44641290197 |
+| `gf180-macro` | macro | gf180mcuD | `tiqora_serial_macro` | 45.0 ns | 450 × 450 | 69,704 | +18.75 ns (nom_ss_125C_4v50), measured at 40 ns | FAIL at 40 ns: core 40/55 (setup -2.69 ns max_ss flop to flop; slew, cap) — run 44641290197; clock since raised to 45 ns, not yet rerun |
+| `openframe-sky130` | carrier | sky130A | `tiqora_serial_openframe_core` | 20.0 ns | 270 × 270 | 22,097 | +9.92 ns (nom_ss_100C_1v60) | FAIL: core 50/55; wrapper stopped in detailed routing (DRT-1231) — run 44641290197 |
+| `sky130-macro` | macro | sky130A | `tiqora_serial_macro` | 20.0 ns | 250 × 250 | 22,076 | +10.39 ns (nom_ss_100C_1v60) | FAIL: core 51/55 gates (slow-corner slew; timing passes) — run 44641290197 |
 | `tt-sky130` | tinytapeout | sky130A | `tt_um_normansrule_tiqora_serial` | 20.0 ns | 1x2 tiles | — | — | Tiny Tapeout gds workflow (.github/workflows/gds.yaml) |
 
 ## Where each number comes from

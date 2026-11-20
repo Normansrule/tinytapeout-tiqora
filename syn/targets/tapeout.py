@@ -578,6 +578,9 @@ def gen_status(world: dict) -> str:
             if worst is None or cv["setup_ws_ns"] < worst:
                 worst, corner = cv["setup_ws_ns"], cn
         sl = f"{worst:+.2f} ns ({corner})" if worst is not None else "—"
+        sta_p = r.get("sta", {}).get("period_ns")
+        if worst is not None and sta_p is not None and float(sta_p) != float(t["design"]["clock_period_ns"]):
+            sl += f", measured at {sta_p:g} ns"   # never shown against a clock it was not measured at
         so = world["results"].get(f"{name}.signoff", {}).get("verdict", "not run")
         if t["kind"] == "tinytapeout":
             so = "Tiny Tapeout gds workflow (.github/workflows/gds.yaml)"
