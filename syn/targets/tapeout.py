@@ -1360,6 +1360,20 @@ def fetch_upstream(world: dict, t: dict):
             mark_power_pins(src, fr["template_power_pins"]))
 
 
+def print_failed_step(run: Path, lines: int = 120):
+    """The end of the last step's own logs, so a failure can be read from the
+    CI log alone (the run directory is only in the uploaded artifact)."""
+    steps = sorted((d for d in run.glob("[0-9]*-*") if d.is_dir()),
+                   key=lambda d: int(d.name.split("-", 1)[0]))
+    if not steps:
+        return
+    last = steps[-1]
+    for log in sorted(last.rglob("*.log")):
+        text = log.read_text(errors="replace").splitlines()
+        print(f"--- last {min(lines, len(text))} lines of {log.relative_to(ROOT)} ---")
+        print("\n".join(text[-lines:]))
+
+
 def harden(world: dict, t: dict, extra: list[str]) -> int:
     stages = []
     if t["kind"] == "macro":
@@ -1380,6 +1394,7 @@ def harden(world: dict, t: dict, extra: list[str]) -> int:
         mp = ROOT / "targets" / t["_stem"] / "runs" / stage / "final" / "metrics.json"
         if not mp.exists():
             print(f"{stage}: LibreLane exited {r.returncode} and wrote no final/metrics.json")
+            print_failed_step(ROOT / "targets" / t["_stem"] / "runs" / stage)
             verdicts[stage] = f"FAIL (LibreLane exit {r.returncode}, no metrics)"
             ok_all = False
             break

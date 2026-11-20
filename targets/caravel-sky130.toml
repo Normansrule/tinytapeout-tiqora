@@ -71,3 +71,18 @@ pins = [
   { pad = 30, out = "ev_count[0]" },
   { pad = 31, out = "ev_count[1]" },
 ]
+
+# The core sits in one corner of the user area and drives pads up to a few
+# millimetres away. With no cells in the wrapper (the frame's default, as
+# upstream), those wires failed max slew, max capacitance and antenna gates
+# (targets runs 44640065735 / 44640071986): no single driver meets 0.2 pF
+# over that length. Here the wrapper gets standard-cell rails and tap cells,
+# and LibreLane may place repeaters, port buffers and antenna diodes on them.
+[wrapper_librelane]
+PDN_ENABLE_RAILS = 1
+RUN_TAP_ENDCAP_INSERTION = 1
+RUN_POST_GPL_DESIGN_REPAIR = true
+RUN_POST_GRT_DESIGN_REPAIR = true
+DESIGN_REPAIR_BUFFER_OUTPUT_PORTS = true
+RUN_ANTENNA_REPAIR = true
+DRT_ANTENNA_REPAIR_ITERS = 3
