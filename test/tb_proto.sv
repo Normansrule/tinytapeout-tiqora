@@ -19,6 +19,11 @@
 //             it with nothing committed and the queue and flag cleared
 //   burst     an edge that arrives while a multi-pin burst is still being
 //             queued replaces the waiting event, and overflow says so
+//   deadlines a deadline already past when its write commits fires on the
+//             next clock; the signed compare's window is 2^31 ticks, checked
+//             5,000 ticks inside and outside it
+//   coherence a read reply is one sample: TIME's four bytes are the tick the
+//             port read, and an edge captured mid-reply waits for the next read
 //
 // Every check is printed with its result, and the run ends with a count.
 // Run with:  make proto
@@ -69,6 +74,9 @@ module tb_proto;
         .uart_rx(rx), .uart_tx(tx), .uart_active(uart_active),
         .ev_chan(ev_chan), .ev_edge(ev_edge), .ev_count(ev_count)
     );
+
+`include "sync_tap_serial.svh"
+
 
     // ---- host side: one 8N1 byte; `stop` = 0 sends a framing error ----
     task send_raw(input [7:0] b, input stop);
@@ -161,6 +169,27 @@ module tb_proto;
             dut.u_sync.cfg_we || dut.u_sync.adj_we  || dut.u_sync.rate_we ||
             dut.u_sync.fifo_pop)
             strobes = strobes + 1;
+    end
+
+    // ---- clocks and timebase values of deadline and read events ----
+    integer     clk_n = 0, arm_clk = 0;
+    integer     rise_clk [0:2], fall_clk [0:2];
+    reg  [31:0] arm_now = 0, rise_now = 0, rd_now = 0;
+    reg  [2:0]  trig_q = 3'b000;
+    initial begin rise_clk[0] = 0; fall_clk[0] = 0; end
+
+    always @(posedge clk) begin
+        clk_n = clk_n + 1;
+        if (dut.u_sync.arm_we && dut.u_sync.arm_sel == 2'd0) begin
+            arm_clk = clk_n; arm_now = dut.u_sync.now;
+        end
+        if (dut.u_host.reg_req && !dut.u_host.reg_we && dut.u_host.reg_addr == 4'h0)
+            rd_now = dut.u_sync.now;
+    end
+    always @(negedge clk) begin
+        if (trig[0] && !trig_q[0]) begin rise_clk[0] = clk_n; rise_now = dut.u_sync.now; end
+        if (!trig[0] && trig_q[0]) fall_clk[0] = clk_n;
+        trig_q = trig;
     end
 
     task do_ping(output logic good);
@@ -367,6 +396,68 @@ module tb_proto;
         do_read(8'h01, d, ok2);
         chk(ok && ok2 && v[31:27] == 5'b0_000_1 && d[31:27] == 5'b0_010_1 && d[26:0] - v[26:0] == 27'd1,
             "the queue holds CAP0 then CAP2, one tick apart");
+
+        // -------------------------------------------------------------
+        $display("\n[late deadlines]");
+        // A host cannot know the exact tick its write lands on: six bytes
+        // take about 1,000 clocks here (6,000+ at the real 434 divider).
+        // The comparator takes the signed difference, so a deadline that
+        // has already passed fires at once, and one less than 2^31 ticks
+        // ahead waits. These checks pin both sides of that window.
+        do_write(8'h07, 32'd8, ok);                 // PW = 8 ticks
+        do_read(8'h00, v, ok2);                     // TIME
+        do_write(8'h04, v, ok);                     // CMP0 = a tick already gone
+        repeat (40) @(negedge clk);
+        chk(ok && ok2 && rise_clk[0] - arm_clk == 1 && fall_clk[0] - rise_clk[0] == 8,
+            "a deadline already in the past fires on the first clock after the write commits, 8 ticks wide");
+        $display("        measured: armed at tick %0d, TRIG0 high at tick %0d (deadline was %0d, %0d ticks late)",
+                 arm_now, rise_now, v, rise_now - v);
+        do_read(8'h02, d, ok);
+        chk(ok && d[8] == 1'b0, "and the channel disarms after it fires");
+
+        do_read(8'h00, v, ok2);
+        d = rise_clk[0];
+        do_write(8'h04, v + 32'h8000_0000 - 32'd5000, ok);   // 2^31 - 5000 ahead
+        repeat (3000) @(negedge clk);
+        do_read(8'h02, v, ok);
+        chk(ok && ok2 && rise_clk[0] == d && v[8] == 1'b1,
+            "a deadline 2^31 - 5,000 ticks ahead stays armed: it is in the future");
+
+        do_read(8'h00, v, ok2);
+        do_write(8'h04, v + 32'h8000_0000 + 32'd5000, ok);   // past the window
+        repeat (40) @(negedge clk);
+        chk(ok && ok2 && rise_clk[0] - arm_clk == 1,
+            "a deadline 2^31 + 5,000 ticks ahead is outside the window: it reads as late and fires at once");
+
+        // -------------------------------------------------------------
+        $display("\n[reply coherence]");
+        // A read reply is four bytes long and the timebase keeps counting
+        // while they go out. The port loads the whole word in the clock it
+        // reads the register, so the four bytes are one sample.
+        do_read(8'h00, v, ok);
+        chk(ok && v == rd_now && dut.u_sync.now - rd_now > 32'd500,
+            "the 4 bytes of a TIME reply are the timebase of the clock the port read it, not a mix of later ticks");
+        $display("        measured: reply %0d, timebase at the read %0d, %0d ticks later when checked",
+                 v, rd_now, dut.u_sync.now - rd_now);
+
+        do_write(8'h03, 32'h0000_0008, ok);        // CFG: CAP3 rising only
+        @(negedge clk) cap[3] = 1'b1;
+        repeat (20) @(negedge clk);
+        send_byte(8'h02); send_byte(8'h01);         // read EVENT
+        #(BIT_NS * 12);                             // the reply is on the wire now
+        @(negedge clk) cap[3] = 1'b0;
+        repeat (4) @(negedge clk) ;
+        cap[3] = 1'b1;                              // a second CAP3 edge mid-reply
+        settle(4, n);
+        ok = (n == 4);
+        if (ok) begin
+            v[7:0] = pop_rx(); v[15:8] = pop_rx(); v[23:16] = pop_rx(); v[31:24] = pop_rx();
+        end else drop_rx();
+        do_read(8'h01, d, ok2);
+        chk(ok && ok2 && v[31:27] == 5'b0_011_1 && d[31:27] == 5'b0_011_1 && d[26:0] > v[26:0],
+            "an edge that lands while an EVENT reply is going out does not change it; it is the next read");
+        do_read(8'h01, v, ok);
+        chk(ok && v === 32'd0, "and each read popped exactly one event");
 
         $display("\n%0d checks, %0d failures", checks, errors);
         if (errors == 0) $display("SERIAL PROTOCOL PASSED\n");
