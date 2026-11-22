@@ -67,7 +67,7 @@ def run(sel=None):
                 continue
             open(f, "w").write(src.replace(old, new))
             r = subprocess.run(["make", "-C", os.path.join(dst, "test"), target],
-                               capture_output=True, text=True)
+                               capture_output=True, text=True, errors="replace")
             ok = r.returncode != 0
             caught += ok
             out = (r.stdout + r.stderr).splitlines()
