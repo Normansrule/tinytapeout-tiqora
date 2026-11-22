@@ -66,6 +66,9 @@ module tb_uart;
         .ev_chan(ev_chan), .ev_edge(ev_edge), .ev_count(ev_count)
     );
 
+`include "sync_tap_serial.svh"
+
+
     // ---- host side: send a byte, 8N1 ----
     task send_byte(input [7:0] b);
         integer i;

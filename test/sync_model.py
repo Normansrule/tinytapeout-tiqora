@@ -11,6 +11,7 @@ that behaviour that any change to the RTL has to agree with clock for clock.
 
     python3 sync_model.py sync_ref_trace.txt   # check one trace
     python3 sync_model.py --suite               # build and check 3 configurations
+    python3 sync_model.py --taps a.txt b.txt    # traces recorded inside a chip (sync_tap.sv)
 
 A trace from tb_sync_ref.sv holds the inputs and outputs of every clock; the
 model replays the inputs and compares every output. It also checks one
@@ -302,9 +303,51 @@ def suite(cycles=60000, seed=1):
     return fails
 
 
+def taps(paths):
+    """Check traces that sync_tap.sv recorded inside a whole chip.
+
+    Each must replay with no mismatch, lose no pin event silently, and show
+    the front end really used the unit (instructions or register accesses,
+    trigger edges, queued events), so an idle trace cannot pass."""
+    fails = 0
+    for p in paths:
+        try:
+            hdr, n, bad, lost = run(p)
+        except (OSError, ValueError, IndexError, KeyError) as e:
+            print(f"  FAIL  {p}: unreadable trace ({e})")
+            fails += 1
+            continue
+        uses = edges = pushes = 0
+        prev_trig = prev_ev = None
+        for line in open(p).read().splitlines()[1:]:
+            i, o = parse(line)
+            if i["rst"]:
+                prev_trig = prev_ev = None
+                continue
+            uses += i["t_valid"] or i["reg_req"]
+            if prev_trig is not None and o["trig"] != prev_trig:
+                edges += 1
+            prev_trig = o["trig"]
+            pushes += prev_ev is not None and o["evt_pending"] and not prev_ev
+            prev_ev = o["evt_pending"]
+        busy = uses > 0 and edges > 0 and pushes > 0
+        good = not bad and not lost[2] and busy and n > 0
+        fails += not good
+        print(f"  {'ok  ' if good else 'FAIL'}  {p}: {n} clocks, {bad} mismatches; "
+              f"{uses} instructions or register accesses, {edges} trigger edges, "
+              f"{pushes} times the queue went from empty to pending; "
+              f"{lost[1]} events dropped, {lost[2]} silently"
+              + ("" if busy else " (the front end hardly used the unit)"))
+    print(f"\n{len(paths)} checks, {fails} failures")
+    print("SYNC TAP TRACES PASSED\n" if not fails else "SYNC TAP TRACES FAILED\n")
+    return fails
+
+
 if __name__ == "__main__":
     if sys.argv[1:] == ["--suite"]:
         sys.exit(1 if suite() else 0)
+    if sys.argv[1:2] == ["--taps"]:
+        sys.exit(1 if taps(sys.argv[2:]) or not sys.argv[2:] else 0)
     hdr, n, bad, lost = run(sys.argv[1])
     print(f"{n} clocks, {bad} output mismatches; {lost[1]} pin events dropped, "
           f"{lost[2]} of them silently; {lost[0]} delayed by a TMARK")

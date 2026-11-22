@@ -42,16 +42,16 @@ COCOTB_TEST_MODULES = test
 
 .PHONY: warnings sim lint synth area uart tour clean-sim explorer proto shared syncref
 
-sim: uart proto tour shared syncref docs
+sim: uart proto tour shared syncref syncdiff docs
 	@echo ""
 	@echo "all testbenches finished — check for FAILED above"
 
 uart:
-	iverilog -g2012 -o tb_uart.vvp -s tb_uart $(RTL) tb_uart.sv
+	iverilog -g2012 -o tb_uart.vvp -s tb_uart $(RTL) sync_tap.sv tb_uart.sv
 	sh vv.sh tb_uart.vvp
 
 proto:
-	iverilog -g2012 -o tb_proto.vvp -s tb_proto $(RTL) tb_proto.sv
+	iverilog -g2012 -o tb_proto.vvp -s tb_proto $(RTL) sync_tap.sv tb_proto.sv
 	sh vv.sh tb_proto.vvp
 
 # The explorer's guided tours, recorded from this RTL at the submitted top's pins
@@ -121,5 +121,19 @@ shared:
 # output compared on every clock: 60,000 random clocks of pins, Xpulse
 # instructions and register accesses, in three configurations (Tiqora,
 # Tiqora-Serial, and a small stress build that overflows its queue often).
+# The timing unit inside the whole chip, driven by the real UART host port
+# in tb_uart and tb_proto, replayed clock for clock through the same
+# reference model (sync_tap.sv). Tiqora runs the same model on traces from
+# its CPU front end, so both chips are held to one statement of the unit.
+syncdiff:
+	iverilog -g2012 -o tb_uart_tap.vvp -s tb_uart $(RTL) sync_tap.sv tb_uart.sv
+	iverilog -g2012 -o tb_proto_tap.vvp -s tb_proto $(RTL) sync_tap.sv tb_proto.sv
+	vvp -n tb_uart_tap.vvp +SYNCTAP=tap_uart.txt > /dev/null
+	vvp -n tb_proto_tap.vvp +SYNCTAP=tap_proto.txt > /dev/null
+	python3 sync_model.py --taps tap_uart.txt tap_proto.txt
+
+audit-mutants:
+	python3 audit_mutants.py
+
 syncref:
 	python3 sync_model.py --suite

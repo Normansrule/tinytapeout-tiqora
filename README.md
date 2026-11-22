@@ -416,8 +416,9 @@ at an internal flip-flop.
 | Check | Result |
 |---|---|
 | `tb_uart.sv`, driving only the serial pins | **30 / 30** |
-| `tb_proto.sv`, framing errors, glitches, all 253 unknown commands, partial frames, unmapped addresses, late bytes, queue loss, reconnection, bursts | **28 / 28** |
+| `tb_proto.sv`, framing errors, glitches, all 253 unknown commands, partial frames, unmapped addresses, late bytes, queue loss, reconnection, bursts, late deadlines, reply coherence | **35 / 35** |
 | `sync_model.py`, the timing unit against a Python reference model, every output on every clock, three builds, and no pin event lost without overflow | **4 / 4** |
+| `make syncdiff`, the same model on the timing unit inside the chip as the UART host port drives it in `tb_uart` and `tb_proto` (`test/sync_tap.sv`), every output on every clock; Tiqora runs it on its CPU front end | **2 / 2** |
 | `test.py` cocotb, through the Tiny Tapeout pin interface | **5 / 5** |
 | `tpctl.py selftest`, host protocol with no hardware | **18 / 18** |
 | Verilator `-Wall` | **clean** (two documented waivers) |
@@ -448,6 +449,19 @@ Two limits follow from the design and are now measured rather than assumed:
   and the next bytes it receives finish that frame. A write cut short and followed by new commands
   commits those bytes as its data. After a host-side timeout, reset the chip, or send the missing
   bytes of a frame you know the state of, before trusting the link again.
+* **A late deadline fires at once, and nothing says it was late.** A write takes six bytes
+  (26,040 clocks, about 0.5 ms, at 115,200 baud and 50 MHz), so a host cannot hit an exact tick that close. A deadline
+  that has already passed when the write commits fires on the next clock, with the programmed
+  pulse width (measured: `make -C test proto`, 1,698 ticks late in the bench). Arm deadlines well
+  ahead, or read TIME back to see how much margin there was.
+* **The window is 2^31 ticks.** The comparator takes the signed difference, so a deadline up to
+  2^31 - 1 ticks ahead waits (about 43 s at 50 MHz), and one further ahead reads as late and fires
+  at once. Both sides are checked with 5,000 ticks of margin.
+
+A read reply is one sample: the port loads the whole word in the clock it reads the register, so
+the four bytes of a TIME reply belong to one tick even though the timebase moves about 700 ticks
+while they are sent, and an edge captured while an EVENT reply is going out waits for the next
+read (both checked in `make proto`).
 
 The timing unit's reference model (`make -C test syncref`) found that an edge arriving while a
 multi-pin burst was still being queued (up to 7 clocks) replaced the waiting events without a
