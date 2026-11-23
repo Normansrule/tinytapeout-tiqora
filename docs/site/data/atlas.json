@@ -5,23 +5,23 @@
   "library": "sky130_fd_sc_hd__tt_025C_1v80.lib",
   "modules_um2": {
    "sync_capture": 890.9,
-   "sync_compare": 8156.6,
+   "sync_compare": 9292.7,
    "sync_event_fifo": 2615.0,
    "sync_timebase": 4908.5,
-   "sync_unit": 4588.2,
+   "sync_unit": 4596.9,
    "tp_drive": 0.0,
-   "tp_host_uart": 2037.0,
+   "tp_host_uart": 2292.2,
    "tp_sync_soc": 32.5,
-   "tp_uart_rx": 1198.6,
+   "tp_uart_rx": 1182.4,
    "tp_uart_tx": 1063.5,
    "tt_um_normansrule_tiqora_serial": 3.8
   },
   "sources": {
    "src/sync/sync_capture.sv": "2a14d3051ed4d0f9c8d4c6158cb148cfe515bceb8111fc9da123d9b3f984a907",
-   "src/sync/sync_compare.sv": "0910608252174b2b17e2909903257ec0e2a1c7cd8b2cdeb8785888bdad3308c3",
+   "src/sync/sync_compare.sv": "2b545b050393d5c6d9215d9e14bcc064e0685d592704f5f36786d3cea5ce6d1c",
    "src/sync/sync_event_fifo.sv": "8fbd9d34936c2624b9292253f31aa6ad31866a2c1c32879ca7a76ef24724c03a",
    "src/sync/sync_timebase.sv": "87d599d0c74435307ca6f45290b608ac9e6fee0e42ccab91e2e8dd5ba3bb32f6",
-   "src/sync/sync_unit.sv": "2a4f9c3df3e71c382c9d11803a12b3c293fab6094ead429536c0edfc38972130",
+   "src/sync/sync_unit.sv": "564db1eff03cefa1af4d2158b689d46b40737b733151113690d425300208d44a",
    "src/tp_drive.sv": "a40d4694d3d91a675dafbbbf91b2cda0be2e31e56845b5d821a698b53fac7578",
    "src/tp_pkg.sv": "49c69ecf3f032b2b59c8796765d878d7c40c7742d6deb421dd6dd7efd326ca78",
    "src/tp_sync_soc.sv": "462a14536fd2450134754e5f7c87a1fb90d28c6c95822d8596fed7975f1905aa",
@@ -31,7 +31,7 @@
    "src/uart/tp_uart_tx.sv": "32458039699f7e41740457c80a820cc7132a2366a3f64bc58ee1675d674cb49a"
   },
   "tool": "Yosys 0.33",
-  "total_hierarchical_um2": 25494.4512,
+  "total_hierarchical_um2": 26878.2784,
   "what": "sky130_fd_sc_hd cell area per module, hierarchical synthesis before placement (the flattened netlist the flow builds is smaller: synthesis optimizes across boundaries)"
  },
  "blocks": [
@@ -743,11 +743,11 @@
    "children": [],
    "errors": "Wrap-safe within 2^31 ticks. The register map reaches CMP0 and CMP1 only (offset 6 is unmapped); TRIG2 fires only through PULSE.",
    "example": "Write CMP0 = TIME + 60000: TRIG0 rises at the pin on the tick the timebase equals 60000 past the value read, 8 ticks wide (checked by make tour).",
-   "ff_bits": 163,
+   "ff_bits": 164,
    "file": "src/sync/sync_compare.sv",
    "handshake": "arm_we with arm_time and arm_sel; pulse_we fires channels at once.",
    "latency": "The pin edge lands on the programmed tick.",
-   "line": 14,
+   "line": 20,
    "module": "sync_compare",
    "params": {
     "NCMP": "3",
@@ -818,6 +818,11 @@
      "dir": "output",
      "name": "armed",
      "width": 3
+    },
+    {
+     "dir": "output",
+     "name": "late",
+     "width": 1
     }
    ],
    "reset": "Disarmed, deadlines 0, pulse width 8 ticks.",
@@ -2177,6 +2182,26 @@
    "const_bits": 0,
    "drivers": [
     {
+     "bits": 1,
+     "block": "tt_um_normansrule_tiqora_serial/u_soc/u_sync/u_cmp",
+     "port": "late"
+    }
+   ],
+   "in": "tt_um_normansrule_tiqora_serial/u_soc/u_sync",
+   "loads": [
+    {
+     "bits": 1,
+     "block": "tt_um_normansrule_tiqora_serial/u_soc/u_sync",
+     "port": "status_out"
+    }
+   ],
+   "net": "late",
+   "width": 1
+  },
+  {
+   "const_bits": 0,
+   "drivers": [
+    {
      "bits": 32,
      "block": "tt_um_normansrule_tiqora_serial/u_soc/u_sync/u_time",
      "port": "now"
@@ -2259,7 +2284,7 @@
    "width": 1
   },
   {
-   "const_bits": 13,
+   "const_bits": 12,
    "drivers": [
     {
      "bits": 8,
@@ -2270,6 +2295,11 @@
      "bits": 3,
      "block": "tt_um_normansrule_tiqora_serial/u_soc/u_sync/u_cmp",
      "port": "armed"
+    },
+    {
+     "bits": 1,
+     "block": "tt_um_normansrule_tiqora_serial/u_soc/u_sync/u_cmp",
+     "port": "late"
     },
     {
      "bits": 3,
@@ -2305,7 +2335,7 @@
      "port": "ovf_pin"
     },
     {
-     "bits": 19,
+     "bits": 20,
      "block": "tt_um_normansrule_tiqora_serial/u_soc/u_sync",
      "port": "status_out"
     },
@@ -2404,10 +2434,10 @@
   "command": "python3 docs/tools/atlas.py",
   "sources": {
    "src/sync/sync_capture.sv": "2a14d3051ed4d0f9c8d4c6158cb148cfe515bceb8111fc9da123d9b3f984a907",
-   "src/sync/sync_compare.sv": "0910608252174b2b17e2909903257ec0e2a1c7cd8b2cdeb8785888bdad3308c3",
+   "src/sync/sync_compare.sv": "2b545b050393d5c6d9215d9e14bcc064e0685d592704f5f36786d3cea5ce6d1c",
    "src/sync/sync_event_fifo.sv": "8fbd9d34936c2624b9292253f31aa6ad31866a2c1c32879ca7a76ef24724c03a",
    "src/sync/sync_timebase.sv": "87d599d0c74435307ca6f45290b608ac9e6fee0e42ccab91e2e8dd5ba3bb32f6",
-   "src/sync/sync_unit.sv": "2a4f9c3df3e71c382c9d11803a12b3c293fab6094ead429536c0edfc38972130",
+   "src/sync/sync_unit.sv": "564db1eff03cefa1af4d2158b689d46b40737b733151113690d425300208d44a",
    "src/tp_drive.sv": "a40d4694d3d91a675dafbbbf91b2cda0be2e31e56845b5d821a698b53fac7578",
    "src/tp_pkg.sv": "49c69ecf3f032b2b59c8796765d878d7c40c7742d6deb421dd6dd7efd326ca78",
    "src/tp_sync_soc.sv": "462a14536fd2450134754e5f7c87a1fb90d28c6c95822d8596fed7975f1905aa",

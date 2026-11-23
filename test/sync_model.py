@@ -60,6 +60,7 @@ class SyncModel:
         self.pend_mask = self.pend_rise = self.pend_ts = 0
         self.cnt = self.rptr = self.wptr = 0
         self.ovf = False
+        self.late = False                  # sticky: a deadline fired off its tick
         self.armed = [False] * self.ncmp
         self.deadline = [0] * self.ncmp
         self.pcnt = [0] * self.ncmp
@@ -84,6 +85,7 @@ class SyncModel:
         s |= (self.cnt == 0) << 4
         s |= (self.cnt == self.depth) << 5
         s |= self.ovf << 6
+        s |= self.late << 7
         for i in range(self.ncmp):
             s |= self.armed[i] << (8 + i)
             s |= (self.pcnt[i] != 0) << (12 + i)
@@ -175,7 +177,10 @@ class SyncModel:
 
         # deadlines and pulses
         for k in range(self.ncmp):
-            reached = ((self.now + 1 - self.deadline[k]) & M32) < 0x80000000
+            diff = (self.now + 1 - self.deadline[k]) & M32
+            reached = diff < 0x80000000
+            if self.armed[k] and reached and diff:
+                self.late = True
             fire = (self.armed[k] and reached) or (pulse and (pulse_mask >> k) & 1)
             if arm and arm_sel == k:
                 self.deadline[k], self.armed[k] = arm_time, True

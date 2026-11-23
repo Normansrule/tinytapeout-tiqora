@@ -24,15 +24,18 @@ module compare_equiv (
     output logic [31:0]      ref_dm1_1,
     output logic [15:0]      ref_pw,
     output logic [15:0]      ref_cnt0,
-    output logic [15:0]      ref_cnt1
+    output logic [15:0]      ref_cnt1,
+    output logic             ref_late
 );
     localparam int NCMP = 2, PWW = 16;
 
     logic [NCMP-1:0] trig_dut, armed_dut;
+    logic            late_dut;
     sync_compare #(.NCMP(NCMP), .PWW(PWW)) dut (
         .clk(clk), .rst(rst), .now(now), .arm_we(arm_we), .arm_time(arm_time),
         .arm_sel(arm_sel), .pulse_we(pulse_we), .pulse_mask(pulse_mask),
-        .pw_we(pw_we), .pw_in(pw_in), .trig(trig_dut), .armed(armed_dut));
+        .pw_we(pw_we), .pw_in(pw_in), .trig(trig_dut), .armed(armed_dut),
+        .late(late_dut));
 
     // reference: the comparator before the change
     logic [PWW-1:0]  pw;
@@ -40,6 +43,8 @@ module compare_equiv (
     logic [PWW-1:0]  cnt0, cnt1;
     logic [NCMP-1:0] armed;
     logic            reached0, reached1, fire0, fire1;
+    // late, stated the plain way: a deadline fired and now + 1 was not it
+    logic            late;
     assign reached0 = ($signed((now + 32'd1) - deadline0) >= 0);
     assign reached1 = ($signed((now + 32'd1) - deadline1) >= 0);
     assign fire0 = (armed[0] && reached0) || (pulse_we && pulse_mask[0]);
@@ -47,7 +52,7 @@ module compare_equiv (
     always_ff @(posedge clk) begin
         if (rst) begin
             armed <= '0; deadline0 <= '0; deadline1 <= '0; cnt0 <= '0; cnt1 <= '0;
-            pw <= 16'd8;
+            pw <= 16'd8; late <= 1'b0;
         end else begin
             if (arm_we && arm_sel == 2'd0) begin deadline0 <= arm_time; armed[0] <= 1'b1; end
             else if (armed[0] && reached0) armed[0] <= 1'b0;
@@ -56,13 +61,17 @@ module compare_equiv (
             if (fire0) cnt0 <= pw; else if (cnt0 != '0) cnt0 <= cnt0 - 1'b1;
             if (fire1) cnt1 <= pw; else if (cnt1 != '0) cnt1 <= cnt1 - 1'b1;
             if (pw_we) pw <= pw_in[PWW-1:0];
+            if ((armed[0] && reached0 && (now + 32'd1 != deadline0)) ||
+                (armed[1] && reached1 && (now + 32'd1 != deadline1))) late <= 1'b1;
         end
     end
 
-    assign ok_out    = (trig_dut == {cnt1 != '0, cnt0 != '0}) && (armed_dut == armed);
+    assign ok_out    = (trig_dut == {cnt1 != '0, cnt0 != '0}) && (armed_dut == armed) &&
+                       (late_dut == late);
     assign ref_pw    = pw;
     assign ref_cnt0  = cnt0;
     assign ref_cnt1  = cnt1;
+    assign ref_late  = late;
     assign ref_dm1_0 = deadline0 - 32'd1;
     assign ref_dm1_1 = deadline1 - 32'd1;
 endmodule

@@ -9,6 +9,12 @@
 //
 // The comparison is a signed difference so an armed deadline survives the
 // timebase rolling over.
+//
+// `late` is sticky: it goes high the first time a channel fires from its
+// deadline on a tick other than the one programmed (the deadline had
+// already passed when it was armed, a TADJ step jumped over it, or a rate
+// correction skipped the tick before it), and only reset clears it, the
+// same rule as the event queue's overflow flag.
 `default_nettype none
 
 module sync_compare #(
@@ -29,7 +35,8 @@ module sync_compare #(
     input  wire  logic             pw_we,
     input  wire  logic [31:0]      pw_in,
     output logic [NCMP-1:0]        trig,
-    output logic [NCMP-1:0]        armed
+    output logic [NCMP-1:0]        armed,
+    output logic                   late
 );
 
     logic [PWW-1:0] pw;
@@ -37,6 +44,7 @@ module sync_compare #(
     assign arm_time_m1 = arm_time - 32'd1;
     (* mem2reg *) logic [31:0]    deadline_m1 [NCMP-1:0];
     (* mem2reg *) logic [PWW-1:0] pulse_cnt [NCMP-1:0];
+    logic [NCMP-1:0] miss;
 
     genvar i;
     generate
@@ -57,6 +65,10 @@ module sync_compare #(
         // earlier rewrite as `now - deadline >= -1` was measured worse (a
         // 32-input AND tree per channel), so the subtraction stays.
         assign reached = ($signed(now - deadline_m1[i]) >= 0);
+        // On time means now == deadline - 1: the pin edge lands on the
+        // programmed tick. An equality of the two registers keeps this off
+        // the subtractor, which is on one of the slowest paths in the chip.
+        assign miss[i] = armed[i] && reached && (now != deadline_m1[i]);
         assign fire    = (armed[i] && reached) ||
                          (pulse_we && pulse_mask[i]);
 
@@ -81,6 +93,11 @@ module sync_compare #(
         assign trig[i] = (pulse_cnt[i] != '0);
     end
     endgenerate
+
+    always_ff @(posedge clk) begin
+        if (rst)        late <= 1'b0;
+        else if (|miss) late <= 1'b1;
+    end
 
     always_ff @(posedge clk) begin
         if (rst)        pw <= {{(PWW-4){1'b0}}, 4'd8};   // 8 ticks by default

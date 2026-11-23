@@ -41,9 +41,9 @@ COMPILE_ARGS += -g2012
 TOPLEVEL = tb
 COCOTB_TEST_MODULES = test
 
-.PHONY: equiv warnings sim lint synth area uart tour clean-sim explorer proto shared syncref
+.PHONY: equiv warnings sim lint synth area uart tour clean-sim explorer proto shared syncref tpctl
 
-sim: uart proto tour shared syncref docs
+sim: uart proto tpctl tour shared syncref docs
 	@echo ""
 	@echo "all testbenches finished — check for FAILED above"
 
@@ -128,3 +128,8 @@ shared:
 # Tiqora-Serial, and a small stress build that overflows its queue often).
 syncref:
 	python3 sync_model.py --suite
+
+# The host tool's own checks: frame building, reply parsing and the status
+# and event word decoders, against a fake chip (no serial port needed).
+tpctl:
+	python3 ../sw/tpctl.py selftest

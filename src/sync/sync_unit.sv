@@ -88,6 +88,7 @@ module sync_unit
     logic [31:0]     arm_time, pw_in;
     logic [1:0]      arm_sel;
     logic [NCMP-1:0] pulse_mask, armed;
+    logic            late;
 
     logic [31:0]     status;
     logic            t_pop, t_arm, t_pulse, t_mark, t_ctl, mm_we, mm_re;
@@ -213,7 +214,8 @@ module sync_unit
         .pw_we     (pw_we),
         .pw_in     (pw_in),
         .trig      (trig_pin),
-        .armed     (armed)
+        .armed     (armed),
+        .late      (late)
     );
 
     // -----------------------------------------------------------------
@@ -225,6 +227,7 @@ module sync_unit
         status[4]          = fifo_empty;
         status[5]          = fifo_full;
         status[6]          = fifo_ovf;
+        status[7]          = late;     // sticky: a deadline fired off its tick
         status[8 +: NCMP]  = armed;
         status[12 +: NCMP] = trig_pin;
         status[16 +: NCH]  = cap_level;

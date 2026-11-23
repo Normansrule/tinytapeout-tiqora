@@ -17,6 +17,8 @@
 //   reconnect a host that vanishes mid-command leaves the port waiting for
 //             the rest (the next command is eaten as data); reset recovers
 //             it with nothing committed and the queue and flag cleared
+//   late flag a deadline that fires off its tick sets STAT bit 7, which
+//             stays set until reset; an on-time deadline leaves it clear
 //   burst     an edge that arrives while a multi-pin burst is still being
 //             queued replaces the waiting event, and overflow says so
 //
@@ -367,6 +369,33 @@ module tb_proto;
         do_read(8'h01, d, ok2);
         chk(ok && ok2 && v[31:27] == 5'b0_000_1 && d[31:27] == 5'b0_010_1 && d[26:0] - v[26:0] == 27'd1,
             "the queue holds CAP0 then CAP2, one tick apart");
+
+        $display("\n[sticky LATE flag]");
+        do_read(8'h02, v, ok);
+        chk(ok && !v[7], "LATE (STAT bit 7) is clear after reset");
+        do_write(8'h0A, 32'h0000_0001, ok2);       // PULSE: a direct fire, no deadline
+        do_read(8'h02, d, ok);
+        chk(ok && ok2 && !d[7], "a direct pulse leaves LATE clear");
+        do_read(8'h00, v, ok);
+        do_write(8'h04, v + 32'd5000, ok2);        // CMP0, ahead of the timebase
+        #(CLK_NS * 6000);
+        do_read(8'h02, d, ok);
+        chk(ok && ok2 && !d[8] && !d[7], "an on-time deadline fires and leaves LATE clear");
+        do_read(8'h00, v, ok);
+        do_write(8'h05, v - 32'd100, ok2);         // CMP1, already passed
+        do_read(8'h02, d, ok);
+        chk(ok && ok2 && !d[9] && d[7], "a deadline already passed when written fires at once and sets LATE");
+        do_read(8'h00, v, ok);
+        do_write(8'h04, v + 32'd5000, ok2);
+        #(CLK_NS * 6000);
+        do_read(8'h02, d, ok);
+        chk(ok && ok2 && !d[8] && d[7], "LATE stays set after a later on-time fire");
+        @(negedge clk) rst = 1'b1;
+        repeat (4) @(negedge clk);
+        rst = 1'b0;
+        #(BIT_NS * 2);
+        do_read(8'h02, d, ok);
+        chk(ok && !d[7], "reset clears LATE");
 
         $display("\n%0d checks, %0d failures", checks, errors);
         if (errors == 0) $display("SERIAL PROTOCOL PASSED\n");
