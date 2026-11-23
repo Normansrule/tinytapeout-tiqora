@@ -1,0 +1,160 @@
+/* views.css — the "Inside a gate" page. Colours come from exhibit.css tokens,
+   so light and dark both work; the layer colours below are the only new ones. */
+#views { --ly-nwell: #c9e3c3; --ly-diff: #6fb36b; --ly-poly: #d8473b; --ly-licon: #3a3a3a; --ly-li1: #8a6fd1;
+  --ly-mcon: #222; --ly-met1: #4a90c8; --on: var(--trace); --hi: color-mix(in srgb, var(--accent) 16%, transparent);
+  --st: color-mix(in srgb, var(--trace) 18%, transparent); }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) #views { --ly-nwell: #24402a; --ly-diff: #3f7d3c;
+  --ly-poly: #e0614f; --ly-licon: #d6d6d6; --ly-li1: #9d86e8; --ly-mcon: #eee; --ly-met1: #5aa6e0; } }
+:root[data-theme="dark"] #views { --ly-nwell: #24402a; --ly-diff: #3f7d3c; --ly-poly: #e0614f; --ly-licon: #d6d6d6;
+  --ly-li1: #9d86e8; --ly-mcon: #eee; --ly-met1: #5aa6e0; }
+
+#views { margin: 1.2rem 0 2rem; }
+#views button { font: inherit; color: inherit; cursor: pointer; }
+#views [tabindex="0"]:focus-visible, #views button:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+.vw-bar { display: flex; flex-wrap: wrap; align-items: center; gap: .35rem; padding: .5rem .7rem;
+  background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); margin-bottom: .75rem; font-size: .92rem; }
+.vw-lbl { font-weight: 700; margin-right: .2rem; }
+.vw-hint { color: var(--muted); }
+.vw-sep { color: var(--muted); }
+.vw-crumb { background: none; border: 1px solid var(--line); border-radius: 999px; padding: .1rem .6rem; font-family: var(--mono); font-size: .85rem; }
+.vw-crumb small { font-family: var(--sans); color: var(--muted); }
+.vw-main { display: grid; grid-template-columns: 210px minmax(0, 1fr); gap: .75rem; }
+@media (max-width: 860px) { .vw-main { grid-template-columns: 1fr; } }
+.vw-side { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: .6rem; align-self: start; }
+.vw-side h3 { margin: 0 0 .4rem; font-size: 1rem; }
+.vw-tree { list-style: none; margin: 0; padding: 0; max-height: 34rem; overflow: auto; }
+.vw-mod { display: flex; justify-content: space-between; gap: .5rem; width: 100%; text-align: left; background: none; border: 0;
+  border-radius: var(--radius); padding: .22rem .4rem; font-family: var(--mono); font-size: .82rem; }
+.vw-mod[aria-pressed="true"] { background: var(--hi); color: var(--accent); font-weight: 700; }
+.vw-n { color: var(--muted); font-variant-numeric: tabular-nums; }
+.vw-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .75rem; }
+@media (max-width: 1100px) { .vw-grid { grid-template-columns: 1fr; } }
+.vw-pane { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: .7rem .8rem; min-width: 0; }
+.vw-pane > header { display: flex; flex-wrap: wrap; align-items: baseline; gap: .1rem .6rem; margin-bottom: .3rem; }
+.vw-pane h3 { margin: 0; font-size: 1.05rem; }
+.vw-sub { color: var(--muted); font-size: .85rem; }
+#vw-fsm { margin-top: .75rem; }
+.vw-meta { font-size: .88rem; color: var(--muted); max-width: none; margin: .3rem 0 .6rem; }
+.vw-meta b { color: var(--ink); }
+.vw-empty { color: var(--muted); font-style: italic; }
+.vw-code { font-family: var(--mono); font-size: .78rem; line-height: 1.45; max-height: 26rem; overflow: auto; background: var(--code-bg);
+  color: var(--code-ink); border-radius: var(--radius); padding: .4rem 0; }
+.vw-ln { display: grid; grid-template-columns: 3.2em 1fr; white-space: pre; padding-right: .6rem; }
+.vw-ln .no { color: var(--code-dim); text-align: right; padding-right: .7em; user-select: none; }
+.vw-ln.mk .no::before { content: "▸ "; color: var(--trace); }
+.vw-ln.mk { cursor: pointer; }
+.vw-ln.mk:hover { background: rgba(255, 255, 255, .06); }
+.vw-ln b { color: #8ec5ff; font-weight: 400; }
+.vw-ln i { color: #f2b36d; font-style: normal; }
+.vw-ln em { color: var(--code-dim); }
+.vw-ln.on-g, .vw-ln.on-x { background: rgba(80, 160, 255, .22); }
+.vw-ln.on-s { background: rgba(240, 170, 60, .18); }
+.vw-ln.on-e { background: rgba(240, 170, 60, .35); }
+.vw-chips { display: flex; flex-wrap: wrap; gap: .3rem; margin: .3rem 0 .6rem; max-height: 9.5rem; overflow: auto; }
+.vw-chip { background: var(--bg); border: 1px solid var(--line); border-radius: 999px; padding: .12rem .6rem; font-family: var(--mono); font-size: .8rem; }
+.vw-chip small { color: var(--muted); }
+.vw-chip.output { border-style: dashed; }
+.vw-chip[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+.vw-chip[aria-pressed="true"] small { color: inherit; }
+.vw-chip .sw { display: inline-block; width: .8em; height: .8em; border-radius: 2px; margin-right: .3em; vertical-align: -1px; }
+.vw-out { font-family: var(--mono); font-size: .85rem; padding: .12rem .6rem; border-radius: 999px; border: 1px solid var(--line); }
+.vw-out.hi { border-color: var(--on); color: var(--on); font-weight: 700; }
+.vw-scroll { overflow: auto; max-height: 30rem; border: 1px solid var(--line); border-radius: var(--radius); background: var(--bg); }
+.vw-scroll.short { max-height: 22rem; }
+.vw-zoom { float: right; display: flex; gap: .2rem; }
+.vw-zoom button { width: 1.8rem; height: 1.8rem; border: 1px solid var(--line); background: var(--bg); border-radius: var(--radius); }
+.vw-svg { display: block; font-family: var(--mono); }
+.vw-svg text { fill: var(--ink); }
+.gates .wire { fill: none; stroke: var(--line-2, var(--muted)); stroke-width: 1.2; }
+.gates .wire.on { stroke: var(--accent); stroke-width: 2.4; }
+.gates .gate .body { fill: var(--surface); stroke: var(--ink); stroke-width: 1.4; }
+.gates .gate .bub { fill: var(--surface); stroke: var(--ink); stroke-width: 1.4; }
+.gates .gate .xl { fill: none; stroke: var(--ink); stroke-width: 1.4; }
+.gates .gate.ff .body { fill: color-mix(in srgb, var(--trace) 14%, var(--surface)); }
+.gates .gate { cursor: pointer; }
+.gates .gate:hover .body, .gates .gate:focus .body { stroke: var(--accent); }
+.gates .gate.sel .body { fill: var(--accent); stroke: var(--accent); }
+.gates .gl { font-size: 10px; }
+.gates .inl { font-size: 10px; fill: var(--muted); }
+.gates g[role="button"] .inl { fill: var(--accent); text-decoration: underline; cursor: pointer; }
+.fets .rail { stroke-width: 3; }
+.fets .rail.p { stroke: var(--fail); }
+.fets .rail.n { stroke: var(--sig-bus); }
+.fets .rl { font-size: 10px; fill: var(--muted); }
+.fets .fet line { stroke: var(--muted); stroke-width: 2; }
+.fets .fet.on .chan { stroke: var(--on); stroke-width: 4; }
+.fets .fet .bub { fill: var(--surface); stroke: var(--muted); stroke-width: 1.5; }
+.fets .fet.sel line { stroke: var(--accent); }
+.fets .fet { cursor: pointer; }
+.fets .fet .hit { fill: transparent; stroke: none; }
+.fets .net { font-size: 9px; pointer-events: none; }
+.vw-svg text { pointer-events: none; }
+.gates g[role="button"] text { pointer-events: auto; }
+.fets .net.v1 { fill: var(--on); font-weight: 700; }
+.fets .net.v0 { fill: var(--muted); }
+.vw-tt { border-collapse: collapse; font-family: var(--mono); font-size: .8rem; margin: .4rem 0; }
+.vw-tt th, .vw-tt td { border: 1px solid var(--line); padding: .1rem .5rem; text-align: center; }
+.vw-tt tr.cur td { background: var(--hi); }
+.vw-tt td.o { font-weight: 700; }
+.lay polygon { stroke: none; }
+.lay .ly-nwell polygon { fill: var(--ly-nwell); }
+.lay .ly-diff polygon { fill: var(--ly-diff); opacity: .85; }
+.lay .ly-poly polygon { fill: var(--ly-poly); opacity: .75; }
+.lay .ly-licon polygon { fill: var(--ly-licon); }
+.lay .ly-li1 polygon { fill: var(--ly-li1); opacity: .45; }
+.lay .ly-mcon polygon { fill: var(--ly-mcon); }
+.lay .ly-met1 polygon { fill: var(--ly-met1); opacity: .35; }
+.lay .gm rect { fill: none; stroke: var(--ink); stroke-width: 1.2; stroke-dasharray: 3 2; }
+.lay .gm.on rect { stroke: var(--on); stroke-width: 2.4; stroke-dasharray: none; }
+.lay .gm.sel rect { stroke: var(--accent); stroke-width: 3.5; stroke-dasharray: none; }
+.lay .gm { cursor: pointer; }
+.lay .pl { font-size: 13px; font-weight: 700; paint-order: stroke; stroke: var(--surface); stroke-width: 3px; }
+.sw-nwell { background: var(--ly-nwell); } .sw-diff { background: var(--ly-diff); } .sw-poly { background: var(--ly-poly); }
+.sw-licon { background: var(--ly-licon); } .sw-li1 { background: var(--ly-li1); } .sw-mcon { background: var(--ly-mcon); } .sw-met1 { background: var(--ly-met1); }
+.vw-ff { margin: .8rem 0 0; }
+.vw-ff figcaption { font-size: .88rem; color: var(--muted); }
+.ff .si { fill: color-mix(in srgb, var(--muted) 25%, var(--surface)); }
+.ff .ox { fill: var(--surface); stroke: var(--muted); }
+.ff .pg { fill: var(--ly-poly); opacity: .8; }
+.ff .sd { fill: var(--ly-diff); }
+.ff .fin { fill: color-mix(in srgb, var(--muted) 45%, var(--surface)); }
+.ff .ch { stroke: var(--on); stroke-width: 3; }
+.ff .fh { font-weight: 700; font-size: 14px; }
+.ff .fl { font-size: 11px; }
+.ff .fn { font-size: 10px; fill: var(--muted); }
+.vw-tabs { display: flex; gap: .3rem; border-bottom: 1px solid var(--line); margin-bottom: .6rem; flex-wrap: wrap; }
+.vw-tabs button { background: none; border: 0; border-bottom: 3px solid transparent; padding: .35rem .6rem; font-weight: 700; color: var(--muted); }
+.vw-tabs button[aria-selected="true"] { color: var(--ink); border-bottom-color: var(--accent); }
+.vw-fsmwrap .vw-scroll { max-height: none; }
+.vw-fsmwrap { display: grid; grid-template-columns: minmax(0, 2fr) minmax(200px, 1fr); gap: .75rem; }
+@media (max-width: 860px) { .vw-fsmwrap { grid-template-columns: 1fr; } }
+.vw-fsminfo h4 { margin: .2rem 0; font-family: var(--mono); }
+.vw-fsminfo p, .vw-fsminfo li { font-size: .88rem; }
+.fsm .tr { fill: none; stroke: var(--muted); stroke-width: 1.4; }
+.fsm .tr.on { stroke: var(--trace); stroke-width: 2.2; }
+.fsm .tr.sel { stroke: var(--accent); stroke-width: 3; }
+.fsm .hit { fill: none; stroke: transparent; stroke-width: 12; cursor: pointer; }
+.fsm .ah { fill: var(--muted); }
+.fsm .st circle { fill: var(--surface); stroke: var(--ink); stroke-width: 1.6; }
+.fsm .st .ring { fill: none; stroke-dasharray: 3 2; }
+.fsm .st.sel circle:first-child { fill: var(--accent); stroke: var(--accent); }
+.fsm .st.sel text { fill: var(--accent-ink); }
+.fsm .st { cursor: pointer; }
+.fsm .sn { font-size: 10px; font-weight: 700; }
+.fsm .sc { font-size: 8px; }
+.links .ln { stroke: var(--line-2, var(--muted)); }
+.links .lw { font-size: 10px; fill: var(--muted); }
+.links .mb rect { fill: var(--surface); stroke: var(--ink); }
+.links .mb { cursor: pointer; }
+.links .mb:hover rect, .links .mb:focus rect { stroke: var(--accent); stroke-width: 2; }
+.links .mn { font-size: 11px; font-weight: 700; }
+.links .mt { font-size: 9px; fill: var(--muted); }
+.vw-tablewrap { overflow: auto; max-height: 34rem; }
+.vw-isa { border-collapse: collapse; font-size: .85rem; width: 100%; }
+.vw-isa th, .vw-isa td { border-bottom: 1px solid var(--line); padding: .3rem .5rem; text-align: left; vertical-align: top; }
+.vw-isa pre { margin: 0; font-family: var(--mono); font-size: .8rem; white-space: pre; }
+.vw-link { background: none; border: 0; padding: 0; color: var(--accent); text-decoration: underline; font-size: .8rem; }
+.vw-static table { border-collapse: collapse; font-size: .9rem; }
+.vw-static th, .vw-static td { border-bottom: 1px solid var(--line); padding: .25rem .6rem; text-align: left; }
+#views:not(.ready) { min-height: 4rem; }
+@media (prefers-reduced-motion: reduce) { #views * { transition: none !important; animation: none !important; scroll-behavior: auto !important; } }

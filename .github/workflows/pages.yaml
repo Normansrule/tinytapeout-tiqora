@@ -30,6 +30,7 @@ jobs:
         run: |
           python3 docs/tools/motion.py --check
           python3 docs/tools/routed_map.py --check
+          python3 docs/tools/views_build.py --check
           python3 docs/tools/build_site.py --check
 
       - name: Collect the site

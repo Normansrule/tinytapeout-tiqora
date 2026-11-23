@@ -17,7 +17,8 @@
  "data": {
   "die": "docs/site/data/die.json",
   "layout": "docs/site/data/serial_1x2_layout.json",
-  "routed": "docs/site/data/routed.json"
+  "routed": "docs/site/data/routed.json",
+  "views": "docs/site/data/views.json"
  },
  "pages": [
   {
@@ -35,6 +36,10 @@
   {
    "id": "physical",
    "nav": "Physical design"
+  },
+  {
+   "id": "views",
+   "nav": "Inside a gate"
   },
   {
    "id": "evidence",

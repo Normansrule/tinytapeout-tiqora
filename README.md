@@ -54,6 +54,7 @@ timing at the slow corner, by 1.30 ns at 50 MHz (local LibreLane 3.0.14 run).
 | [**Tours**](https://normansrule.github.io/tinytapeout-tiqora/tours.html) | six sequences recorded from the RTL, with play, step, scrub and captions; type your own command bytes and see the 8N1 frames and the reply |
 | [**Chip atlas**](https://normansrule.github.io/tinytapeout-tiqora/atlas.html) | every block from the elaborated RTL: ports, legal values, behaviour, tests, connections you can follow |
 | [**Physical design**](https://normansrule.github.io/tinytapeout-tiqora/physical.html) | measured cell area per block against the 1 × 2 die, and the routed 1 × 2 layout with its sign-off numbers; zoom into every wire and send a clock edge down the real clock tree |
+| [**Inside a gate**](https://normansrule.github.io/tinytapeout-tiqora/views.html) | one design at four depths, linked: the RTL, the sky130 gates synthesis made from it, any gate as transistors you can switch, and its layout; plus the serial receiver's state machine. Every view is checked against the next ([notes](docs/views/NOTES.md)) |
 | [**Evidence**](https://normansrule.github.io/tinytapeout-tiqora/evidence.html) | the ladder from RTL tests to silicon, with the command behind every rung |
 
 The same pages are in `docs/site/` and open from a clone with no network.

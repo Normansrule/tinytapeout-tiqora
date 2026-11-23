@@ -1,0 +1,44 @@
+name: views
+
+# The "Inside a gate" page (docs/site/views.html) and every check behind it:
+# layout == transistors (KLayout LVS + a geometric check), transistors == the
+# liberty gate (switch level, every input), the gate netlist == the RTL
+# (lockstep, six runs of real host commands, three with random resets), the
+# serial receiver's state diagram == behaviour, every link on the page, the
+# page in a browser, and the mutants each of those checks must catch. The PDK
+# is not needed: docs/views/*.json hold what docs/tools/views_synth.py took
+# from it.
+
+on: [push, workflow_dispatch]
+
+jobs:
+  views:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v6
+
+      - name: Install Icarus Verilog
+        run: sudo apt-get update && sudo apt-get install -y iverilog
+
+      - name: Setup python
+        uses: actions/setup-python@v6
+        with:
+          python-version: '3.11'
+
+      - name: Install Python packages
+        run: pip install klayout==0.30.14
+
+      - name: Setup node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Install Playwright and Chromium
+        run: |
+          npm install --no-save --prefix "$RUNNER_TEMP/pw" playwright@1.63.0
+          echo "NODE_PATH=$RUNNER_TEMP/pw/node_modules" >> "$GITHUB_ENV"
+          "$RUNNER_TEMP/pw/node_modules/.bin/playwright" install --with-deps chromium
+
+      - name: make -C test views
+        run: make -C test views

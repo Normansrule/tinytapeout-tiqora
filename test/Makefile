@@ -40,7 +40,7 @@ COMPILE_ARGS += -g2012
 TOPLEVEL = tb
 COCOTB_TEST_MODULES = test
 
-.PHONY: warnings sim lint synth area uart tour clean-sim explorer proto shared syncref
+.PHONY: warnings sim lint synth area uart tour clean-sim explorer proto shared syncref views views-lockstep views-page views-mutants
 
 sim: uart proto tour shared syncref docs
 	@echo ""
@@ -123,3 +123,42 @@ shared:
 # Tiqora-Serial, and a small stress build that overflows its queue often).
 syncref:
 	python3 sync_model.py --suite
+
+# ---- "Inside a gate" (docs/site/views.html): every view checked against the next
+# layout == transistors (KLayout LVS + an independent geometric check),
+# transistors == liberty gate (switch level, every input), gates == RTL
+# (lockstep: real host commands on the serial line, six runs), the receiver's
+# state diagram == behaviour, every link on the page resolves, the page itself
+# in a browser, and mutants that each of those checks must catch.
+# Needs: pip klayout, Icarus, node + Playwright (the page test is skipped without them).
+# seed[:option]; RESETS adds random mid-run resets (the only way the receiver
+# leaves S_DATA for S_IDLE, so the diagram's reset arrows get taken)
+VIEWS_RUNS = 1 2 3 4:RESETS 5:RESETS 6:RESETS
+VIEWS_CYCLES ?= 200000
+views: views-lockstep
+	cd .. && python3 docs/tools/views_switch.py
+	cd .. && python3 docs/tools/views_lvs.py
+	cd .. && python3 test/views/mini_lvs.py
+	cd .. && python3 docs/tools/views_build.py --check
+	cd .. && python3 test/views/check_views.py
+	$(MAKE) views-page
+	$(MAKE) views-mutants
+
+views-lockstep:
+	mkdir -p views_gl
+	rm -f views_gl/*
+	python3 views/netlist_v.py views_gl G_
+	iverilog -g2012 -o views_gl/tb_lockstep.vvp -s tb_lockstep $(RTL) views_gl/cells.v views_gl/netlist.v views/tb_lockstep.sv
+	@for r in $(VIEWS_RUNS); do \
+	  seed=$${r%%:*}; opt=""; [ "$$r" != "$$seed" ] && opt=+$${r#*:}; \
+	  sh vv.sh views_gl/tb_lockstep.vvp +CYCLES=$(VIEWS_CYCLES) +SEED=$$seed +FSMLOG=views_gl/fsm_$$seed.log $$opt > views_gl/run_$$seed.log 2>&1; st=$$?; \
+	  cat views_gl/run_$$seed.log; \
+	  [ $$st -eq 0 ] || exit 1; \
+	done
+	python3 views/fsm_check.py views_gl/fsm_*.log
+
+views-page:
+	@if node -e "require('playwright')" 2>/dev/null; then node views/page_test.js; else echo "views-page: Playwright not found, browser test skipped"; fi
+
+views-mutants:
+	cd .. && python3 test/views/mutants.py
