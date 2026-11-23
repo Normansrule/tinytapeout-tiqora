@@ -1,0 +1,19 @@
+<!-- {"title": "Inside a gate", "description": "One design, five linked views: the RTL, the sky130 gates synthesis made from it, one gate as transistors, the same gate's layout, and the serial receiver's state machine. Click anything to see it in every other view.", "data": ["views"], "scripts": []} -->
+<h1>Inside a gate</h1>
+<p class=lede>Tiqora-Serial at four depths: the SystemVerilog it is written in, the {{v:cells}} standard cells synthesis turns it into, the transistors inside each cell, and how those transistors are drawn in silicon.</p>
+<p class=small>Everything below comes from real files: the RTL in <code>src/</code>, a Yosys {{v:yosys}} synthesis to the SkyWater sky130 high-density cell library ({{v:area}} µm², {{v:transistors}} transistors counted from the SkyWater SPICE netlists), and the SkyWater layouts of the {{v:celltypes}} cell types it uses. <code>docs/tools/views_build.py</code> builds it; nothing on this page is drawn by hand.</p>
+
+<h2>How to use it</h2>
+<p>Every highlighted thing is a <b>viewing point</b>: choose it and every view that can show it follows. Choose a module on the left, then a register: its RTL lines light up and the gates that compute its next value are drawn. Choose a gate to open its transistors and layout. Flip the inputs and watch which transistors conduct. Below, the <b>state machine</b> is a common language between the views: a state is a case arm in the RTL, one flip-flop in the gates, and a circle in the diagram. The address bar keeps your place, so a view can be linked.</p>
+
+<div id=views aria-live=off></div>
+<noscript>{{v:noscript}}</noscript>
+
+<h2>How each view is checked</h2>
+<ul class=vw-checks>
+<li><b>Layout is the transistors.</b> KLayout's netlist extractor rebuilds the circuit from each cell's polygons and compares it with the SkyWater SPICE netlist, transistor by transistor (type, width, length, connections): <code>python3 docs/tools/views_lvs.py</code>. A second, independent geometric check measures every channel: <code>python3 test/views/mini_lvs.py</code>.</li>
+<li><b>The transistors are the gate.</b> A switch-level simulation of each cell's transistors, for every input combination, must give the liberty Boolean function; flip-flops must load D on a rising clock and hold otherwise: <code>python3 docs/tools/views_switch.py</code>. The transistor view on this page uses the same rules, and <code>test/views/page_test.js</code> checks the two agree on every cell.</li>
+<li><b>The gates are the RTL.</b> The gate netlist and the RTL run side by side on the same host traffic (pings, register reads and writes, stray bytes and short glitches on the serial line, and random resets), with random capture-pin activity, and every output pin is compared on every clock: <code>make -C test views</code>.</li>
+<li><b>The diagrams are what the chip does.</b> The same runs log the serial receiver's state machine every clock; each step must be an arrow of the diagram, and the gate flip-flops must hold the one-hot code synthesis chose: <code>python3 test/views/fsm_check.py</code>.</li>
+</ul>
+<p class=small><span class="ev illustrative">illustrative</span> The FinFET drawing in the layout view is a comparison sketch. Every transistor in this chip is a planar MOSFET; SkyWater 130 nm has no FinFETs.</p>
