@@ -27,7 +27,8 @@ module sync_unit
     parameter int PTRW  = 1,       // $clog2(DEPTH)
     parameter int FRACW = 24,      // rate accumulator width
     parameter int FILTW = 0,       // capture glitch filter length
-    parameter int PWW   = 16       // trigger pulse-width counter bits
+    parameter int PWW   = 16,      // trigger pulse-width counter bits
+    parameter int NARM  = NCMP     // channels that take deadlines (rest: PULSE only)
 ) (
     input  wire  logic            clk,
     input  wire  logic            rst,
@@ -88,6 +89,7 @@ module sync_unit
     logic [31:0]     arm_time, pw_in;
     logic [1:0]      arm_sel;
     logic [NCMP-1:0] pulse_mask, armed;
+    logic            late;
 
     logic [31:0]     status;
     logic            t_pop, t_arm, t_pulse, t_mark, t_ctl, mm_we, mm_re;
@@ -201,7 +203,7 @@ module sync_unit
     // -----------------------------------------------------------------
     // Compare / trigger
     // -----------------------------------------------------------------
-    sync_compare #(.NCMP(NCMP), .PWW(PWW)) u_cmp (
+    sync_compare #(.NCMP(NCMP), .PWW(PWW), .NARM(NARM)) u_cmp (
         .clk       (clk),
         .rst       (rst),
         .now       (now),
@@ -213,7 +215,8 @@ module sync_unit
         .pw_we     (pw_we),
         .pw_in     (pw_in),
         .trig      (trig_pin),
-        .armed     (armed)
+        .armed     (armed),
+        .late      (late)
     );
 
     // -----------------------------------------------------------------
@@ -225,6 +228,7 @@ module sync_unit
         status[4]          = fifo_empty;
         status[5]          = fifo_full;
         status[6]          = fifo_ovf;
+        status[7]          = late;     // sticky: a deadline fired off its tick
         status[8 +: NCMP]  = armed;
         status[12 +: NCMP] = trig_pin;
         status[16 +: NCH]  = cap_level;

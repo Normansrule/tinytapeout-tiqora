@@ -320,7 +320,7 @@ Same map as the full chip. `aa` is the offset.
 |---|---|---|---|
 | 0 | TIME | R | Current 32-bit timebase |
 | 1 | EVENT | R | Oldest queued event. **Reading pops it.** |
-| 2 | STAT | R | Status word |
+| 2 | STAT | R | Status word (bit 6 overflow and bit 7 LATE are sticky until reset) |
 | 3 | CFG | W | Capture enable and edge selection |
 | 4 | CMP0 | W | Arm trigger 0 at this timebase value |
 | 5 | CMP1 | W | Arm trigger 1 at this timebase value |
@@ -416,7 +416,7 @@ at an internal flip-flop.
 | Check | Result |
 |---|---|
 | `tb_uart.sv`, driving only the serial pins | **30 / 30** |
-| `tb_proto.sv`, framing errors, glitches, all 253 unknown commands, partial frames, unmapped addresses, late bytes, queue loss, reconnection, bursts | **28 / 28** |
+| `tb_proto.sv`, framing errors, glitches, all 253 unknown commands, partial frames, unmapped addresses, late bytes, queue loss, reconnection, bursts, the sticky LATE bit | **34 / 34** |
 | `sync_model.py`, the timing unit against a Python reference model, every output on every clock, three builds, and no pin event lost without overflow | **4 / 4** |
 | `test.py` cocotb, through the Tiny Tapeout pin interface | **5 / 5** |
 | `tpctl.py selftest`, host protocol with no hardware | **18 / 18** |
@@ -440,6 +440,9 @@ acknowledged and change nothing. Only the low four address bits are decoded. A t
 the 2-deep event queue is dropped and raises the overflow pin and STAT bit; the two queued events
 read back oldest first, and the flag stays set after the queue drains until reset. Reset recovers
 a link left mid-frame: nothing of the cut frame is committed and the next ping answers.
+STAT bit 7 (LATE) goes high the first time a deadline fires on a tick other than the one
+written: it was already past when CMP0 or CMP1 was written, or an ADJ step jumped over it.
+An on-time deadline and a direct PULSE leave it clear, and only reset clears it.
 
 Two limits follow from the design and are now measured rather than assumed:
 

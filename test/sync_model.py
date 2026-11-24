@@ -39,8 +39,9 @@ SR_PW, SR_ADJ, SR_RATE, SR_PULSE = 7, 8, 9, 0xA
 
 
 class SyncModel:
-    def __init__(self, nch, ncmp, depth, fracw, filtw, pww):
+    def __init__(self, nch, ncmp, depth, fracw, filtw, pww, narm=None):
         self.nch, self.ncmp, self.depth = nch, ncmp, depth
+        self.narm = ncmp if narm is None else narm   # channels that take deadlines
         self.fracw, self.filtw, self.pww = fracw, filtw, pww
         self.chmask = (1 << nch) - 1
         self.mem = [None] * depth          # queue storage is not reset
@@ -60,6 +61,7 @@ class SyncModel:
         self.pend_mask = self.pend_rise = self.pend_ts = 0
         self.cnt = self.rptr = self.wptr = 0
         self.ovf = False
+        self.late = False                  # sticky: a deadline fired off its tick
         self.armed = [False] * self.ncmp
         self.deadline = [0] * self.ncmp
         self.pcnt = [0] * self.ncmp
@@ -84,6 +86,7 @@ class SyncModel:
         s |= (self.cnt == 0) << 4
         s |= (self.cnt == self.depth) << 5
         s |= self.ovf << 6
+        s |= self.late << 7
         for i in range(self.ncmp):
             s |= self.armed[i] << (8 + i)
             s |= (self.pcnt[i] != 0) << (12 + i)
@@ -175,9 +178,12 @@ class SyncModel:
 
         # deadlines and pulses
         for k in range(self.ncmp):
-            reached = ((self.now + 1 - self.deadline[k]) & M32) < 0x80000000
+            diff = (self.now + 1 - self.deadline[k]) & M32
+            reached = diff < 0x80000000
+            if self.armed[k] and reached and diff:
+                self.late = True
             fire = (self.armed[k] and reached) or (pulse and (pulse_mask >> k) & 1)
-            if arm and arm_sel == k:
+            if arm and arm_sel == k and k < self.narm:
                 self.deadline[k], self.armed[k] = arm_time, True
             elif self.armed[k] and reached:
                 self.armed[k] = False
@@ -240,7 +246,8 @@ def run(path, show=5):
     lines = open(path).read().splitlines()
     hdr = dict(kv.split("=") for kv in lines[0][1:].split())
     m = SyncModel(int(hdr["NCH"]), int(hdr["NCMP"]), int(hdr["DEPTH"]),
-                  int(hdr["FRACW"]), int(hdr["FILTW"]), int(hdr["PWW"]))
+                  int(hdr["FRACW"]), int(hdr["FILTW"]), int(hdr["PWW"]),
+                  int(hdr.get("NARM", hdr["NCMP"])))
     bad, lost = 0, [0, 0, 0]
     for n, line in enumerate(lines[1:]):
         if "x" in line.split("|")[0].lower():
@@ -268,7 +275,7 @@ def run(path, show=5):
 # filter, a narrow rate accumulator and pulse counter.
 SUITE = [
     ("Tiqora", {}),
-    ("Tiqora-Serial", {"NCMP": 3}),
+    ("Tiqora-Serial", {"NCMP": 3, "NARM": 2}),
     ("stress", {"NCH": 4, "NCMP": 4, "DEPTH": 4, "PTRW": 2, "FRACW": 8, "FILTW": 2, "PWW": 6}),
 ]
 

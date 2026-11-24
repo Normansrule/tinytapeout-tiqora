@@ -102,6 +102,7 @@ class Status:
     empty: bool
     full: bool
     overflow: bool      # an event was lost. Sticky.
+    late: bool          # a deadline fired after its tick. Sticky.
     armed: int          # bit per compare channel
     triggers: int       # bit per compare channel, high while pulsing
     levels: int         # live state of the eight capture pins
@@ -113,6 +114,7 @@ class Status:
             empty=bool((word >> 4) & 1),
             full=bool((word >> 5) & 1),
             overflow=bool((word >> 6) & 1),
+            late=bool((word >> 7) & 1),
             armed=(word >> 8) & 0xF,
             triggers=(word >> 12) & 0xF,
             levels=(word >> 16) & 0xFF,
@@ -123,6 +125,7 @@ class Status:
                 f"{' EMPTY' if self.empty else ''}"
                 f"{' FULL' if self.full else ''}"
                 f"{'  OVERFLOW' if self.overflow else ''}"
+                f"{'  LATE' if self.late else ''}"
                 f"   armed 0b{self.armed:04b}"
                 f"   trig 0b{self.triggers:04b}"
                 f"   pins 0b{self.levels:08b}")
@@ -423,6 +426,9 @@ def selftest() -> int:
         "the status word decodes")
     st = Status.decode((1 << 6) | 2)
     chk(st.overflow and st.count == 2, "overflow and queue count decode")
+    st = Status.decode(1 << 7)
+    chk(st.late and not st.overflow and "LATE" in str(st),
+        "the sticky LATE bit decodes and prints")
 
     fake.regs[REG_STAT] = 0
     fake.regs[REG_EVENT] = 0x1800_0101

@@ -5,4 +5,4 @@ read_verilog -sv syn/compare_equiv.sv
 hierarchy -top compare_equiv
 proc; memory; flatten; opt_clean
 # reset in the first clock, then any input sequence
-sat -tempinduct -prove ok_out 1 -prove dut.deadline_m1[0] ref_dm1_0 -prove dut.deadline_m1[1] ref_dm1_1 -prove dut.pw ref_pw -prove dut.pulse_cnt[0] ref_cnt0 -prove dut.pulse_cnt[1] ref_cnt1 -set-at 1 rst 1 -seq 1 -maxsteps 8 -verify
+sat -tempinduct -prove ok_out 1 -prove dut.deadline_m1[0] ref_dm1_0 -prove dut.deadline_m1[1] ref_dm1_1 -prove dut.pw ref_pw -prove dut.pulse_cnt[0] ref_cnt0 -prove dut.pulse_cnt[1] ref_cnt1 -prove dut.late ref_late -set-at 1 rst 1 -seq 1 -maxsteps 8 -verify
