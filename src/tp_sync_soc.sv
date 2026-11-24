@@ -19,6 +19,9 @@ module tp_sync_soc #(
     parameter int FRACW = 24,
     parameter int FILTW = 0,
     parameter int PWW   = 16,      // trigger pulse-width counter bits
+    // Only CMP0 and CMP1 have registers, so trigger 2 is pulse-only: it
+    // builds without a deadline register, subtractor or LATE compare.
+    parameter int NARM  = 2,
     parameter int DIV   = 434,     // baud = clk_hz / DIV; 115200 at 50 MHz
     parameter int DIVW  = 9
 ) (
@@ -64,7 +67,7 @@ module tp_sync_soc #(
 
     sync_unit #(
         .NCH(NCH), .NCMP(NCMP), .DEPTH(DEPTH), .PTRW(PTRW),
-        .FRACW(FRACW), .FILTW(FILTW), .PWW(PWW)
+        .FRACW(FRACW), .FILTW(FILTW), .PWW(PWW), .NARM(NARM)
     ) u_sync (
         .clk        (clk),
         .rst        (rst),

@@ -22,6 +22,7 @@ module tb_sync_ref;
     parameter int FRACW = 24;
     parameter int FILTW = 0;
     parameter int PWW   = 16;
+    parameter int NARM  = NCMP;
 
     reg              clk = 1'b0, rst = 1'b1;
     reg  [NCH-1:0]   cap = '0;
@@ -39,7 +40,7 @@ module tb_sync_ref;
 
     sync_unit #(
         .NCH(NCH), .NCMP(NCMP), .DEPTH(DEPTH), .PTRW(PTRW),
-        .FRACW(FRACW), .FILTW(FILTW), .PWW(PWW)
+        .FRACW(FRACW), .FILTW(FILTW), .PWW(PWW), .NARM(NARM)
     ) dut (
         .clk(clk), .rst(rst),
         .cap_pin(cap), .trig_pin(trig), .evt_pending(evt_pending), .ovf_pin(ovf),
@@ -82,8 +83,8 @@ module tb_sync_ref;
         if (!$value$plusargs("SEED=%d", seed))     seed = 1;
         if (!$value$plusargs("CYCLES=%d", cycles)) cycles = 20000;
         fd = $fopen("sync_ref_trace.txt", "w");
-        $fdisplay(fd, "# NCH=%0d NCMP=%0d DEPTH=%0d PTRW=%0d FRACW=%0d FILTW=%0d PWW=%0d SEED=%0d",
-                  NCH, NCMP, DEPTH, PTRW, FRACW, FILTW, PWW, seed);
+        $fdisplay(fd, "# NCH=%0d NCMP=%0d DEPTH=%0d PTRW=%0d FRACW=%0d FILTW=%0d PWW=%0d NARM=%0d SEED=%0d",
+                  NCH, NCMP, DEPTH, PTRW, FRACW, FILTW, PWW, NARM, seed);
 
         for (n = 0; n < cycles; n = n + 1) begin
             @(negedge clk);

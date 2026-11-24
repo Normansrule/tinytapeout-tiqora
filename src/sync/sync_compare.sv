@@ -19,7 +19,12 @@
 
 module sync_compare #(
     parameter int NCMP = 2,
-    parameter int PWW  = 16
+    parameter int PWW  = 16,
+    // Channels 0 .. NARM-1 take deadlines; the rest are pulse-only (fired
+    // by PULSE alone) and carry no deadline register, subtractor or LATE
+    // compare. Tiqora-Serial's third trigger has no CMP register, so it
+    // builds with NARM = 2 and saves that logic.
+    parameter int NARM = NCMP
 ) (
     input  wire  logic             clk,
     input  wire  logic             rst,
@@ -64,27 +69,40 @@ module sync_compare #(
         // wrap included: (now + 1) - d == now - (d - 1) modulo 2^32. An
         // earlier rewrite as `now - deadline >= -1` was measured worse (a
         // 32-input AND tree per channel), so the subtraction stays.
-        assign reached = ($signed(now - deadline_m1[i]) >= 0);
-        // On time means now == deadline - 1: the pin edge lands on the
-        // programmed tick. An equality of the two registers keeps this off
-        // the subtractor, which is on one of the slowest paths in the chip.
-        assign miss[i] = armed[i] && reached && (now != deadline_m1[i]);
-        assign fire    = (armed[i] && reached) ||
-                         (pulse_we && pulse_mask[i]);
+        if (i < NARM) begin : g_dl
+            assign reached = ($signed(now - deadline_m1[i]) >= 0);
+            // On time means now == deadline - 1: the pin edge lands on the
+            // programmed tick. An equality of the two registers keeps this
+            // off the subtractor, on one of the slowest paths in the chip.
+            assign miss[i] = armed[i] && reached && (now != deadline_m1[i]);
+
+            always_ff @(posedge clk) begin
+                if (rst) begin
+                    armed[i]       <= 1'b0;
+                    deadline_m1[i] <= 32'hFFFF_FFFF;
+                end else if (arm_we && (arm_sel == i[1:0])) begin
+                    deadline_m1[i] <= arm_time_m1;
+                    armed[i]       <= 1'b1;
+                end else if (armed[i] && reached) begin
+                    armed[i]       <= 1'b0;
+                end
+            end
+        end else begin : g_pulse_only
+            // constant flip-flops: synthesis removes them
+            assign reached = 1'b0;
+            assign miss[i] = 1'b0;
+            always_ff @(posedge clk) begin
+                armed[i]       <= 1'b0;
+                deadline_m1[i] <= 32'hFFFF_FFFF;
+            end
+        end
+
+        assign fire = (armed[i] && reached) || (pulse_we && pulse_mask[i]);
 
         always_ff @(posedge clk) begin
             if (rst) begin
-                armed[i]     <= 1'b0;
-                deadline_m1[i] <= 32'hFFFF_FFFF;
                 pulse_cnt[i] <= '0;
             end else begin
-                if (arm_we && (arm_sel == i[1:0])) begin
-                    deadline_m1[i] <= arm_time_m1;
-                    armed[i]    <= 1'b1;
-                end else if (armed[i] && reached) begin
-                    armed[i]    <= 1'b0;
-                end
-
                 if (fire)                        pulse_cnt[i] <= pw;
                 else if (pulse_cnt[i] != '0)     pulse_cnt[i] <= pulse_cnt[i] - 1'b1;
             end

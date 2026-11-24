@@ -27,7 +27,8 @@ module sync_unit
     parameter int PTRW  = 1,       // $clog2(DEPTH)
     parameter int FRACW = 24,      // rate accumulator width
     parameter int FILTW = 0,       // capture glitch filter length
-    parameter int PWW   = 16       // trigger pulse-width counter bits
+    parameter int PWW   = 16,      // trigger pulse-width counter bits
+    parameter int NARM  = NCMP     // channels that take deadlines (rest: PULSE only)
 ) (
     input  wire  logic            clk,
     input  wire  logic            rst,
@@ -202,7 +203,7 @@ module sync_unit
     // -----------------------------------------------------------------
     // Compare / trigger
     // -----------------------------------------------------------------
-    sync_compare #(.NCMP(NCMP), .PWW(PWW)) u_cmp (
+    sync_compare #(.NCMP(NCMP), .PWW(PWW), .NARM(NARM)) u_cmp (
         .clk       (clk),
         .rst       (rst),
         .now       (now),
