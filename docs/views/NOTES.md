@@ -44,10 +44,10 @@ Icarus 12.0, Playwright 1.63.0 / Chromium):
 | (independent) | `python3 test/views/mini_lvs.py` | 65 cells, 615 transistors: every channel's type, W, L matches SPICE, 0 mismatches |
 | transistors == liberty gate | `python3 docs/tools/views_switch.py` | 65 cells, 2,126 input states, 0 mismatches |
 | gates == RTL | `make -C test views-lockstep` | 6 runs × 200,000 clocks; three with random 3-clock resets (17, 12 and 10 of them); all 24 output and enable pins equal every clock |
-| diagram == behaviour | `python3 test/views/fsm_check.py` | 1,200,000 per-clock state samples, 0 errors; tp_uart_rx 10/10 edges, 4/4 states |
+| diagram == behaviour | `python3 test/views/fsm_check.py` | 1,200,000 per-clock state samples, 0 errors; tp_uart_rx 10/10 edges, 4/4 states; `chip.json` `fsm_gaps` is empty, so losing any edge fails (one run alone takes 9/10: 1 error) |
 | page links | `python3 test/views/check_views.py` | 12,664 references, 0 errors, build is deterministic |
 | page in a browser | `node test/views/page_test.js` | 167 checks: page simulator equals Python on all 2,148 states node by node; all 58 groups draw; every link, keyboard, light/dark, reduced motion, no-JS fallback |
-| mutants | `python3 test/views/mutants.py` | 14 mutants (the 3 instruction-table mutants do not apply), 17 check-failures expected, 17 caught, 0 survived; the gate swap is caught at clock 5,046 of a 200,000-clock run, the inverted transmit bit at clock 4,612 |
+| mutants | `python3 test/views/mutants.py` | 15 mutants (the 3 instruction-table mutants do not apply), 18 check-failures expected, 18 caught, 0 survived (2026-11-24: `--quick` run, 16 caught, plus the new `fsm-coverage`, caught as tp_uart_rx edge 2->0 untaken when only the first run is kept; `page-pmos` from the 2026-11-23 run, page unchanged); the gate swap is caught at clock 5,046 of a 200,000-clock run, the inverted transmit bit at clock 4,612 |
 
 ### The lockstep bench
 

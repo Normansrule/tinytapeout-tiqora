@@ -13,7 +13,14 @@ Then prints how many of the diagram's edges the run took (coverage), so a
 run that never leaves reset cannot pass quietly: each machine must visit at
 least MIN_STATES states.
 
-    python3 test/views/fsm_check.py LOG [LOG ...]
+If docs/views/chip.json has "fsm_gaps" ({module: {"a->b": reason}}), the
+run's untaken edges must be exactly the listed ones: an untaken edge with no
+reason fails (coverage went down, or a new arrow appeared), and so does a
+listed edge the run took (the reason is stale). The gate is only meaningful
+on the whole suite's logs (`make -C test views-lockstep`); --no-gaps skips it,
+for runs of a single program.
+
+    python3 test/views/fsm_check.py [--no-gaps] LOG [LOG ...]
 """
 import collections, json, os, sys
 
@@ -32,7 +39,7 @@ def diagram(fsm):
     return edges, bit_of_code
 
 
-def check(logs, fsms):
+def check(logs, fsms, gaps=None):
     seen = collections.defaultdict(collections.Counter)
     errors, clocks = [], 0
     dia = {m: diagram(f) for m, f in fsms.items()}
@@ -58,15 +65,26 @@ def check(logs, fsms):
         report[mod] = (len(took), len(edges), len(states), sorted(edges - took))
         if len(states) < MIN_STATES:
             errors.append(f"{mod}: the run only visited {len(states)} states")
+        if gaps is not None:
+            listed = {tuple(int(x) for x in k.split("->")) for k in gaps.get(mod, {})}
+            for a, b in sorted(edges - took - listed):
+                errors.append(f"{mod}: edge {a}->{b} not taken and not in chip.json fsm_gaps")
+            for a, b in sorted(listed & took):
+                errors.append(f"{mod}: edge {a}->{b} is in chip.json fsm_gaps but was taken")
+            for a, b in sorted(listed - edges):
+                errors.append(f"{mod}: chip.json fsm_gaps lists {a}->{b}, which is not a diagram edge")
     return errors, clocks, report
 
 
 def main():
-    logs = sys.argv[1:]
+    logs = [a for a in sys.argv[1:] if a != "--no-gaps"]
     if not logs:
         sys.exit(__doc__)
     fsms = json.load(open(os.path.join(ROOT, "docs", "views", "netlist.json")))["fsms"]
-    errors, clocks, report = check(logs, fsms)
+    gaps = None
+    if "--no-gaps" not in sys.argv:
+        gaps = json.load(open(os.path.join(ROOT, "docs", "views", "chip.json"))).get("fsm_gaps")
+    errors, clocks, report = check(logs, fsms, gaps)
     for e in errors[:20]:
         print("FAIL", e)
     for mod, (took, total, states, missed) in sorted(report.items()):
