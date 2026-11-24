@@ -21,6 +21,9 @@ should catch it passes anyway; any survivor fails this script.
                     the flip-flop's feedback transistor removed       -> views_switch
   fsm-edge          state diagram: one transition the chip takes deleted -> fsm_check
   fsm-onehot        state diagram: two states' one-hot bits swapped   -> fsm_check
+  fsm-coverage**    lockstep suite: the run that alone takes some arrow left
+                    out, or else only the first run kept (coverage drops
+                    below chip.json fsm_gaps)                         -> fsm_check (gap gate)
   link-rtl-line     page data: a register points at the wrong RTL line -> check_views
   link-state-flop   page data: a state points at another flip-flop    -> check_views
   link-isa-line*    page data: an instruction points at the wrong decode line -> check_views
@@ -29,6 +32,7 @@ should catch it passes anyway; any survivor fails this script.
   page-pmos         page: the browser's simulator turns PMOS on at 1  -> page_test.js (Playwright)
 
 * only on a chip with a processor (chip.json "isa"); Tiqora-Serial has none.
+** only on a chip whose chip.json lists "fsm_gaps".
 """
 import json, os, re, shutil, subprocess, sys, tempfile
 
@@ -216,6 +220,25 @@ def m_fsm_onehot(c):
     return [f"{PY} test/views/fsm_check.py {fsm_logs(c)}"]
 
 
+def m_fsm_coverage(c):
+    # leave out the first run (by name) that is the only one to take some arrow
+    sys.path.insert(0, os.path.join(c, "test/views"))
+    import fsm_check
+    fsms = jload(os.path.join(c, "docs/views/netlist.json"))["fsms"]
+    logs = fsm_logs(c).split()
+
+    def took(ls):
+        return {m: r[0] for m, r in fsm_check.check(ls, fsms)[2].items()}
+    full = took(logs)
+    for drop in logs:
+        if took([l for l in logs if l != drop]) != full:
+            return [f"{PY} test/views/fsm_check.py " + " ".join(l for l in logs if l != drop)]
+    # every arrow is taken by two runs or more (Tiqora-Serial): keep the first run only
+    if took(logs[:1]) != full:
+        return [f"{PY} test/views/fsm_check.py {logs[0]}"]
+    raise RuntimeError("the first run alone takes every arrow: no smaller suite to try")
+
+
 def views_json(c):
     return os.path.join(c, "docs/site/data/views.json")
 
@@ -281,7 +304,7 @@ MUTANTS = [
     ("spice-gate-net", m_spice_gate_net), ("spice-width", m_spice_width),
     ("gds-drop-licon", m_gds_drop_licon), ("gds-drop-poly", m_gds_drop_poly),
     ("liberty-func", m_liberty_func), ("ff-no-hold", m_ff_no_hold),
-    ("fsm-edge", m_fsm_edge), ("fsm-onehot", m_fsm_onehot),
+    ("fsm-edge", m_fsm_edge), ("fsm-onehot", m_fsm_onehot), ("fsm-coverage", m_fsm_coverage),
     ("link-rtl-line", m_link_rtl_line), ("link-state-flop", m_link_state_flop), ("link-isa-line", m_link_isa_line),
     ("isa-opcode", m_isa_opcode), ("pkg-opcode", m_pkg_opcode), ("page-pmos", m_page_pmos),
 ]
@@ -307,6 +330,7 @@ def main():
         if CHIP.get("isa"):
             base_checks.append(f"{PY} docs/tools/views_isa.py --check")
         base_checks += [lockstep(base, run) for run in ("quick", "sends")]
+        base_checks.append(f"{PY} test/views/fsm_check.py {fsm_logs(base)}")   # the FSM mutants need a passing start
         for chk in base_checks:
             rc, out = run(chk, base)
             if rc:
@@ -317,6 +341,9 @@ def main():
                 continue
             if name in ISA_ONLY and not CHIP.get("isa"):
                 print(f"mutant {name:16s} not applicable (no processor on this chip)")
+                continue
+            if name == "fsm-coverage" and "fsm_gaps" not in CHIP:
+                print(f"mutant {name:16s} not applicable (chip.json lists no fsm_gaps)")
                 continue
             if name == "page-pmos" and not pw:
                 print(f"mutant {name:16s} skipped (no Playwright)")
